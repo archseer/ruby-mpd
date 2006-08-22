@@ -121,6 +121,7 @@ class MPDTestServer < GServer
 											if not song['album'].nil? and !listed.include? song['album']
 												socks.puts "Album: #{song['album']}"
 												listed << song['album']
+											end
 										end
 									end
 									sock.puts 'todo'
