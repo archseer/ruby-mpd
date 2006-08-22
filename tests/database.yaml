@@ -1,0 +1,114 @@
+- &songs
+  - &song1
+      file: "/music/Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Shpongle Falls"
+      track: 1
+  - &song2
+      file: "/music/Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Monster Hit"
+      track: 2
+  - &song3
+      file: "/music/Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Vapour Rumours"
+      track: 3
+  - &song4
+      file: "/music/Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Shpongle Spores"
+      track: 4
+  - &song5
+      file: "/music/Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Behind Closed Eyelids"
+      track: 5
+  - &song6
+      file: "/music/Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "Divine Moments of Truth"
+      track: 6
+  - &song7
+      file: "/music/Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg"
+      artist: "Shpongle"
+      album: "Are You Shpongled"
+      title: "... and the Day Turned to Night"
+      track: 7
+  - &song8
+      file: "/music/Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Dancing Galaxy"
+      track: 1
+  - &song9
+      file: "/music/Astral_Projection/Dancing_Galaxy/2.Soundform.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Soundform"
+      track: 2
+  - &song10
+      file: "/music/Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Flying Into A Star"
+      track: 3
+  - &song11
+      file: "/music/Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "No One Ever Dreams"
+      track: 4
+  - &song12
+      file: "/music/Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Cosmic Ascension (ft. DJ Jorg)"
+      track: 5
+  - &song13
+      file: "/music/Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Life On Mars"
+      track: 6
+  - &song14
+      file: "/music/Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Liquid Sun"
+      track: 7
+  - &song15
+      file: "/music/Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg"
+      artist: "Astral Projection"
+      album: "Dancing Galaxy"
+      title: "Ambient Galaxy (Disco Valley Mix)"
+      track: 8
+ 
+- &playlists
+  - &playlist1
+      file: "Shpongle_-_Are_You_Shpongled.m3u"
+      songs:
+        - *song1
+        - *song2
+        - *song3
+        - *song4
+        - *song5
+        - *song6
+        - *song7
+  - &playlist2
+      file: "Astral_Projection_-_Dancing_Galaxy.m3u"
+      songs:
+        - *song8
+        - *song9
+        - *song10
+        - *song11
+        - *song12
+        - *song13
+        - *song14
+        - *song15
