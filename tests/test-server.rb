@@ -16,16 +16,27 @@ class MPDTestServer < GServer
 		@database = YAML::load( File.open( db_file ) )
 		@songs = @database[0]
 		@playlists = @database[1]
+		@artists = []
+		@albums = []
+		@songs.each do |song|
+			if !song['artist'].nil? and !@artists.include? song['artist']
+				@artists << song['artist']
+			end
+			if !song['album'].nil? and !@albums.include? song['album']
+				@albums << song['album']
+			end
+		end
 		@the_playlist = []
 	end
 
 	def serve( sock )
 		close = false
 		while !close and line = sock.gets
-			line.strip!
-			args = line.split
-			cmd = args[0]
-			args.shift
+
+			args = self.build_args line
+
+			cmd = args.shift
+
 			case cmd
 				when 'add'
 					if args.length == 0
@@ -103,36 +114,32 @@ class MPDTestServer < GServer
 						else
 							if args[0] == 'artist'
 								# List all Artists
-								listed = []
-								@songs.each do |song|
-									if not song['artist'].nil? and !listed.include? song['artist']
-										sock.puts "Artist: #{song['artist']}"
-										listed << song['artist']
-									end
+								@artists.each do |artist|
+									sock.puts "Artist: #{artist}"
 								end
 								sock.puts 'OK'
 							else
 								if args.length == 2
 									# List all Albums by Artist
 									# artist == args[1]
-									listed = []
-									@songs.each do |song|
-										if song['artist'] == args[1]
-											if not song['album'].nil? and !listed.include? song['album']
-												socks.puts "Album: #{song['album']}"
-												listed << song['album']
+									if !@artists.include? args[1]
+										sock.puts "ACK [50@0] {list} artist \"#{args[1]}\" not found"
+									else
+										listed = []
+										@songs.each do |song|
+											if song['artist'] == args[1]
+												if not song['album'].nil? and !listed.include? song['album']
+													sock.puts "Album: #{song['album']}"
+													listed << song['album']
+												end
 											end
 										end
+										sock.puts 'OK'
 									end
-									sock.puts 'todo'
 								else
 									# List all Albums
-									listed = []
-									@songs.each do |song|
-										if not song['album'].nil? and !listed.include? song['album']
-											sock.puts "Album: #{song['album']}"
-											listed << song['album']
-										end
+									@albums.each do |album|
+										sock.puts "Album: #{album}"
 									end
 									sock.puts 'OK'
 								end
@@ -397,6 +404,38 @@ class MPDTestServer < GServer
 					sock.puts "ACK [5@0] {} unknown command #{cmd}"
 			end # End Case cmd
 		end # End while !close and line = sock.gets
+	end
+
+	def build_args( line )
+		ret = []
+		word = ''
+		escaped = false
+		in_quote = false
+
+		line.strip!
+
+		line.each_byte do |c|
+			c = c.chr
+			if c == ' ' and !in_quote
+				ret << word unless word.empty?
+				word = ''
+			elsif c == '"' and !escaped
+				if in_quote
+					in_quote = false
+				else
+					in_quote = true
+				end
+				ret << word unless word.empty?
+				word = ''
+			else
+				escaped = (c == '\\')
+				word += c
+			end
+		end
+
+		ret << word unless word.empty?
+
+		return ret
 	end
 
 	def args_check( sock, cmd, argv, argc )

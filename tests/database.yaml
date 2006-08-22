@@ -91,7 +91,7 @@
       track: 8
   - &song16
       file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg"
-			artist: "Carbon Based Lifeforms"
+      artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Central Plains"
       track: 1
