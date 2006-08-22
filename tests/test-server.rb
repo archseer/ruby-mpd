@@ -18,6 +18,7 @@ class MPDTestServer < GServer
 		@playlists = @database[1]
 		@artists = []
 		@albums = []
+		@filetree = {:name =>'/', :dirs =>[], :songs =>[]}
 		@songs.each do |song|
 			if !song['artist'].nil? and !@artists.include? song['artist']
 				@artists << song['artist']
@@ -25,7 +26,28 @@ class MPDTestServer < GServer
 			if !song['album'].nil? and !@albums.include? song['album']
 				@albums << song['album']
 			end
-		end
+			if !song['file'].nil?
+				dirs = song['file'].split '/'
+				dirs.pop
+				dirs.shift
+				the_dir = @filetree
+				dirs.each do |d|
+					found = nil
+					the_dir[:dirs].each do |sub|
+						if sub[:name] == d
+							found = sub
+							break
+						end
+					end
+					if found.nil?
+						found = {:name => d, :dirs =>[], :songs =>[]}
+						the_dir[:dirs] << found
+					end
+					the_dir = found
+				end # End dirs.each
+				the_dir[:songs] << song
+			end # End if !song['file'].nil?
+		end # End @songs.each
 		@the_playlist = []
 	end
 
