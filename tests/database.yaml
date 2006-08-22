@@ -1,156 +1,156 @@
 - &songs
   - &song1
-      file: "/music/Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg"
+      file: "Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Shpongle Falls"
       track: 1
   - &song2
-      file: "/music/Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg"
+      file: "Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Monster Hit"
       track: 2
   - &song3
-      file: "/music/Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg"
+      file: "Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Vapour Rumours"
       track: 3
   - &song4
-      file: "/music/Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg"
+      file: "Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Shpongle Spores"
       track: 4
   - &song5
-      file: "/music/Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg"
+      file: "Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Behind Closed Eyelids"
       track: 5
   - &song6
-      file: "/music/Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg"
+      file: "Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "Divine Moments of Truth"
       track: 6
   - &song7
-      file: "/music/Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg"
+      file: "Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg"
       artist: "Shpongle"
       album: "Are You Shpongled"
       title: "... and the Day Turned to Night"
       track: 7
   - &song8
-      file: "/music/Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Dancing Galaxy"
       track: 1
   - &song9
-      file: "/music/Astral_Projection/Dancing_Galaxy/2.Soundform.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/2.Soundform.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Soundform"
       track: 2
   - &song10
-      file: "/music/Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Flying Into A Star"
       track: 3
   - &song11
-      file: "/music/Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "No One Ever Dreams"
       track: 4
   - &song12
-      file: "/music/Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg"
+      file: "Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Cosmic Ascension (ft. DJ Jorg)"
       track: 5
   - &song13
-      file: "/music/Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Life On Mars"
       track: 6
   - &song14
-      file: "/music/Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg"
+      file: "Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Liquid Sun"
       track: 7
   - &song15
-      file: "/music/Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg"
+      file: "Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg"
       artist: "Astral Projection"
       album: "Dancing Galaxy"
       title: "Ambient Galaxy (Disco Valley Mix)"
       track: 8
   - &song16
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Central Plains"
       track: 1
   - &song17
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/02.Tensor.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/02.Tensor.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Tensor"
       track: 2
   - &song18
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/03.MOS_6581_(Album_Version).ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/03.MOS_6581_(Album_Version).ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "MOS 6581 (Album Version)"
       track: 3
   - &song19
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/04.Silent_Running.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/04.Silent_Running.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Silent Running"
       track: 4
   - &song20
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/05.Neurotransmitter.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/05.Neurotransmitter.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Neurotransmitter"
       track: 5
   - &song21
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/06.Hydroponic_Garden.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/06.Hydroponic_Garden.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Hydroponic Garden"
       track: 6
   - &song22
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/07.Exosphere.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/07.Exosphere.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Exosphere"
       track: 7
   - &song23
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/08.Comsat.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/08.Comsat.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Comsat"
       track: 8
   - &song24
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/09.Epicentre_(First_Movement).ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/09.Epicentre_(First_Movement).ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Epicentre (First Movement)"
       track: 9
   - &song25
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/10.Artificial_Island.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/10.Artificial_Island.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Artificial Island"
       track: 10
   - &song26
-      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg"
+      file: "Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
       title: "Artifical Island"
