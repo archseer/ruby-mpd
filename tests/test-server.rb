@@ -18,7 +18,9 @@ class MPDTestServer < GServer
 		@playlists = @database[1]
 		@artists = []
 		@albums = []
-		@filetree = {:name =>'/', :dirs =>[], :songs =>[]}
+		@the_playlist = []
+		@the_error = nil
+		@filetree = {:name =>'', :dirs =>[], :songs =>[]}
 		@songs.each do |song|
 			if !song['artist'].nil? and !@artists.include? song['artist']
 				@artists << song['artist']
@@ -29,7 +31,6 @@ class MPDTestServer < GServer
 			if !song['file'].nil?
 				dirs = song['file'].split '/'
 				dirs.pop
-				dirs.shift
 				the_dir = @filetree
 				dirs.each do |d|
 					found = nil
@@ -48,7 +49,6 @@ class MPDTestServer < GServer
 				the_dir[:songs] << song
 			end # End if !song['file'].nil?
 		end # End @songs.each
-		@the_playlist = []
 	end
 
 	def serve( sock )
@@ -71,15 +71,16 @@ class MPDTestServer < GServer
 				when 'clear'
 					self.args_check( sock, cmd, args, 0 ) do
 						@status[:playlist] += 1
-						sock.puts 'todo'
+						@the_playlist = []
+						sock.puts 'OK'
 					end
 				when 'clearerror'
 					self.args_check( sock, cmd, args, 0 ) do
-						sock.puts 'todo'
+						@the_error = nil
+						sock.puts 'OK'
 					end
 				when 'close'
 					self.args_check( sock, cmd, args, 0 ) do
-						sock.puts 'todo'
 						close = true
 					end
 				when 'crossfade'
@@ -170,11 +171,34 @@ class MPDTestServer < GServer
 					end
 				when 'listall'
 					self.args_check( sock, cmd, args, 0..1 ) do |args|
-						sock.puts 'todo'
+						if args.length == 0
+							@filetree[:dirs].each do |d|
+								self.send_dir sock, d, false
+							end
+						else
+							dir = self.locate_dir args[0]
+							if not dir.nil?
+								parents = args[0].split '/'
+								parents.pop
+								parents = parents.join '/'
+								parents += '/' unless parents.length == 0
+								self.send_dir sock, dir, false, parents
+							else
+								sock.puts 'ACK [50@0] {listall} directory or file not found'
+							end
+						end
+						sock.puts 'OK'
 					end
 				when 'listallinfo'
 					self.args_check( sock, cmd, args, 0..1 ) do |args|
-						sock.puts 'todo'
+						if args.length == 0
+							@filetree[:dirs].each do |d|
+								self.send_dir sock, d, true
+							end
+						else
+							sock.puts 'todo'
+						end
+						sock.puts 'OK'
 					end
 				when 'load'
 					self.args_check( sock, cmd, args, 0 ) do
@@ -475,6 +499,47 @@ class MPDTestServer < GServer
 
 	def is_bool( val )
 		val == '0' or val == '1'
+	end
+
+	def locate_dir( path )
+		dirs = path.split '/'
+
+		the_dir = @filetree
+		dirs.each do |d|
+			found = nil
+			the_dir[:dirs].each do |sub|
+				if sub[:name] == d
+					found = sub
+					break
+				end
+			end
+			if found.nil?
+				return nil
+			else
+				the_dir = found
+			end
+		end
+
+		return the_dir
+	end
+
+	def send_dir( sock, dir, allinfo, path = '' )
+		sock.puts "directory: #{path}#{dir[:name]}"
+
+		dir[:songs].each do |song|
+			if allinfo
+				sock.puts "file: #{song['file']}"
+				song.each_pair do |key,val|
+					sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
+				end
+			else
+				sock.puts "file: #{song['file']}"
+			end
+		end
+
+		dir[:dirs].each do |d|
+			send_dir(sock, d, allinfo, dir[:name] + '/')
+		end
 	end
 
 end
