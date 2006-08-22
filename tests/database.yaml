@@ -89,6 +89,61 @@
       album: "Dancing Galaxy"
       title: "Ambient Galaxy (Disco Valley Mix)"
       track: 8
+  - &song16
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg"
+      album: "Hydroponic Garden"
+      title: "Central Plains"
+      track: 1
+  - &song17
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/02.Tensor.ogg"
+      album: "Hydroponic Garden"
+      title: "Tensor"
+      track: 2
+  - &song18
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/03.MOS_6581_(Album_Version).ogg"
+      album: "Hydroponic Garden"
+      title: "MOS 6581 (Album Version)"
+      track: 3
+  - &song19
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/04.Silent_Running.ogg"
+      album: "Hydroponic Garden"
+      title: "Silent Running"
+      track: 4
+  - &song20
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/05.Neurotransmitter.ogg"
+      album: "Hydroponic Garden"
+      title: "Neurotransmitter"
+      track: 5
+  - &song21
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/06.Hydroponic_Garden.ogg"
+      album: "Hydroponic Garden"
+      title: "Hydroponic Garden"
+      track: 6
+  - &song22
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/07.Exosphere.ogg"
+      album: "Hydroponic Garden"
+      title: "Exosphere"
+      track: 7
+  - &song23
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/08.Comsat.ogg"
+      album: "Hydroponic Garden"
+      title: "Comsat"
+      track: 8
+  - &song24
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/09.Epicentre_(First_Movement).ogg"
+      album: "Hydroponic Garden"
+      title: "Epicentre (First Movement)"
+      track: 9
+  - &song25
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/10.Artificial_Island.ogg"
+      album: "Hydroponic Garden"
+      title: "Artificial Island"
+      track: 10
+  - &song26
+      file: "/music/Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg"
+      album: "Hydroponic Garden"
+      title: "Artifical Island"
+      track: 11
  
 - &playlists
   - &playlist1
