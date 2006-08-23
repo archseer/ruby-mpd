@@ -21,7 +21,8 @@ class MPDTestServer < GServer
 		@the_playlist = []
 		@the_error = nil
 		@filetree = {:name =>'', :dirs =>[], :songs =>[]}
-		@songs.each do |song|
+		@songs.each_with_index do |song,i|
+			song['id'] = i
 			if !song['artist'].nil? and !@artists.include? song['artist']
 				@artists << song['artist']
 			end
@@ -65,13 +66,35 @@ class MPDTestServer < GServer
 					if args.length == 0
 						# Add the entire database
 						@songs.each do |s|
+							@status[:playlist] += 1
 							@the_playlist << s
 						end
+						sock.puts 'OK'
 					else
 						# Add a single entry
+						the_song = nil
+						@songs.each do |s|
+							if s['file'] == args[0]
+								the_song = s
+								break
+							end
+						end
+
+						if the_song.nil?
+							dir = locate_dir(args[0])
+							if not dir.nil?
+								# Add the dir
+								self.add_dir_to_pls dir
+								sock.puts 'OK'
+							else
+								sock.puts 'ACK [50@0] {add} directory or file not found'
+							end
+						else
+							@status[:playlist] += 1
+							@the_playlist << the_song
+							sock.puts 'OK'
+						end
 					end
-					# @status[:playlist] += 1 for each song added
-					sock.puts 'todo'
 				when 'clear'
 					self.args_check( sock, cmd, args, 0 ) do
 						@status[:playlist] += 1
@@ -103,9 +126,13 @@ class MPDTestServer < GServer
 				when 'delete'
 					self.args_check( sock, cmd, args, 1 ) do |args|
 						if self.is_int args[0]
-							# Note: args[0] < 0 will be checked for in the pls...
-							@status[:playlist] += 1
-							sock.puts 'todo'
+							if args[0].to_i < 0 or args[0].to_i >= @the_playlist.length
+								sock.puts "ACK [50@0] {delete} song doesn't exist: \"#{args[0]}\""
+							else
+								@the_playlist.delete_at 0
+								@status[:playlist] += 1
+								sock.puts 'OK'
+							end
 						else
 							sock.puts 'ACK [2@0] {delete} need a positive integer'
 						end
@@ -113,9 +140,21 @@ class MPDTestServer < GServer
 				when 'deleteid'
 					self.args_check( sock, cmd, args, 1 ) do |args|
 						if self.is_int args[0]
-							# Note: args[0] < 0 will be checked for as a song id...
-							@status[:playlist] += 1
-							sock.puts 'todo'
+							the_song = nil
+							@the_playlist.each do |song|
+								if song['id'] == args[0].to_i
+									the_song = song
+									break
+								end
+							end
+
+							if not the_song.nil?
+								@the_playlist.delete the_song
+								@status[:playlist] += 1
+								sock.puts 'OK'
+							else
+								sock.puts "ACK [50@0] {deleteid} song id doesn't exist: \"#{args[0]}\""
+							end
 						else
 							sock.puts 'ACK [2@0] {deleteid} need a positive integer'
 						end
@@ -565,6 +604,17 @@ class MPDTestServer < GServer
 
 		dir[:dirs].each do |d|
 			send_dir(sock, d, allinfo, dir[:name] + '/')
+		end
+	end
+
+	def add_dir_to_pls( dir )
+		dir[:songs].each do |song|
+			@status[:playlist] += 1
+			@the_playlist << song
+		end
+
+		dir[:dirs].each do |d|
+			add_dir_to_pls d
 		end
 	end
 
