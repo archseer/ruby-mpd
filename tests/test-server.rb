@@ -52,6 +52,7 @@ class MPDTestServer < GServer
 	end
 
 	def serve( sock )
+		sock.puts 'OK MPD 0.11.5'
 		close = false
 		while !close and line = sock.gets
 
@@ -63,6 +64,9 @@ class MPDTestServer < GServer
 				when 'add'
 					if args.length == 0
 						# Add the entire database
+						@songs.each do |s|
+							@the_playlist << s
+						end
 					else
 						# Add a single entry
 					end
@@ -276,15 +280,37 @@ class MPDTestServer < GServer
 				when 'playlist'
 					self.log 'MPD Warning: Call to Deprecated API: "playlist"'
 					self.args_check( sock, cmd, args, 0 ) do
-						sock.puts 'todo'
+						@the_playlist.each_with_index do |v,i|
+							sock.puts "#{i}: #{v['file']}"
+						end
+						sock.puts 'OK'
 					end
 				when 'playlistinfo'
 					self.args_check( sock, cmd, args, 0..1 ) do |args|
 						if args.length > 0 and !self.is_int(args[0])
 							sock.puts 'ACK [2@0] {playlistinfo} need a positive integer'
 						else
-							# Note: args[0] < 0 just return OK...
-							sock.puts 'todo'
+							args.clear if args.length > 0 and args[0].to_i < 0
+							if args.length != 0
+								if args[0].to_i >= @the_playlist.length
+									sock.puts "ACK [50@0] {playlistinfo} song doesn't exist: \"#{args[0]}\""
+								else
+									song = @the_playlist[args[0].to_i]
+									sock.puts "file: #{song['file']}"
+									song.each_pair do |key,val|
+										sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
+									end
+									sock.puts 'OK'
+								end
+							else
+								@the_playlist.each do |song|
+									sock.puts "file: #{song['file']}"
+									song.each_pair do |key,val|
+										sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
+									end
+								end
+								sock.puts 'OK'
+							end
 						end
 					end
 				when 'playlistid'
