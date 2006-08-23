@@ -579,7 +579,7 @@ class MPD
 	# Raises a RuntimeError if the command failed
 	def list( type, arg = nil )
 		if not arg.nil?
-			response = send_command "list #{type} #{arg}"
+			response = send_command "list #{type} \"#{arg}\""
 		else
 			response = send_command "list #{type}"
 		end
