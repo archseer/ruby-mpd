@@ -153,127 +153,127 @@
       file: "Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg"
       artist: "Carbon Based Lifeforms"
       album: "Hydroponic Garden"
-      title: "Artifical Island"
+      title: "Refraction 1.33"
       track: 11
   - &song27
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/01.Botanical_Dimensions.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "01.Botanical Dimensions.ogg"
+      title: "Botanical Dimensions"
       track: 1
   - &song28
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/02.Outer_Shpongolia.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "02.Outer Shpongolia.ogg"
+      title: "Outer Shpongolia"
       track: 2
   - &song29
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/03.Levitation_Nation.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "03.Levitation Nation.ogg"
+      title: "Levitation Nation"
       track: 3
   - &song30
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/04.Periscopes_of_Consciousness.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "04.Periscopes of Consciousness.ogg"
+      title: "Periscopes of Consciousness"
       track: 4
   - &song31
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/05.Schmaltz_Herring.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "05.Schmaltz Herring.ogg"
+      title: "Schmaltz Herring"
       track: 5
   - &song32
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/06.Nothing_Lasts....ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "06.Nothing Lasts....ogg"
+      title: "Nothing Lasts....ogg"
       track: 6
   - &song33
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/07.Shnitzled_in_the_Negev.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "07.Shnitzled in the Negev.ogg"
+      title: "Shnitzled in the Negev"
       track: 7
   - &song34
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/08....But_Nothing_Is_Lost.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "08....But Nothing Is Lost.ogg"
+      title: "...But Nothing Is Lost.ogg"
       track: 8
   - &song35
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/09.When_Shall_I_Be_Free.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "09.When Shall I Be Free.ogg"
+      title: "When Shall I Be Free"
       track: 9
   - &song36
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/10.The_Stamen_of_the_Shamen.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "10.The Stamen of the Shamen.ogg"
+      title: "The Stamen of the Shamen"
       track: 10
   - &song37
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/11.Circuits_of_the_Imagination.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "11.Circuits of the Imagination.ogg"
+      title: "Circuits of the Imagination"
       track: 11
   - &song38
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/12.Linguistic_Mystic.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "12.Linguistic Mystic.ogg"
+      title: "Linguistic Mystic"
       track: 12
   - &song39
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/13.Mentalism.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "13.Mentalism.ogg"
+      title: "Mentalism"
       track: 13
   - &song40
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/14.Invocation.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "14.Invocation.ogg"
+      title: "Invocation"
       track: 14
   - &song41
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/15.Molecular_Superstructure.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "15.Molecular Superstructure.ogg"
+      title: "Molecular Superstructure"
       track: 15
   - &song42
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/16.Turn_Up_the_Silence.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "16.Turn Up the Silence.ogg"
+      title: "Turn Up the Silence"
       track: 16
   - &song43
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/17.Exhalation.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "17.Exhalation.ogg"
+      title: "Exhalation"
       track: 17
   - &song44
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/18.Connoisseur_of_Hallucinations.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "18.Connoisseur of Hallucinations.ogg"
+      title: "Connoisseur of Hallucinations"
       track: 18
   - &song45
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/19.The_Nebbish_Route.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "19.The Nebbish Route.ogg"
+      title: "The Nebbish Route"
       track: 19
   - &song46
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/20.Falling_Awake.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "20.Falling Awake.ogg"
+      title: "Falling Awake"
       track: 20
 
 - &playlists
