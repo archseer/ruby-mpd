@@ -135,14 +135,14 @@ class MPDTestServer < GServer
 				args_check( sock, cmd, args, 1 ) do |args|
 					if is_int args[0]
 						if args[0].to_i < 0 or args[0].to_i >= @the_playlist.length
-							sock.puts "ACK [50@0] {delete} song doesn't exist: \"#{args[0]}\""
+							return(cmd_fail(sock,"ACK [50@0] {delete} song doesn't exist: \"#{args[0]}\""))
 						else
 							@the_playlist.delete_at args[0].to_i
 							@status[:playlist] += 1
 							return(cmd_pass(sock))
 						end
 					else
-						sock.puts 'ACK [2@0] {delete} need a positive integer'
+						return(cmd_fail('ACK [2@0] {delete} need a positive integer'))
 					end
 				end
 			when 'deleteid'
@@ -161,16 +161,16 @@ class MPDTestServer < GServer
 							@status[:playlist] += 1
 							return(cmd_pass(sock))
 						else
-							sock.puts "ACK [50@0] {deleteid} song id doesn't exist: \"#{args[0]}\""
+							return(cmd_fail(sock,"ACK [50@0] {deleteid} song id doesn't exist: \"#{args[0]}\""))
 						end
 					else
-						sock.puts 'ACK [2@0] {deleteid} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {deleteid} need a positive integer'))
 					end
 				end
 			when 'find'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if args[0] != 'album' and args[0] != 'artist' and args[0] != 'title'
-						sock.puts 'ACK [2@0] {find} unknown table'
+						return(cmd_fail(sock,'ACK [2@0] {find} unknown table'))
 					else
 						sock.puts 'todo'
 					end
@@ -182,9 +182,9 @@ class MPDTestServer < GServer
 			when 'list'
 				args_check( sock, cmd, args, 1..2 ) do |args|
 					if args[0] != 'album' and args[0] != 'artist'
-						sock.puts 'ACK [2@0] {list} unknown table'
+						return(cmd_fail(sock,'ACK [2@0] {list} unknown table'))
 					elsif args[0] == 'artist' and args.length > 1
-						sock.puts 'ACK [2@0] {list} artist table takes no args'
+						return(cmd_fail(sock,'ACK [2@0] {list} artist table takes no args'))
 					else
 						if args[0] == 'artist'
 							# List all Artists
@@ -197,7 +197,7 @@ class MPDTestServer < GServer
 								# List all Albums by Artist
 								# artist == args[1]
 								if !@artists.include? args[1]
-									sock.puts "ACK [50@0] {list} artist \"#{args[1]}\" not found"
+									return(cmd_fail(sock,"ACK [50@0] {list} artist \"#{args[1]}\" not found"))
 								else
 									listed = []
 									@songs.each do |song|
@@ -235,7 +235,7 @@ class MPDTestServer < GServer
 							parents += '/' unless parents.length == 0
 							send_dir sock, dir, false, parents
 						else
-							sock.puts 'ACK [50@0] {listall} directory or file not found'
+							return(cmd_fail(sock,'ACK [50@0] {listall} directory or file not found'))
 						end
 					end
 					return(cmd_pass(sock))
@@ -263,9 +263,9 @@ class MPDTestServer < GServer
 			when 'move'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {move} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {move} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {move} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {move} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: negative args should be checked
 						@status[:playlist] += 1
@@ -275,9 +275,9 @@ class MPDTestServer < GServer
 			when 'moveid'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {moveid} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {moveid} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {moveid} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {moveid} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: negative args should be checked
 						@status[:playlist] += 1
@@ -293,7 +293,7 @@ class MPDTestServer < GServer
 					if is_bool args[0]
 						sock.puts 'todo'
 					else
-						sock.puts "ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"
+						return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
 					end
 				end
 			when 'password'
@@ -307,7 +307,7 @@ class MPDTestServer < GServer
 			when 'play'
 				args_check( sock, cmd, args, 0..1 ) do |args|
 					if args.length > 0 and !is_int(args[0])
-						sock.puts 'ACK [2@0] {play} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {play} need a positive integer'))
 					else
 						# Note: args[0] < 0 is checked to exist in pls...
 						# but -1 seems to just return OK...
@@ -317,7 +317,7 @@ class MPDTestServer < GServer
 			when 'playid'
 				args_check( sock, cmd, args, 0..1 ) do |args|
 					if args.length > 0 and !is_int(args[0])
-						sock.puts 'ACK [2@0] {playid} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {playid} need a positive integer'))
 					else
 						# Note: args[0] < 0 is checked to exist as a songid
 						# but -1 seems to just return OK...
@@ -335,12 +335,12 @@ class MPDTestServer < GServer
 			when 'playlistinfo'
 				args_check( sock, cmd, args, 0..1 ) do |args|
 					if args.length > 0 and !is_int(args[0])
-						sock.puts 'ACK [2@0] {playlistinfo} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {playlistinfo} need a positive integer'))
 					else
 						args.clear if args.length > 0 and args[0].to_i < 0
 						if args.length != 0
 							if args[0].to_i >= @the_playlist.length
-								sock.puts "ACK [50@0] {playlistinfo} song doesn't exist: \"#{args[0]}\""
+								return(cmd_fail(sock,"ACK [50@0] {playlistinfo} song doesn't exist: \"#{args[0]}\""))
 							else
 								song = @the_playlist[args[0].to_i]
 								sock.puts "file: #{song['file']}"
@@ -363,7 +363,7 @@ class MPDTestServer < GServer
 			when 'playlistid'
 				args_check( sock, cmd, args, 0..1 ) do |args|
 					if args.length > 0 and !is_int(args[0])
-						sock.puts 'ACK [2@0] {playlistid} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {playlistid} need a positive integer'))
 					else
 						# Note: args[0] < 0 just return OK...
 						sock.puts 'todo'
@@ -372,7 +372,7 @@ class MPDTestServer < GServer
 			when 'plchanges'
 				args_check( sock, cmd, args, 1 ) do |args|
 					if args.length > 0 and !is_int(args[0])
-						sock.puts 'ACK [2@0] {plchanges} need a positive integer'
+						return(cmd_fail(sock,'ACK [2@0] {plchanges} need a positive integer'))
 					else
 						# Note: args[0] < 0 just return OK...
 						sock.puts 'todo'
@@ -393,9 +393,9 @@ class MPDTestServer < GServer
 						@status[:random] = args[0].to_i
 						return(cmd_pass(sock))
 					elsif is_int args[0]
-						sock.puts "ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"
+						return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
 					else
-						sock.puts 'ACK [2@0] {random} need an integer'
+						return(cmd_fail(sock,'ACK [2@0] {random} need an integer'))
 					end
 				end
 			when 'repeat'
@@ -404,9 +404,9 @@ class MPDTestServer < GServer
 						@status[:repeat] = args[0].to_i
 						return(cmd_pass(sock))
 					elsif is_int args[0]
-						sock.puts "ACK [2@0] {repeat} \"#{args[0]}\" is not 0 or 1"
+						return(cmd_fail(sock,"ACK [2@0] {repeat} \"#{args[0]}\" is not 0 or 1"))
 					else
-						sock.puts 'ACK [2@0] {repeat} need an integer'
+						return(cmd_fail(sock,'ACK [2@0] {repeat} need an integer'))
 					end
 				end
 			when 'rm'
@@ -420,7 +420,7 @@ class MPDTestServer < GServer
 			when 'search'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if args[0] != 'title' and args[0] != 'artist' and args[0] != 'album' and args[0] != 'filename'
-						sock.puts 'ACK [2@0] {search} unknown table'
+						return(cmd_fail(sock,'ACK [2@0] {search} unknown table'))
 					else
 						sock.puts 'todo'
 					end
@@ -428,9 +428,9 @@ class MPDTestServer < GServer
 			when 'seek'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {seek} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {seek} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {seek} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {seek} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: arg[0] < 0 is checked as a song pos
 						# arg[1] < 0 causes the song to start from the beginning
@@ -440,9 +440,9 @@ class MPDTestServer < GServer
 			when 'seekid'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {seekid} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {seekid} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {seekid} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {seekid} \"#{args[1]}\" is not a integer"))
 					else
 						# See above notes
 						sock.puts 'todo'
@@ -451,7 +451,7 @@ class MPDTestServer < GServer
 			when 'setvol'
 				args_check( sock, cmd, args, 1 ) do |args|
 					if !is_int args[0]
-						sock.puts 'ACK [2@0] {setvol} need an integer'
+						return(cmd_fail(sock,'ACK [2@0] {setvol} need an integer'))
 					else
 						# Note: args[0] < 0 actually sets the vol val to < 0
 						@status[:volume] = args[0].to_i
@@ -482,9 +482,9 @@ class MPDTestServer < GServer
 			when 'swap'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {swap} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {swap} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {swap} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {swap} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: args[0] < 0 are checked as valid song posititions...
 						@status[:playlist] += 1
@@ -494,9 +494,9 @@ class MPDTestServer < GServer
 			when 'swapid'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if !is_int args[0]
-						sock.puts "ACK [2@0] {swapid} \"#{args[0]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {swapid} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
-						sock.puts "ACK [2@0] {swapid} \"#{args[1]}\" is not a integer"
+						return(cmd_fail(sock,"ACK [2@0] {swapid} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: args[0] < 0 are checked as valid songids...
 						@status[:playlist] += 1
@@ -512,7 +512,7 @@ class MPDTestServer < GServer
 				log 'MPD Warning: Call to Deprecated API: "volume"' if audit
 				args_check( sock, cmd, args, 1 ) do |args|
 					if !is_int args[0]
-						sock.puts 'ACK [2@0] {volume} need an integer'
+						return(cmd_fail(sock,'ACK [2@0] {volume} need an integer'))
 					else
 						# Note: args[0] < 0 subtract from the volume
 						@status[:volume] += args[0].to_i
@@ -520,7 +520,7 @@ class MPDTestServer < GServer
 					end
 				end
 			else
-				sock.puts "ACK [5@0] {} unknown command #{cmd}"
+				return(cmd_fail(sock,"ACK [5@0] {} unknown command #{cmd}"))
 		end # End Case cmd
 	end
 
