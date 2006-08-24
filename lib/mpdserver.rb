@@ -52,6 +52,9 @@ class MPDTestServer < GServer
 	end
 
 	def serve( sock )
+		command_list = []
+		in_cmd_list = false
+		in_ok_list = false
 		sock.puts 'OK MPD 0.11.5'
 		begin
 			while line = sock.gets
@@ -60,11 +63,47 @@ class MPDTestServer < GServer
 
 				cmd = args.shift
 
-				ret = do_cmd sock, cmd, args
-				if audit
-					log "MPD Command \"#{cmd}(#{args.join(', ')})\": " + (ret ? 'successful' : 'failed')
-				end
-			end
+				if cmd == 'command_list_begin' and args.length == 0 and !in_cmd_list
+					in_cmd_list = true
+					log 'MPD: Starting Command List' if audit
+				elsif cmd == 'command_list_ok_begin' and args.length == 0 and !in_cmd_list
+					in_cmd_list = true
+					in_ok_list = true
+					log 'MPD: Starting Command OK List' if audit
+				elsif cmd == 'command_list_end' and in_cmd_list
+					log 'MPD: Running Command List' if audit
+
+					the_ret = true
+					command_list.each_with_index do |set,i|
+						the_ret = do_cmd sock, set[0], set[1]
+
+						if audit
+							log "MPD Command List: CMD ##{i}: \"#{set[0]}(#{set[1].join(', ')})\": " + (the_ret ? 'successful' : 'failed')
+						end
+						
+						break unless the_ret
+
+						sock.puts 'list_OK' if in_ok_list
+						
+					end
+
+					sock.puts 'OK' if the_ret
+
+					command_list.clear
+					in_cmd_list = false
+					in_ok_list = false
+				else
+					if in_cmd_list
+						command_list << [cmd, args]
+					else
+						ret = do_cmd sock, cmd, args
+						sock.puts 'OK' if ret
+						if audit
+							log "MPD Command \"#{cmd}(#{args.join(', ')})\": " + (ret ? 'successful' : 'failed')
+						end # End if audit
+					end # End if in_cmd_list
+				end # End if cmd == 'comand_list_begin' ...
+			end # End while line = sock.gets
 		rescue
 		end
 	end
@@ -78,7 +117,7 @@ class MPDTestServer < GServer
 						@status[:playlist] += 1
 						@the_playlist << s
 					end
-					return(cmd_pass(sock))
+					return true
 				else
 					# Add a single entry
 					the_song = nil
@@ -94,26 +133,26 @@ class MPDTestServer < GServer
 						if not dir.nil?
 							# Add the dir
 							add_dir_to_pls dir
-							return(cmd_pass(sock))
+							return true
 						else
 							return(cmd_fail(sock,'ACK [50@0] {add} directory or file not found'))
 						end
 					else
 						@status[:playlist] += 1
 						@the_playlist << the_song
-						return(cmd_pass(sock))
+						return true
 					end
 				end
 			when 'clear'
 				args_check( sock, cmd, args, 0 ) do
 					@status[:playlist] += 1
 					@the_playlist = []
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'clearerror'
 				args_check( sock, cmd, args, 0 ) do
 					@the_error = nil
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'close'
 				sock.close
@@ -122,7 +161,7 @@ class MPDTestServer < GServer
 				args_check( sock, cmd, args, 1 ) do |args|
 					if is_int(args[0]) and args[0].to_i >= 0
 						@status[:xfade] = args[0].to_i
-						return(cmd_pass(sock))
+						return true
 					else
 						return(cmd_fail(sock,"ACK [2@0] {crossfade} \"#{args[0]}\" is not a integer >= 0"))
 					end
@@ -139,7 +178,7 @@ class MPDTestServer < GServer
 						else
 							@the_playlist.delete_at args[0].to_i
 							@status[:playlist] += 1
-							return(cmd_pass(sock))
+							return true
 						end
 					else
 						return(cmd_fail('ACK [2@0] {delete} need a positive integer'))
@@ -159,7 +198,7 @@ class MPDTestServer < GServer
 						if not the_song.nil?
 							@the_playlist.delete the_song
 							@status[:playlist] += 1
-							return(cmd_pass(sock))
+							return true
 						else
 							return(cmd_fail(sock,"ACK [50@0] {deleteid} song id doesn't exist: \"#{args[0]}\""))
 						end
@@ -191,7 +230,7 @@ class MPDTestServer < GServer
 							@artists.each do |artist|
 								sock.puts "Artist: #{artist}"
 							end
-							return(cmd_pass(sock))
+							return true
 						else
 							if args.length == 2
 								# List all Albums by Artist
@@ -208,14 +247,14 @@ class MPDTestServer < GServer
 											end
 										end
 									end
-									return(cmd_pass(sock))
+									return true
 								end
 							else
 								# List all Albums
 								@albums.each do |album|
 									sock.puts "Album: #{album}"
 								end
-								return(cmd_pass(sock))
+								return true
 							end
 						end
 					end
@@ -238,7 +277,7 @@ class MPDTestServer < GServer
 							return(cmd_fail(sock,'ACK [50@0] {listall} directory or file not found'))
 						end
 					end
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'listallinfo'
 				args_check( sock, cmd, args, 0..1 ) do |args|
@@ -249,7 +288,7 @@ class MPDTestServer < GServer
 					else
 						sock.puts 'todo'
 					end
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'load'
 				args_check( sock, cmd, args, 0 ) do
@@ -302,7 +341,7 @@ class MPDTestServer < GServer
 				end
 			when 'ping'
 				args_check( sock, cmd, args, 0 ) do
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'play'
 				args_check( sock, cmd, args, 0..1 ) do |args|
@@ -330,7 +369,7 @@ class MPDTestServer < GServer
 					@the_playlist.each_with_index do |v,i|
 						sock.puts "#{i}: #{v['file']}"
 					end
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'playlistinfo'
 				args_check( sock, cmd, args, 0..1 ) do |args|
@@ -347,7 +386,7 @@ class MPDTestServer < GServer
 								song.each_pair do |key,val|
 									sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
 								end
-								return(cmd_pass(sock))
+								return true
 							end
 						else
 							@the_playlist.each do |song|
@@ -356,7 +395,7 @@ class MPDTestServer < GServer
 									sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
 								end
 							end
-							return(cmd_pass(sock))
+							return true
 						end
 					end
 				end
@@ -391,7 +430,7 @@ class MPDTestServer < GServer
 				args_check( sock, cmd, args, 1 ) do |args|
 					if is_bool args[0]
 						@status[:random] = args[0].to_i
-						return(cmd_pass(sock))
+						return true
 					elsif is_int args[0]
 						return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
 					else
@@ -402,7 +441,7 @@ class MPDTestServer < GServer
 				args_check( sock, cmd, args, 1 ) do |args|
 					if is_bool args[0]
 						@status[:repeat] = args[0].to_i
-						return(cmd_pass(sock))
+						return true
 					elsif is_int args[0]
 						return(cmd_fail(sock,"ACK [2@0] {repeat} \"#{args[0]}\" is not 0 or 1"))
 					else
@@ -455,7 +494,7 @@ class MPDTestServer < GServer
 					else
 						# Note: args[0] < 0 actually sets the vol val to < 0
 						@status[:volume] = args[0].to_i
-						return(cmd_pass(sock))
+						return true
 					end
 				end
 			when 'shuffle'
@@ -473,7 +512,7 @@ class MPDTestServer < GServer
 						sock.puts "#{key}: #{val}"
 					end
 					sock.puts "playlistlength: #{@the_playlist.length}"
-					return(cmd_pass(sock))
+					return true
 				end
 			when 'stop'
 				args_check( sock, cmd, args, 0 ) do
@@ -516,17 +555,12 @@ class MPDTestServer < GServer
 					else
 						# Note: args[0] < 0 subtract from the volume
 						@status[:volume] += args[0].to_i
-						return(cmd_pass(sock))
+						return true
 					end
 				end
 			else
 				return(cmd_fail(sock,"ACK [5@0] {} unknown command #{cmd}"))
 		end # End Case cmd
-	end
-
-	def cmd_pass( sock )
-		sock.puts 'OK'
-		return true
 	end
 
 	def cmd_fail( sock, msg )
