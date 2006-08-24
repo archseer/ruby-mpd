@@ -18,6 +18,7 @@ class MPDTestServer < GServer
 		@playlists = @database[1]
 		@artists = []
 		@albums = []
+		@titles = []
 		@the_playlist = []
 		@filetree = {:name =>'', :dirs =>[], :songs =>[]}
 		@songs.each_with_index do |song,i|
@@ -27,6 +28,9 @@ class MPDTestServer < GServer
 			end
 			if !song['album'].nil? and !@albums.include? song['album']
 				@albums << song['album']
+			end
+			if !song['title'].nil?
+				@titles << song['title']
 			end
 			if !song['file'].nil?
 				dirs = song['file'].split '/'
@@ -49,12 +53,17 @@ class MPDTestServer < GServer
 				the_dir[:songs] << song
 			end # End if !song['file'].nil?
 		end # End @songs.each
+
+		@artists.sort!
+		@albums.sort!
+		@titles.sort!
 	end
 
 	def serve( sock )
 		command_list = []
 		in_cmd_list = false
 		in_ok_list = false
+		the_error = nil
 		sock.puts 'OK MPD 0.11.5'
 		begin
 			while line = sock.gets
@@ -151,7 +160,7 @@ class MPDTestServer < GServer
 				end
 			when 'clearerror'
 				args_check( sock, cmd, args, 0 ) do
-					@the_error = nil
+					the_error = nil
 					return true
 				end
 			when 'close'
@@ -209,9 +218,29 @@ class MPDTestServer < GServer
 			when 'find'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if args[0] != 'album' and args[0] != 'artist' and args[0] != 'title'
-						return(cmd_fail(sock,'ACK [2@0] {find} unknown table'))
+						return(cmd_fail(sock,'ACK [2@0] {find} incorrect arguments'))
 					else
-						sock.puts 'todo'
+						if args[0] == 'album'
+							@songs.each do |song|
+								if song['album'] == args[1]
+									puts song
+									send_song sock, song
+								end
+							end
+						elsif args[0] == 'artist'
+							@songs.each do |song|
+								if song['artist'] == args[1]
+									send_song sock, song
+								end
+							end
+						elsif args[0] == 'title'
+							@songs.each do |song|
+								if song['title'] == args[1]
+									send_song sock, song
+								end
+							end
+						end
+						return true
 					end
 				end
 			when 'kill'
@@ -220,10 +249,10 @@ class MPDTestServer < GServer
 				end
 			when 'list'
 				args_check( sock, cmd, args, 1..2 ) do |args|
-					if args[0] != 'album' and args[0] != 'artist'
-						return(cmd_fail(sock,'ACK [2@0] {list} unknown table'))
+					if args[0] != 'album' and args[0] != 'artist' and args[0] != 'title'
+						return(cmd_fail(sock,"ACK [2@0] {list} \"#{args[0]}\" is not known"))
 					elsif args[0] == 'artist' and args.length > 1
-						return(cmd_fail(sock,'ACK [2@0] {list} artist table takes no args'))
+						return(cmd_fail(sock,'ACK [2@0] {list} should be "Album" for 3 arguments'))
 					else
 						if args[0] == 'artist'
 							# List all Artists
@@ -231,24 +260,26 @@ class MPDTestServer < GServer
 								sock.puts "Artist: #{artist}"
 							end
 							return true
+						elsif args[0] == 'title'
+							# List all Titles
+							@titles.each do |title|
+								sock.puts "Title: #{title}"
+							end
+							return true
 						else
 							if args.length == 2
 								# List all Albums by Artist
 								# artist == args[1]
-								if !@artists.include? args[1]
-									return(cmd_fail(sock,"ACK [50@0] {list} artist \"#{args[1]}\" not found"))
-								else
-									listed = []
-									@songs.each do |song|
-										if song['artist'] == args[1]
-											if not song['album'].nil? and !listed.include? song['album']
-												sock.puts "Album: #{song['album']}"
-												listed << song['album']
-											end
+								listed = []
+								@songs.each do |song|
+									if song['artist'] == args[1]
+										if not song['album'].nil? and !listed.include? song['album']
+											sock.puts "Album: #{song['album']}"
+											listed << song['album']
 										end
 									end
-									return true
 								end
+								return true
 							else
 								# List all Albums
 								@albums.each do |album|
@@ -266,6 +297,19 @@ class MPDTestServer < GServer
 							send_dir sock, d, false
 						end
 					else
+						was_song = false
+						@songs.each do |song|
+							if song['file'] == args[0]
+								sock.puts "file: #{song['file']}"
+								was_song = true
+								break
+							end
+						end
+
+						if was_song
+							return true
+						end
+
 						dir = locate_dir args[0]
 						if not dir.nil?
 							parents = args[0].split '/'
@@ -286,14 +330,52 @@ class MPDTestServer < GServer
 							send_dir sock, d, true
 						end
 					else
-						sock.puts 'todo'
+						was_song = false
+						@songs.each do |song|
+							if song['file'] == args[0]
+								send_song song
+								was_song = true
+								break
+							end
+						end
+
+						if was_song
+							return true
+						end
+
+						dir = locate_dir args[0]
+						if not dir.nil?
+							parents = args[0].split '/'
+							parents.pop
+							parents = parents.join '/'
+							parents += '/' unless parents.length == 0
+							send_dir sock, dir, true, parents
+						else
+							return(cmd_fail(sock,'ACK [50@0] {listallinfo} directory or file not found'))
+						end
 					end
 					return true
 				end
 			when 'load'
-				args_check( sock, cmd, args, 0 ) do
+				args_check( sock, cmd, args, 1 ) do
 					# @status[:playlist] += 1 for each song loaded
-					sock.puts 'todo'
+					pls = args[0] + '.m3u'
+					the_pls = nil
+					@playlists.each do |p|
+						if p['file'] == pls
+							the_pls = p
+							break
+						end
+					end
+
+					if not the_pls.nil?
+						the_pls['songs'].each do |song|
+							@the_playlist << song
+							@status[:playlist] += 1
+						end
+					else
+						return(cmd_fail(sock,"ACK [50@0] {load} playlist \"#{args[0]}\" not found"))
+					end
 				end
 			when 'lsinfo'
 				args_check( sock, cmd, args, 0..1 ) do
@@ -382,18 +464,12 @@ class MPDTestServer < GServer
 								return(cmd_fail(sock,"ACK [50@0] {playlistinfo} song doesn't exist: \"#{args[0]}\""))
 							else
 								song = @the_playlist[args[0].to_i]
-								sock.puts "file: #{song['file']}"
-								song.each_pair do |key,val|
-									sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
-								end
+								send_song sock, song
 								return true
 							end
 						else
 							@the_playlist.each do |song|
-								sock.puts "file: #{song['file']}"
-								song.each_pair do |key,val|
-									sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
-								end
+								send_song sock, song
 							end
 							return true
 						end
@@ -637,6 +713,13 @@ class MPDTestServer < GServer
 		end
 
 		return the_dir
+	end
+
+	def send_song( sock, song )
+		sock.puts "file: #{song['file']}"
+		song.each_pair do |key,val|
+			sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
+		end
 	end
 
 	def send_dir( sock, dir, allinfo, path = '' )
