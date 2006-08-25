@@ -182,4 +182,119 @@ class MPDTester < Test::Unit::TestCase
 		xfade = reply.gsub( /.*\nxfade: (.*)\n.*/,'\1' ).to_i
 		assert_equal 49, xfade
 	end
+
+	def test_current_song
+		# TODO
+	end
+
+	def test_delete
+		@sock.gets
+
+		@sock.puts 'add Shpongle/Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 7, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
+		assert_equal '1: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
+
+		# Test correct arg
+		@sock.puts 'delete 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '3: Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[3]
+		assert_equal '4: Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[4]
+
+		@sock.puts 'delete 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 5, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '2: Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
+		assert_equal '3: Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[3]
+		assert_equal '4: Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', songs[4]
+
+		# Test arg == length
+		@sock.puts 'delete 5'
+		assert_equal "ACK [50@0] {delete} song doesn't exist: \"5\"\n", @sock.gets
+
+		# Test arg > length
+		@sock.puts 'delete 900'
+		assert_equal "ACK [50@0] {delete} song doesn't exist: \"900\"\n", @sock.gets
+
+		# Test arg < 0
+		@sock.puts 'delete -1'
+		assert_equal "ACK [50@0] {delete} song doesn't exist: \"-1\"\n", @sock.gets
+
+		# Test no args
+		@sock.puts 'delete'
+		assert_equal "ACK [2@0] {delete} wrong number of arguments for \"delete\"\n", @sock.gets
+	end
+
+	def test_deleteid
+		@sock.gets
+
+		@sock.puts 'add Shpongle/Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 7, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
+		assert_equal '1: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
+
+		# Test correct arg
+		@sock.puts 'deleteid 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '1: Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
+		assert_equal '2: Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
+
+		@sock.puts 'deleteid 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 5, songs.length
+		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '1: Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
+		assert_equal '2: Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[2]
+
+		# Test arg no present but valid
+		@sock.puts 'deleteid 8'
+		assert_equal "ACK [50@0] {deleteid} song id doesn't exist: \"8\"\n", @sock.gets
+
+		# Test arg > length
+		@sock.puts 'deleteid 900'
+		assert_equal "ACK [50@0] {deleteid} song id doesn't exist: \"900\"\n", @sock.gets
+
+		# Test arg < 0
+		@sock.puts 'deleteid -1'
+		assert_equal "ACK [50@0] {deleteid} song id doesn't exist: \"-1\"\n", @sock.gets
+
+		# Test no args
+		@sock.puts 'deleteid'
+		assert_equal "ACK [2@0] {deleteid} wrong number of arguments for \"deleteid\"\n", @sock.gets
+	end
+
+	def test_find
+
+	end
 end
