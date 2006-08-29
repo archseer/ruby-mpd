@@ -223,7 +223,6 @@ class MPDTestServer < GServer
 						if args[0] == 'album'
 							@songs.each do |song|
 								if song['album'] == args[1]
-									puts song
 									send_song sock, song
 								end
 							end
