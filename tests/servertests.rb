@@ -47,12 +47,44 @@ class MPDTester < Test::Unit::TestCase
 		end
 
 		if error.nil?
-			return true if msg.empty?
 			return msg
 		else
 			raise error.gsub( /^ACK \[(\d+)\@(\d+)\] \{(.+)\} (.+)$/, 'MPD Error #\1: \3: \4')
 		end
   end
+
+	def build_hash( reply )
+		lines = reply.split "\n"
+
+		hash = {}
+		lines.each do |l|
+			key = l.gsub(/^([^:]*): .*/, '\1')
+			hash[key.downcase] = l.gsub( key + ': ', '' )
+		end
+
+		return hash
+	end
+
+	def build_songs( reply )
+		lines = reply.split "\n"
+
+		song = nil
+		songs = []
+		lines.each do |l|
+			if l =~ /^file: /
+				songs << song unless song == nil
+				song = {}
+				song['file'] = l.gsub(/^file: /, '')
+			else
+				key = l.gsub( /^([^:]*): .*/, '\1' )
+				song[key.downcase] = l.gsub( key + ': ', '' )
+			end
+		end
+
+		songs << song
+
+		return songs
+	end
 
 	def test_connect
 		assert_equal "OK MPD 0.11.5\n", @sock.gets
@@ -170,17 +202,15 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal "OK\n", @sock.gets
 
 		@sock.puts 'status'
-		reply = get_response
-		crossfade = reply.gsub( /.*\nxfade: (.*)\n.*/,'\1' ).to_i
-		assert_not_equal 49, crossfade
+		hash = build_hash(get_response)
+		assert_equal '10', hash['xfade']
 
 		@sock.puts 'crossfade 49'
 		assert_equal "OK\n", @sock.gets
 
 		@sock.puts 'status'
-		reply = get_response
-		xfade = reply.gsub( /.*\nxfade: (.*)\n.*/,'\1' ).to_i
-		assert_equal 49, xfade
+		hash = build_hash(get_response)
+		assert_equal '49', hash['xfade']
 	end
 
 	def test_current_song
@@ -295,6 +325,77 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_find
+		@sock.gets
+
+		# Test no args
+		@sock.puts 'find'
+		assert_equal "ACK [2@0] {find} wrong number of arguments for \"find\"\n", @sock.gets
+
+		# Test one arg
+		@sock.puts 'find album'
+		assert_equal "ACK [2@0] {find} wrong number of arguments for \"find\"\n", @sock.gets
+
+		# Test incorrect args
+		@sock.puts 'find wrong test'
+		assert_equal "ACK [2@0] {find} incorrect arguments\n", @sock.gets
+
+		# Test album search
+		@sock.puts 'find album "Are You Shpongled?"'
+		songs = build_songs(get_response)
+		assert_equal 7, songs.length
+		assert_equal 'Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[2]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[3]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[4]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[5]['file']
+		assert_equal 'Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', songs[6]['file']
+
+		songs.each_with_index do |s,i|
+			assert_equal 'Shpongle', s['artist']
+			assert_equal 'Are You Shpongled?', s['album']
+			assert_equal i+1, s['track'].to_i
+		end
+
+		# Test artist search
+		@sock.puts 'find artist "Carbon Based Lifeforms"'
+		songs = build_songs(get_response)
+		assert_equal 11, songs.length
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg', songs[0]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/02.Tensor.ogg', songs[1]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/03.MOS_6581_(Album_Version).ogg', songs[2]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/04.Silent_Running.ogg', songs[3]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/05.Neurotransmitter.ogg', songs[4]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/06.Hydroponic_Garden.ogg', songs[5]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/07.Exosphere.ogg', songs[6]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/08.Comsat.ogg', songs[7]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/09.Epicentre_(First_Movement).ogg', songs[8]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/10.Artificial_Island.ogg', songs[9]['file']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg', songs[10]['file']
+
+		songs.each_with_index do |s,i|
+			assert_equal 'Carbon Based Lifeforms', s['artist']
+			assert_equal 'Hydroponic Garden', s['album']
+			assert_equal i+1, s['track'].to_i
+		end
+
+		# Test title search
+		@sock.puts 'find title "Ambient Galaxy (Disco Valley Mix)"'
+		songs = build_songs(get_response)
+		assert_equal 1, songs.length
+		assert_equal 'Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', songs[0]['file']
+		assert_equal 'Astral Projection', songs[0]['artist']
+		assert_equal 'Dancing Galaxy', songs[0]['album']
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[0]['title']
+		assert_equal '8', songs[0]['track']
+
+	end
+
+	def test_kill
+		# TODO
+	end
+
+	def test_list
 
 	end
 end
