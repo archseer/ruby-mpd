@@ -673,4 +673,43 @@ class MPDTester < Test::Unit::TestCase
 			assert_nil s['directory']
 		end
 	end
+
+	def test_load
+		@sock.gets
+
+		# Test no args
+		@sock.puts 'load'
+		assert_equal "ACK [2@0] {load} wrong number of arguments for \"load\"\n", @sock.gets
+
+		# Test args > 1
+		@sock.puts 'load blah blah'
+		assert_equal "ACK [2@0] {load} wrong number of arguments for \"load\"\n", @sock.gets
+
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		# Test arg doesn't exist
+		@sock.puts 'load nopls'
+		assert_equal "ACK [50@0] {load} playlist \"nopls\" not found\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['playlistlength']
+
+		# Test arg that exists but contains m3u
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy.m3u'
+		assert_equal "ACK [50@0] {load} playlist \"Astral_Projection_-_Dancing_Galaxy.m3u\" not found\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['playlistlength']
+
+		# Test correct arg
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '8', status['playlistlength']
+	end
 end
