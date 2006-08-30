@@ -396,6 +396,67 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_list
+		@sock.gets
+
+		# Test no args
+		@sock.puts 'list'
+		assert_equal "ACK [2@0] {list} wrong number of arguments for \"list\"\n", @sock.gets
+
+		# Test wrong args
+		@sock.puts 'list bad'
+		assert_equal "ACK [2@0] {list} \"bad\" is not known\n", @sock.gets
+
+		# Test wrong args
+		@sock.puts 'list bad blah'
+		assert_equal "ACK [2@0] {list} \"bad\" is not known\n", @sock.gets
+
+		# Test wrong args
+		@sock.puts 'list artist blah'
+		assert_equal "ACK [2@0] {list} should be \"Album\" for 3 arguments\n", @sock.gets
+
+		# Test album
+		@sock.puts 'list album'
+		reply = get_response
+		albums = reply.split "\n"
+		assert_equal 4, albums.length
+		assert_equal 'Album: Are You Shpongled?', albums[0]
+		assert_equal 'Album: Dancing Galaxy', albums[1]
+		assert_equal 'Album: Hydroponic Garden', albums[2]
+		assert_equal 'Album: Nothing Lasts... But Nothing Is Lost', albums[3]
+
+		# Test album + artist
+		@sock.puts 'list album Shpongle'
+		reply = get_response
+		albums = reply.split "\n"
+		assert_equal 2, albums.length
+		assert_equal 'Album: Are You Shpongled?', albums[0]
+		assert_equal 'Album: Nothing Lasts... But Nothing Is Lost', albums[1]
+
+		# Test album + non artist
+		@sock.puts 'list album zero'
+		assert_equal "OK\n", @sock.gets
+
+		# Test artist
+		@sock.puts 'list artist'
+		reply = get_response
+		artists = reply.split "\n"
+		assert_equal 3, artists.length
+		assert_equal 'Artist: Astral Projection', artists[0]
+		assert_equal 'Artist: Carbon Based Lifeforms', artists[1]
+		assert_equal 'Artist: Shpongle', artists[2]
+
+		# Test title
+		@sock.puts 'list title'
+		reply = get_response
+		titles = reply.split "\n"
+		assert_equal 46, titles.length
+		assert_equal 'Title: ... and the Day Turned to Night', titles[0]
+		assert_equal 'Title: ...But Nothing Is Lost', titles[1]
+		assert_equal 'Title: When Shall I Be Free', titles[45]
+
+	end
+
+	def test_listall
 
 	end
 end
