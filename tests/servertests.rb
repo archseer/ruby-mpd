@@ -146,7 +146,7 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 1, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
+		assert_equal '0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
 
 		# Add a non existant item
 		@sock.puts 'add ABOMINATION'
@@ -237,8 +237,8 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 7, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
-		assert_equal '1: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
+		assert_equal '0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
 
 		# Test correct arg
 		@sock.puts 'delete 0'
@@ -248,9 +248,9 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 6, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
-		assert_equal '3: Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[3]
-		assert_equal '4: Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[4]
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '3:Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[3]
+		assert_equal '4:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[4]
 
 		@sock.puts 'delete 3'
 		assert_equal "OK\n", @sock.gets
@@ -259,10 +259,10 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 5, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
-		assert_equal '2: Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
-		assert_equal '3: Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[3]
-		assert_equal '4: Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', songs[4]
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '2:Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
+		assert_equal '3:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', songs[3]
+		assert_equal '4:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', songs[4]
 
 		# Test arg == length
 		@sock.puts 'delete 5'
@@ -291,8 +291,8 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 7, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
-		assert_equal '1: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
+		assert_equal '0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', songs[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[1]
 
 		# Test correct arg
 		@sock.puts 'deleteid 0'
@@ -302,9 +302,9 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 6, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
-		assert_equal '1: Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
-		assert_equal '2: Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
+		assert_equal '2:Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', songs[2]
 
 		@sock.puts 'deleteid 3'
 		assert_equal "OK\n", @sock.gets
@@ -313,9 +313,9 @@ class MPDTester < Test::Unit::TestCase
 		reply = get_response
 		songs = reply.split "\n"
 		assert_equal 5, songs.length
-		assert_equal '0: Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
-		assert_equal '1: Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
-		assert_equal '2: Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[2]
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', songs[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', songs[1]
+		assert_equal '2:Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', songs[2]
 
 		# Test arg no present but valid
 		@sock.puts 'deleteid 8'
@@ -711,5 +711,93 @@ class MPDTester < Test::Unit::TestCase
 		@sock.puts 'status'
 		status = build_hash get_response
 		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.length
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/2.Soundform.ogg', lines[1]
+		assert_equal '2:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[2]
+		assert_equal '3:Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg', lines[3]
+		assert_equal '4:Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg', lines[4]
+		assert_equal '5:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[5]
+		assert_equal '6:Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg', lines[6]
+		assert_equal '7:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[7]
+	end
+
+	def test_lsinfo
+		# TODO
+	end
+
+	def test_move
+		# TODO
+	end
+
+	def test_moveid
+		# TODO
+	end
+
+	def test_next
+		# TODO
+	end
+
+	def test_pause
+		# TODO
+	end
+
+	def test_password
+		# TODO
+	end
+
+	def test_ping
+		@sock.gets
+
+		# Test ping w/ args
+		@sock.puts 'ping blah'
+		assert_equal "ACK [2@0] {ping} wrong number of arguments for \"ping\"\n", @sock.gets
+
+		# Test ping
+		@sock.puts 'ping'
+		assert_equal "OK\n", @sock.gets
+	end
+
+	def test_play
+		# TODO
+	end
+
+	def test_playid
+		# TODO
+	end
+
+	def test_playlist
+		@sock.gets
+
+		# Test with args
+		@sock.puts 'playlist blah'
+		assert_equal "ACK [2@0] {playlist} wrong number of arguments for \"playlist\"\n", @sock.gets
+
+		# Test w/o args
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.length
+		assert_equal '0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', lines[1]
+		assert_equal '2:Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', lines[2]
+		assert_equal '3:Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', lines[3]
+		assert_equal '4:Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', lines[4]
+		assert_equal '5:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', lines[5]
+		assert_equal '6:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', lines[6]
+	end
+
+	def test_playlistinfo
+
 	end
 end
