@@ -77,13 +77,23 @@ class MPDTester < Test::Unit::TestCase
 				song['file'] = l.gsub(/^file: /, '')
 			else
 				key = l.gsub( /^([^:]*): .*/, '\1' )
-				song[key.downcase] = l.gsub( key + ': ', '' )
+				song[key] = l.gsub( key + ': ', '' )
 			end
 		end
 
 		songs << song
 
 		return songs
+	end
+
+	def extract_song( lines )
+		song = {}
+		lines.each do |l|
+			key = l.gsub /^([^:]*): .*/, '\1'
+			song[key] = l.gsub key + ': ', ''
+		end
+
+		return song
 	end
 
 	def test_connect
@@ -352,9 +362,10 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', songs[6]['file']
 
 		songs.each_with_index do |s,i|
-			assert_equal 'Shpongle', s['artist']
-			assert_equal 'Are You Shpongled?', s['album']
-			assert_equal i+1, s['track'].to_i
+			assert_equal 'Shpongle', s['Artist']
+			assert_equal 'Are You Shpongled?', s['Album']
+			assert_equal (i+1).to_s, s['Track']
+			assert_not_nil s['Time']
 		end
 
 		# Test artist search
@@ -374,9 +385,10 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/11.Refraction_1.33.ogg', songs[10]['file']
 
 		songs.each_with_index do |s,i|
-			assert_equal 'Carbon Based Lifeforms', s['artist']
-			assert_equal 'Hydroponic Garden', s['album']
-			assert_equal i+1, s['track'].to_i
+			assert_equal 'Carbon Based Lifeforms', s['Artist']
+			assert_equal 'Hydroponic Garden', s['Album']
+			assert_equal (i+1).to_s, s['Track']
+			assert_not_nil s['Time']
 		end
 
 		# Test title search
@@ -384,10 +396,11 @@ class MPDTester < Test::Unit::TestCase
 		songs = build_songs(get_response)
 		assert_equal 1, songs.length
 		assert_equal 'Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', songs[0]['file']
-		assert_equal 'Astral Projection', songs[0]['artist']
-		assert_equal 'Dancing Galaxy', songs[0]['album']
-		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[0]['title']
-		assert_equal '8', songs[0]['track']
+		assert_equal 'Astral Projection', songs[0]['Artist']
+		assert_equal 'Dancing Galaxy', songs[0]['Album']
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[0]['Title']
+		assert_equal '8', songs[0]['Track']
+		assert_equal '825', songs[0]['Time']
 
 	end
 
@@ -523,5 +536,141 @@ class MPDTester < Test::Unit::TestCase
 		@sock.puts 'listall Shpongle/nothere'
 		assert_equal "ACK [50@0] {listall} directory or file not found\n", @sock.gets
 
+	end
+
+	def test_listallinfo
+		@sock.gets
+
+		# Test too many args
+		@sock.puts 'listallinfo blah blah'
+		assert_equal "ACK [2@0] {listallinfo} wrong number of arguments for \"listallinfo\"\n", @sock.gets
+
+		# Test no args
+		@sock.puts 'listallinfo'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 329, lines.length
+		assert_equal 'directory: Astral_Projection', lines[0]
+		assert_equal 'directory: Astral_Projection/Dancing_Galaxy', lines[1]
+		assert_equal 'file: Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[2]
+		song = extract_song lines[3..8]
+		assert_equal 'Astral Projection', song['Artist']
+		assert_equal 'Dancing Galaxy', song['Album']
+		assert_equal 'Dancing Galaxy', song['Title']
+		assert_equal '558', song['Time']
+		assert_equal '1', song['Track']
+		assert_equal '7', song['Id']
+
+		song_num = 1
+		while song_num < 8
+			index = (song_num * 7) + 2
+			song = extract_song lines[index..(index+6)]
+			assert_equal 'Astral Projection', song['Artist']
+			assert_equal 'Dancing Galaxy', song['Album']
+			assert_equal (song_num+1).to_s, song['Track']
+			assert_equal (song_num+7).to_s, song['Id']
+			assert_not_nil song['Time']
+			assert_not_nil song['Title']
+			assert_not_nil song['file']
+			song_num += 1
+		end
+
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[58]
+		assert_equal 'directory: Carbon_Based_Lifeforms/Hydroponic_Garden', lines[59]
+		assert_equal 'file: Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg', lines[60]
+
+		song = extract_song lines[61..66]
+		assert_equal 'Carbon Based Lifeforms', song['Artist']
+		assert_equal 'Hydroponic Garden', song['Album']
+		assert_equal 'Central Plains', song['Title']
+		assert_equal '1', song['Track']
+		assert_equal '15', song['Id']
+
+		song_num = 1
+		while song_num < 11
+			index = (song_num * 7) + 60
+			song = extract_song lines[index..(index+6)]
+			assert_equal 'Carbon Based Lifeforms', song['Artist']
+			assert_equal 'Hydroponic Garden', song['Album']
+			assert_equal (song_num+1).to_s, song['Track']
+			assert_equal (song_num+15).to_s, song['Id']
+			assert_not_nil song['Time']
+			assert_not_nil song['Title']
+			assert_not_nil song['file']
+			song_num += 1
+		end
+
+		assert_equal 'directory: Shpongle', lines[137]
+		assert_equal 'directory: Shpongle/Are_You_Shpongled', lines[138]
+		assert_equal 'file: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[139]
+
+		song = extract_song lines[140..145]
+		assert_equal 'Shpongle', song['Artist']
+		assert_equal 'Are You Shpongled?', song['Album']
+		assert_equal 'Shpongle Falls', song['Title']
+		assert_equal '1', song['Track']
+		assert_equal '0', song['Id']
+
+		song_num = 1
+		while song_num < 7
+			index = (song_num * 7) + 139
+			song = extract_song lines[index..(index+6)]
+			assert_equal 'Shpongle', song['Artist']
+			assert_equal 'Are You Shpongled?', song['Album']
+			assert_equal (song_num+1).to_s, song['Track']
+			assert_equal (song_num).to_s, song['Id']
+			assert_not_nil song['Time']
+			assert_not_nil song['Title']
+			assert_not_nil song['file']
+			song_num += 1
+		end
+
+		assert_equal 'directory: Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost', lines[188]
+		assert_equal 'file: Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/01.Botanical_Dimensions.ogg', lines[189]
+
+		song = extract_song lines[190..195]
+		assert_equal 'Shpongle', song['Artist']
+		assert_equal 'Nothing Lasts... But Nothing Is Lost', song['Album']
+		assert_equal 'Botanical Dimensions', song['Title']
+		assert_equal '1', song['Track']
+		assert_equal '26', song['Id']
+
+		song_num = 1
+		while song_num < 20
+			index = (song_num * 7) + 189
+			song = extract_song lines[index..(index+6)]
+			assert_equal 'Shpongle', song['Artist']
+			assert_equal 'Nothing Lasts... But Nothing Is Lost', song['Album']
+			assert_equal (song_num+1).to_s, song['Track']
+			assert_equal (song_num+26).to_s, song['Id']
+			assert_not_nil song['Time']
+			assert_not_nil song['Title']
+			assert_not_nil song['file']
+			song_num += 1
+		end
+
+		# Test one arg that doesn't exist
+		@sock.puts 'listallinfo noentry'
+		assert_equal "ACK [50@0] {listallinfo} directory or file not found\n", @sock.gets
+
+		# Test one arg that exists
+		@sock.puts 'listallinfo Carbon_Based_Lifeforms'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[0]
+		assert_equal 'directory: Carbon_Based_Lifeforms/Hydroponic_Garden', lines[1]
+		lines.shift
+		lines.shift
+		reply = lines.join "\n"
+		songs = build_songs reply
+		
+		songs.each_with_index do |s,i|
+			assert_equal 'Carbon Based Lifeforms', s['Artist']
+			assert_equal 'Hydroponic Garden', s['Album']
+			assert_equal (i+1).to_s, s['Track']
+			assert_equal (i+15).to_s, s['Id']
+			assert_not_nil s['Time']
+			assert_nil s['directory']
+		end
 	end
 end
