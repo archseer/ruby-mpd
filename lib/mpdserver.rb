@@ -54,6 +54,7 @@ class MPDTestServer < GServer
 			end # End if !song['file'].nil?
 		end # End @songs.each
 
+		sort_dir @filetree
 		@artists.sort!
 		@albums.sort!
 		@titles.sort!
@@ -748,6 +749,16 @@ class MPDTestServer < GServer
 
 		dir[:dirs].each do |d|
 			add_dir_to_pls d
+		end
+	end
+
+	def sort_dir( dir )
+		dir[:dirs].sort! do |x,y|
+			x[:name] <=> y[:name]
+		end
+
+		dir[:dirs].each do |d|
+			sort_dir d
 		end
 	end
 
