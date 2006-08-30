@@ -2,43 +2,43 @@
   - &song1
       file: "Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Shpongle Falls"
       track: 1
   - &song2
       file: "Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Monster Hit"
       track: 2
   - &song3
       file: "Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Vapour Rumours"
       track: 3
   - &song4
       file: "Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Shpongle Spores"
       track: 4
   - &song5
       file: "Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Behind Closed Eyelids"
       track: 5
   - &song6
       file: "Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "Divine Moments of Truth"
       track: 6
   - &song7
       file: "Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg"
       artist: "Shpongle"
-      album: "Are You Shpongled"
+      album: "Are You Shpongled?"
       title: "... and the Day Turned to Night"
       track: 7
   - &song8
@@ -189,7 +189,7 @@
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/06.Nothing_Lasts....ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "Nothing Lasts....ogg"
+      title: "Nothing Lasts..."
       track: 6
   - &song33
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/07.Shnitzled_in_the_Negev.ogg"
@@ -201,7 +201,7 @@
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/08....But_Nothing_Is_Lost.ogg"
       artist: "Shpongle"
       album: "Nothing Lasts... But Nothing Is Lost"
-      title: "...But Nothing Is Lost.ogg"
+      title: "...But Nothing Is Lost"
       track: 8
   - &song35
       file: "Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/09.When_Shall_I_Be_Free.ogg"
