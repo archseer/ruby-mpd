@@ -457,6 +457,71 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_listall
+		@sock.gets
+
+		# Test too many args
+		@sock.puts 'listall blah blah'
+		assert_equal "ACK [2@0] {listall} wrong number of arguments for \"listall\"\n", @sock.gets
+
+		# Test no args
+		@sock.puts 'listall'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 53, lines.length
+		assert_equal 'directory: Astral_Projection', lines[0]
+		assert_equal 'directory: Astral_Projection/Dancing_Galaxy', lines[1]
+		assert_equal 'file: Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[2]
+		for i in 3...10
+			assert lines[i] =~ /^file: Astral_Projection\/Dancing_Galaxy\//
+		end
+
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[10]
+		assert_equal 'directory: Carbon_Based_Lifeforms/Hydroponic_Garden', lines[11]
+		assert_equal 'file: Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg', lines[12]
+		for i in 13...23
+			assert lines[i] =~ /^file: Carbon_Based_Lifeforms\/Hydroponic_Garden\//
+		end
+
+		assert_equal 'directory: Shpongle', lines[23]
+		assert_equal 'directory: Shpongle/Are_You_Shpongled', lines[24]
+		assert_equal 'file: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[25]
+		for i in 26...32
+			assert lines[i] =~ /^file: Shpongle\/Are_You_Shpongled\//
+		end
+
+		assert_equal 'directory: Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost', lines[32]
+		assert_equal 'file: Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/01.Botanical_Dimensions.ogg', lines[33]
+		for i in 34...53
+			assert lines[i] =~ /^file: Shpongle\/Nothing_Lasts..._But_Nothing_Is_Lost\//
+		end
+
+		# Test one arg
+		@sock.puts 'listall Carbon_Based_Lifeforms'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 13, lines.length
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[0]
+		assert_equal 'directory: Carbon_Based_Lifeforms/Hydroponic_Garden', lines[1]
+		assert_equal 'file: Carbon_Based_Lifeforms/Hydroponic_Garden/01.Central_Plains.ogg', lines[2]
+		for i in 2...13
+			assert lines[i] =~ /^file: Carbon_Based_Lifeforms\/Hydroponic_Garden\//
+		end
+
+		@sock.puts 'listall Shpongle/Are_You_Shpongled'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.length
+		assert_equal 'directory: Shpongle/Are_You_Shpongled', lines[0]
+		assert_equal 'file: Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[1]
+		for i in 2...8
+			assert lines[i] =~ /^file: Shpongle\/Are_You_Shpongled\//
+		end
+
+		@sock.puts 'listall nothere'
+		assert_equal "ACK [50@0] {listall} directory or file not found\n", @sock.gets
+
+		@sock.puts 'listall Shpongle/nothere'
+		assert_equal "ACK [50@0] {listall} directory or file not found\n", @sock.gets
 
 	end
 end
