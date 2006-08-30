@@ -449,7 +449,7 @@ class MPDTestServer < GServer
 				log 'MPD Warning: Call to Deprecated API: "playlist"' if audit
 				args_check( sock, cmd, args, 0 ) do
 					@the_playlist.each_with_index do |v,i|
-						sock.puts "#{i}: #{v['file']}"
+						sock.puts "#{i}:#{v['file']}"
 					end
 					return true
 				end
