@@ -918,4 +918,50 @@ class MPDTester < Test::Unit::TestCase
 		status = build_hash get_response
 		assert_equal '0', status['random']
 	end
+
+	def test_repeat
+		@sock.gets
+		# Test no args
+		@sock.puts 'repeat'
+		assert_equal "ACK [2@0] {repeat} wrong number of arguments for \"repeat\"\n", @sock.gets
+
+		# Test too many args
+		@sock.puts 'repeat blah blah'
+		assert_equal "ACK [2@0] {repeat} wrong number of arguments for \"repeat\"\n", @sock.gets
+
+		# Test arg != integer
+		@sock.puts 'repeat b'
+		assert_equal "ACK [2@0] {repeat} need an integer\n", @sock.gets
+
+		# Test arg != (0||1)
+		@sock.puts 'repeat 3'
+		assert_equal "ACK [2@0] {repeat} \"3\" is not 0 or 1\n", @sock.gets
+
+		# Test arg < 0
+		@sock.puts 'repeat -1'
+		assert_equal "ACK [2@0] {repeat} \"-1\" is not 0 or 1\n", @sock.gets
+
+		# Test disable
+		@sock.puts 'repeat 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['repeat']
+
+		# Test enable
+		@sock.puts 'repeat 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '1', status['repeat']
+
+		@sock.puts 'repeat 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['repeat']
+	end
 end
