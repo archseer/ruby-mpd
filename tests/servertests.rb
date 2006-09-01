@@ -856,4 +856,66 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal '4', songs[0]['Track']
 		assert_equal '10', songs[0]['Id']
 	end
+
+	def test_playlistid
+		# TODO
+	end
+
+	def test_plchanges
+		# TODO
+	end
+
+	def test_plchangesposid
+		# TODO
+	end
+
+	def test_previous
+		# TODO
+	end
+
+	def test_random
+		@sock.gets
+		# Test no args
+		@sock.puts 'random'
+		assert_equal "ACK [2@0] {random} wrong number of arguments for \"random\"\n", @sock.gets
+
+		# Test too many args
+		@sock.puts 'random blah blah'
+		assert_equal "ACK [2@0] {random} wrong number of arguments for \"random\"\n", @sock.gets
+
+		# Test arg != integer
+		@sock.puts 'random b'
+		assert_equal "ACK [2@0] {random} need an integer\n", @sock.gets
+
+		# Test arg != (0||1)
+		@sock.puts 'random 3'
+		assert_equal "ACK [2@0] {random} \"3\" is not 0 or 1\n", @sock.gets
+
+		# Test arg < 0
+		@sock.puts 'random -1'
+		assert_equal "ACK [2@0] {random} \"-1\" is not 0 or 1\n", @sock.gets
+
+		# Test disable
+		@sock.puts 'random 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['random']
+
+		# Test Enable
+		@sock.puts 'random 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '1', status['random']
+
+		@sock.puts 'random 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['random']
+	end
 end
