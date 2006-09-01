@@ -508,7 +508,7 @@ class MPDTestServer < GServer
 						@status[:random] = args[0].to_i
 						return true
 					elsif is_int args[0]
-						return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
+						return(cmd_fail(sock,"ACK [2@0] {random} \"#{args[0]}\" is not 0 or 1"))
 					else
 						return(cmd_fail(sock,'ACK [2@0] {random} need an integer'))
 					end
