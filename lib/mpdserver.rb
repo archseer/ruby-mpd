@@ -379,7 +379,12 @@ class MPDTestServer < GServer
 				end
 			when 'lsinfo'
 				args_check( sock, cmd, args, 0..1 ) do
-					sock.puts 'todo'
+					if args.length == 0
+						@playlists.each do |pls|
+							sock.puts "playlist: #{pls['file'].gsub( /\.m3u$/, '' )}"
+						end
+					end
+					return true
 				end
 			when 'move'
 				args_check( sock, cmd, args, 2 ) do |args|
@@ -526,7 +531,18 @@ class MPDTestServer < GServer
 				end
 			when 'rm'
 				args_check( sock, cmd, args, 1 ) do |args|
-					sock.puts 'todo'
+					rm_pls = args[0] + '.m3u'
+					the_pls = -1
+					@playlists.each_with_index do |pls,i|
+						the_pls = i if pls['file'] == rm_pls
+					end
+
+					if the_pls != -1
+						@playlists.delete_at the_pls
+						return true
+					else
+						return(cmd_fail(sock,"ACK [50@0] {rm} playlist \"#{args[0]}\" not found"))
+					end
 				end
 			when 'save'
 				args_check( sock, cmd, args, 1 ) do |args|
