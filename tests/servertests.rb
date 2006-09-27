@@ -727,7 +727,11 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_lsinfo
-		# TODO
+		@sock.gets
+
+		# Test args > 1
+		@sock.puts 'lsinfo 1 2'
+		assert_equal "ACK [2@0] {lsinfo} wrong number of arguments for \"lsinfo\"\n", @sock.gets
 	end
 
 	def test_move
@@ -963,5 +967,43 @@ class MPDTester < Test::Unit::TestCase
 		@sock.puts 'status'
 		status = build_hash get_response
 		assert_equal '0', status['repeat']
+	end
+
+	def test_rm
+		@sock.gets
+		
+		# Test no args
+		@sock.puts 'rm'
+		assert_equal "ACK [2@0] {rm} wrong number of arguments for \"rm\"\n", @sock.gets
+
+		# Test args > 1
+		@sock.puts 'rm 1 2'
+		assert_equal "ACK [2@0] {rm} wrong number of arguments for \"rm\"\n", @sock.gets
+
+		# Test arg not exist
+		@sock.puts 'rm abomination'
+		assert_equal "ACK [50@0] {rm} playlist \"abomination\" not found\n", @sock.gets
+
+		# Test arg exists
+		@sock.puts 'rm Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		# Ensure the pls was removed
+		@sock.puts 'lsinfo'
+		reply = get_response
+		lines = reply.split "\n"
+		found = false
+		lines.each do |l|
+			if l == 'playlist: Shpongle_-_Are_You_Shpongled'
+				found = true
+				break
+			end
+		end
+
+		assert !found, 'The playlist was not removed'
+	end
+
+	def test_save
+		#TODO
 	end
 end
