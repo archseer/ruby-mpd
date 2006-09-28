@@ -1043,6 +1043,79 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_save
-		#TODO
+		@sock.gets
+
+		# Test no args
+		@sock.puts 'save'
+		assert_equal "ACK [2@0] {save} wrong number of arguments for \"save\"\n", @sock.gets
+
+		# Test args > 1
+		@sock.puts 'save 1 2'
+		assert_equal "ACK [2@0] {save} wrong number of arguments for \"save\"\n", @sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Test correct args
+		@sock.puts 'save Save_Test'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'lsinfo'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 6, lines.length
+		assert_equal 'directory: Astral_Projection', lines[0]
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[1]
+		assert_equal 'directory: Shpongle', lines[2]
+		assert_equal 'playlist: Shpongle_-_Are_You_Shpongled', lines[3]
+		assert_equal 'playlist: Astral_Projection_-_Dancing_Galaxy', lines[4]
+		assert_equal 'playlist: Save_Test', lines[5]
+
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Save_Test'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 15, lines.length
+		assert_equal '0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[0]
+		assert_equal '3:Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', lines[3]
+		assert_equal '6:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', lines[6]
+		assert_equal '7:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[7]
+		assert_equal '11:Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg', lines[11]
+		assert_equal '14:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[14]
+	end
+
+	def test_search
+		# TODO
+	end
+
+	def test_seek
+		# TODO
+	end
+
+	def test_seekid
+		# TODO
+	end
+
+	def test_setvol
+		@sock.gets
+
+		# Test no args
+		@sock.puts 'setvol'
+		assert_equal "ACK [2@0] {setvol} wrong number of arguments for \"setvol\"\n", @sock.gets
+
+		# Test too many args
+		@sock.puts 'setvol 1 2'
+		assert_equal "ACK [2@0] {setvol} wrong number of arguments for \"setvol\"\n", @sock.gets
 	end
 end

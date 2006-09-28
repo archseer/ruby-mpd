@@ -564,7 +564,12 @@ class MPDTestServer < GServer
 				end
 			when 'save'
 				args_check( sock, cmd, args, 1 ) do |args|
-					sock.puts 'todo'
+					new_playlist = {'file' => args[0]+'.m3u', 'songs' => @the_playlist}
+#@the_playlist.each do |song|
+#						new_playlist['songs'] << song
+#					end
+					@playlists << new_playlist
+					return true
 				end
 			when 'search'
 				args_check( sock, cmd, args, 2 ) do |args|
