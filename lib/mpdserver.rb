@@ -380,8 +380,26 @@ class MPDTestServer < GServer
 			when 'lsinfo'
 				args_check( sock, cmd, args, 0..1 ) do
 					if args.length == 0
+						@filetree[:dirs].each do |d|
+							sock.puts "directory: #{d[:name]}"
+							d[:songs].each do |s|
+								send_song sock, s
+							end
+						end
 						@playlists.each do |pls|
 							sock.puts "playlist: #{pls['file'].gsub( /\.m3u$/, '' )}"
+						end
+					else
+						dir = locate_dir args[0]
+						if dir.nil?
+							return(cmd_fail(sock,"ACK [50@0] {lsinfo} directory not found"))
+						else
+							dir[:dirs].each do |d|
+								sock.puts "directory: #{args[0] + '/' + d[:name]}"
+							end
+							dir[:songs].each do |s|
+								send_song sock, s
+							end
 						end
 					end
 					return true
@@ -743,10 +761,7 @@ class MPDTestServer < GServer
 
 		dir[:songs].each do |song|
 			if allinfo
-				sock.puts "file: #{song['file']}"
-				song.each_pair do |key,val|
-					sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
-				end
+				send_song sock, song
 			else
 				sock.puts "file: #{song['file']}"
 			end

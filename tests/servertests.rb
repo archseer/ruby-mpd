@@ -732,6 +732,45 @@ class MPDTester < Test::Unit::TestCase
 		# Test args > 1
 		@sock.puts 'lsinfo 1 2'
 		assert_equal "ACK [2@0] {lsinfo} wrong number of arguments for \"lsinfo\"\n", @sock.gets
+
+		# Test arg not exist
+		@sock.puts 'lsinfo abomination'
+		assert_equal "ACK [50@0] {lsinfo} directory not found\n", @sock.gets
+
+		@sock.puts 'lsinfo Shpongle/a'
+		assert_equal "ACK [50@0] {lsinfo} directory not found\n", @sock.gets
+
+		# Test no args
+		@sock.puts 'lsinfo'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 5, lines.length
+		assert_equal 'directory: Astral_Projection', lines[0]
+		assert_equal 'directory: Carbon_Based_Lifeforms', lines[1]
+		assert_equal 'directory: Shpongle', lines[2]
+		assert_equal 'playlist: Shpongle_-_Are_You_Shpongled', lines[3]
+		assert_equal 'playlist: Astral_Projection_-_Dancing_Galaxy', lines[4]
+
+		# Test arg
+		@sock.puts 'lsinfo Shpongle'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 2, lines.length
+		assert_equal 'directory: Shpongle/Are_You_Shpongled', lines[0]
+		assert_equal 'directory: Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost', lines[1]
+
+		@sock.puts 'lsinfo Astral_Projection/Dancing_Galaxy'
+		songs = build_songs get_response
+		assert_equal 8, songs.length
+		songs.each_with_index do |s,i|
+			assert s['file'] =~ /^Astral_Projection\/Dancing_Galaxy\//
+			assert_equal 'Astral Projection', s['Artist']
+			assert_equal 'Dancing Galaxy', s['Album']
+			assert_not_nil s['Title']
+			assert_not_nil s['Time']
+			assert_equal (i+1).to_s, s['Track']
+			assert_equal (i+7).to_s, s['Id']
+		end
 	end
 
 	def test_move
