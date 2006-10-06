@@ -1172,6 +1172,7 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal "0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg", lines[0]
 		assert_equal "1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg", lines[1]
 
+		# Test correct usage
 		@sock.puts 'shuffle'
 		assert_equal "OK\n", @sock.gets
 
@@ -1181,6 +1182,28 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 7, lines.size
 		assert_equal "0:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg", lines[0]
 		assert_equal "1:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg", lines[1]
+	end
 
+	def test_stats
+		@sock.gets
+
+		# Test args > 0
+		@sock.puts 'stats 1'
+		assert_equal "ACK [2@0] {stats} wrong number of arguments for \"stats\"\n", @sock.gets
+
+		@sock.puts 'stats 1 2'
+		assert_equal "ACK [2@0] {stats} wrong number of arguments for \"stats\"\n", @sock.gets
+
+		# Test correct usage
+		@sock.puts 'stats'
+		stats = build_hash get_response
+		assert_equal 7, stats.size
+		assert_equal '3', stats['artists']
+		assert_equal '4', stats['albums']
+		assert_equal '46', stats['songs']
+		assert_equal '500', stats['uptime']
+		assert_equal '18091', stats['db_playtime']
+		assert_equal '1159418502', stats['db_update']
+		assert_equal '10', stats['playtime']
 	end
 end

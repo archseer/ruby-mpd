@@ -620,7 +620,25 @@ class MPDTestServer < GServer
 				end
 			when 'stats'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+				# artists
+				sock.puts "artists: #{@artists.size}"
+				# albums
+				sock.puts "albums: #{@albums.size}"
+				# songs
+				sock.puts "songs: #{@songs.size}"
+				# uptime
+				sock.puts "uptime: 500"
+				# db_playtime
+				time = 0
+				@songs.each do |s|
+					time += s['time'].to_i
+				end
+				sock.puts "db_playtime: #{time}"
+				# db_update
+				sock.puts "db_update: 1159418502"
+				# playtime
+				sock.puts "playtime: 10"
+				return true
 				end
 			when 'status'
 				args_check( sock, cmd, args, 0 ) do
