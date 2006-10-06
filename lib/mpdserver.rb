@@ -615,7 +615,8 @@ class MPDTestServer < GServer
 			when 'shuffle'
 				args_check( sock, cmd, args, 0 ) do
 					@status[:playlist] += 1
-					sock.puts 'todo'
+					@the_playlist.reverse!
+					return true
 				end
 			when 'stats'
 				args_check( sock, cmd, args, 0 ) do

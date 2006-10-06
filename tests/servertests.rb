@@ -1117,5 +1117,70 @@ class MPDTester < Test::Unit::TestCase
 		# Test too many args
 		@sock.puts 'setvol 1 2'
 		assert_equal "ACK [2@0] {setvol} wrong number of arguments for \"setvol\"\n", @sock.gets
+
+		# Test arg not an int
+		@sock.puts 'setvol a'
+		assert_equal "ACK [2@0] {setvol} need an integer\n", @sock.gets
+
+		# Test correct arg
+		@sock.puts 'setvol 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '0', status['volume']
+
+		@sock.puts 'setvol 20'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '20', status['volume']
+
+		@sock.puts 'setvol -30'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '-30', status['volume']
+	end
+
+	def test_shuffle
+		@sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		# Test args > 0
+		@sock.puts 'shuffle 1'
+		assert_equal "ACK [2@0] {shuffle} wrong number of arguments for \"shuffle\"\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal "0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg", lines[0]
+		assert_equal "1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg", lines[1]
+
+		@sock.puts 'shuffle 1 2'
+		assert_equal "ACK [2@0] {shuffle} wrong number of arguments for \"shuffle\"\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal "0:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg", lines[0]
+		assert_equal "1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg", lines[1]
+
+		@sock.puts 'shuffle'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal "0:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg", lines[0]
+		assert_equal "1:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg", lines[1]
+
 	end
 end
