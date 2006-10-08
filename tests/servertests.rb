@@ -223,7 +223,7 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal '49', hash['xfade']
 	end
 
-	def test_current_song
+	def test_currentsong
 		# TODO
 	end
 
@@ -774,7 +774,111 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_move
-		# TODO
+		@sock.gets
+
+		# Test args == 0
+		@sock.puts 'move'
+		assert_equal "ACK [2@0] {move} wrong number of arguments for \"move\"\n", @sock.gets
+
+		# Test args > 2
+		@sock.puts 'move 1 2 3'
+		assert_equal "ACK [2@0] {move} wrong number of arguments for \"move\"\n", @sock.gets
+
+		# Test args not integers
+		@sock.puts 'move a b'
+		assert_equal "ACK [2@0] {move} \"a\" is not a integer\n", @sock.gets
+
+		@sock.puts 'move 1 b'
+		assert_equal "ACK [2@0] {move} \"b\" is not a integer\n", @sock.gets
+
+		# Test arg doesn't exist
+		@sock.puts 'move 1 2'
+		assert_equal "ACK [50@0] {move} song doesn't exist: \"1\"\n", @sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'move 1 99'
+		assert_equal "ACK [50@0] {move} song doesn't exist: \"99\"\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		lines.each_with_index do |l,i|
+			assert /^#{i}:Shpongle\/Are_You_Shpongled\/#{i+1}/ =~ l
+		end
+
+		@sock.puts 'move 1 7'
+		assert_equal "ACK [50@0] {move} song doesn't exist: \"7\"\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		lines.each_with_index do |l,i|
+			assert /^#{i}:Shpongle\/Are_You_Shpongled\/#{i+1}/ =~ l
+		end
+
+		# Test correct usage
+		@sock.puts 'move 0 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		lines.each_with_index do |l,i|
+			assert /^#{i}:Shpongle\/Are_You_Shpongled\/#{i+1}/ =~ l
+		end
+
+		@sock.puts 'move 0 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', lines[0]
+		assert_equal '1:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[1]
+		assert_equal '2:Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', lines[2]
+
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'move 0 6'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal '0:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', lines[0]
+		assert_equal '5:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', lines[5]
+		assert_equal '6:Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg', lines[6]
+
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Shpongle_-_Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'move 5 2'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 7, lines.size
+		assert_equal '1:Shpongle/Are_You_Shpongled/2.Monster_Hit.ogg', lines[1]
+		assert_equal '2:Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg', lines[2]
+		assert_equal '3:Shpongle/Are_You_Shpongled/3.Vapour_Rumours.ogg', lines[3]
+		assert_equal '4:Shpongle/Are_You_Shpongled/4.Shpongle_Spores.ogg', lines[4]
+		assert_equal '5:Shpongle/Are_You_Shpongled/5.Behind_Closed_Eyelids.ogg', lines[5]
+		assert_equal '6:Shpongle/Are_You_Shpongled/7...._and_the_Day_Turned_to_Night.ogg', lines[6]
 	end
 
 	def test_moveid
@@ -1205,5 +1309,70 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal '18091', stats['db_playtime']
 		assert_equal '1159418502', stats['db_update']
 		assert_equal '10', stats['playtime']
+	end
+
+	def test_status
+		@sock.gets
+
+		# Test args > 0
+		@sock.puts 'status 1'
+		assert_equal "ACK [2@0] {status} wrong number of arguments for \"status\"\n", @sock.gets
+
+		@sock.puts 'status 1 2'
+		assert_equal "ACK [2@0] {status} wrong number of arguments for \"status\"\n", @sock.gets
+
+		# Test correct usage
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal '0', status['volume']
+		assert_equal '0', status['repeat']
+		assert_equal '0', status['playlist']
+		assert_equal '0', status['playlistlength']
+		assert_equal 'stop', status['state']
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'setvol 50'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal '50', status['volume']
+
+		@sock.puts 'repeat 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal '50', status['volume']
+		assert_equal '1', status['repeat']
+
+#TODO
+		#@sock.puts 'play'
+		#assert_equal "OK\n", @sock.gets
+	end
+
+	def test_stop
+		# TODO
+	end
+
+	def test_swap
+		# TODO
+	end
+
+	def test_swapid
+		# TODO
+	end
+
+	def test_update
+		# TODO
+	end
+
+	def test_volume
+		# TODO
 	end
 end

@@ -410,10 +410,16 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {move} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {move} \"#{args[1]}\" is not a integer"))
+					elsif args[0].to_i < 0 or args[0].to_i >= @the_playlist.length
+						return(cmd_fail(sock,"ACK [50@0] {move} song doesn't exist: \"#{args[0]}\""))
+					elsif args[1].to_i < 0 or args[1].to_i >= @the_playlist.length
+						return(cmd_fail(sock,"ACK [50@0] {move} song doesn't exist: \"#{args[1]}\""))
 					else
 						# Note: negative args should be checked
 						@status[:playlist] += 1
-						sock.puts 'todo'
+						tmp = @the_playlist.delete_at args[0].to_i
+						@the_playlist.insert args[1].to_i, tmp
+						return true
 					end
 				end
 			when 'moveid'
