@@ -970,6 +970,7 @@ class MPDTester < Test::Unit::TestCase
 			assert_not_nil s['Time']
 			assert_equal (i+1).to_s, s['Track']
 			assert_equal (i+7).to_s, s['Id']
+			assert_equal (i).to_s, s['Pos']
 		end
 
 		# Test with arg > pls length
@@ -989,6 +990,7 @@ class MPDTester < Test::Unit::TestCase
 			assert_not_nil s['Time']
 			assert_equal (i+1).to_s, s['Track']
 			assert_equal (i+7).to_s, s['Id']
+			assert_equal (i).to_s, s['Pos']
 		end
 		
 		#Test with valid arg
@@ -1002,6 +1004,7 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal '505', songs[0]['Time']
 		assert_equal '4', songs[0]['Track']
 		assert_equal '10', songs[0]['Id']
+		assert_equal '3', songs[0]['Pos']
 	end
 
 	def test_playlistid
@@ -1009,7 +1012,159 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_plchanges
-		# TODO
+		@sock.gets
+
+		# Test args = 0
+		@sock.puts 'plchanges'
+		assert_equal "ACK [2@0] {plchanges} wrong number of arguments for \"plchanges\"\n", @sock.gets
+
+		# Test args > 1
+		@sock.puts 'plchanges 1 2'
+		assert_equal "ACK [2@0] {plchanges} wrong number of arguments for \"plchanges\"\n", @sock.gets
+
+		# Test arg not integer
+		@sock.puts 'plchanges a'
+		assert_equal "ACK [2@0] {plchanges} need a positive integer\n", @sock.gets
+
+		# Add some stuff to manipulate
+		@sock.puts 'add Shpongle/Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '8', status['playlist']
+		assert_equal '7', status['playlistlength']
+
+		@sock.puts 'plchanges 7'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal '... and the Day Turned to Night', songs[0]['Title']
+		assert_equal '6', songs[0]['Pos']
+
+		@sock.puts 'plchanges 6'
+		songs = build_songs get_response
+		assert_equal 2, songs.size
+		assert_equal 'Divine Moments of Truth', songs[0]['Title']
+		assert_equal '5', songs[0]['Pos']
+		assert_equal '... and the Day Turned to Night', songs[1]['Title']
+		assert_equal '6', songs[1]['Pos']
+
+		@sock.puts 'delete 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '9', status['playlist']
+		assert_equal '6', status['playlistlength']
+
+		@sock.puts 'plchanges 8'
+		songs = build_songs get_response
+		assert_equal 3, songs.size
+		assert_equal 'Behind Closed Eyelids', songs[0]['Title']
+		assert_equal '3', songs[0]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[1]['Title']
+		assert_equal '4', songs[1]['Pos']
+		assert_equal '... and the Day Turned to Night', songs[2]['Title']
+		assert_equal '5', songs[2]['Pos']
+
+		@sock.puts 'plchanges 5'
+		songs = build_songs get_response
+		assert_equal 3, songs.size
+		assert_equal 'Behind Closed Eyelids', songs[0]['Title']
+		assert_equal '3', songs[0]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[1]['Title']
+		assert_equal '4', songs[1]['Pos']
+		assert_equal '... and the Day Turned to Night', songs[2]['Title']
+		assert_equal '5', songs[2]['Pos']
+
+		@sock.puts 'deleteid 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '10', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchanges 9'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Vapour Rumours', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Behind Closed Eyelids', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+		assert_equal '... and the Day Turned to Night', songs[3]['Title']
+		assert_equal '4', songs[3]['Pos']
+
+		@sock.puts 'plchanges 8'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Vapour Rumours', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Behind Closed Eyelids', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+		assert_equal '... and the Day Turned to Night', songs[3]['Title']
+		assert_equal '4', songs[3]['Pos']
+
+		@sock.puts 'move 1 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '11', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchanges 10'
+		songs = build_songs get_response
+		assert_equal 3, songs.size
+		assert_equal 'Behind Closed Eyelids', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'Vapour Rumours', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+
+		@sock.puts 'move 4 2'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '12', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchanges 11'
+		songs = build_songs get_response
+		assert_equal 3, songs.size
+		assert_equal '... and the Day Turned to Night', songs[0]['Title']
+		assert_equal '2', songs[0]['Pos']
+		assert_equal 'Divine Moments of Truth', songs[1]['Title']
+		assert_equal '3', songs[1]['Pos']
+		assert_equal 'Vapour Rumours', songs[2]['Title']
+		assert_equal '4', songs[2]['Pos']
+
+		@sock.puts 'move 3 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '13', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchanges 12'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal 'Divine Moments of Truth', songs[0]['Title']
+		assert_equal '3', songs[0]['Pos']
+
+# TODO moveid test
+# TODO swap test
+# TODO swapid test
+# TODO shuffle test
+# TODO load test
+# TODO add single file test
 	end
 
 	def test_plchangesposid
@@ -1327,7 +1482,7 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 7, status.size
 		assert_equal '0', status['volume']
 		assert_equal '0', status['repeat']
-		assert_equal '0', status['playlist']
+		assert_equal '1', status['playlist']
 		assert_equal '0', status['playlistlength']
 		assert_equal 'stop', status['state']
 

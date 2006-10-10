@@ -9,7 +9,7 @@ class MPDTestServer < GServer
 			:volume => 0,
 			:repeat => 0,
 			:random => 0,
-			:playlist => 0,
+			:playlist => 1,
 			:state => 'stop',
 			:xfade => 0
 		}
@@ -124,7 +124,8 @@ class MPDTestServer < GServer
 				if args.length == 0
 					# Add the entire database
 					@songs.each do |s|
-						@status[:playlist] += 1
+						s['_mod_ver'] = @status[:playlist]
+						incr_version
 						@the_playlist << s
 					end
 					return true
@@ -148,14 +149,15 @@ class MPDTestServer < GServer
 							return(cmd_fail(sock,'ACK [50@0] {add} directory or file not found'))
 						end
 					else
-						@status[:playlist] += 1
+						the_song['_mod_ver'] = @status[:playlist]
+						incr_version
 						@the_playlist << the_song
 						return true
 					end
 				end
 			when 'clear'
 				args_check( sock, cmd, args, 0 ) do
-					@status[:playlist] += 1
+					incr_version
 					@the_playlist = []
 					return true
 				end
@@ -187,7 +189,10 @@ class MPDTestServer < GServer
 							return(cmd_fail(sock,"ACK [50@0] {delete} song doesn't exist: \"#{args[0]}\""))
 						else
 							@the_playlist.delete_at args[0].to_i
-							@status[:playlist] += 1
+							args[0].to_i.upto @the_playlist.length - 1 do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+							incr_version
 							return true
 						end
 					else
@@ -206,8 +211,12 @@ class MPDTestServer < GServer
 						end
 
 						if not the_song.nil?
+							index = @the_playlist.index the_song
 							@the_playlist.delete the_song
-							@status[:playlist] += 1
+							index.upto @the_playlist.length - 1 do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+							incr_version
 							return true
 						else
 							return(cmd_fail(sock,"ACK [50@0] {deleteid} song id doesn't exist: \"#{args[0]}\""))
@@ -358,7 +367,7 @@ class MPDTestServer < GServer
 				end
 			when 'load'
 				args_check( sock, cmd, args, 1 ) do
-					# @status[:playlist] += 1 for each song loaded
+					# incr_version for each song loaded
 					pls = args[0] + '.m3u'
 					the_pls = nil
 					@playlists.each do |p|
@@ -368,10 +377,11 @@ class MPDTestServer < GServer
 						end
 					end
 
-					if not the_pls.nil?
+					unless the_pls.nil?
 						the_pls['songs'].each do |song|
+							song['_mod_ver'] = @status[:playlist]
 							@the_playlist << song
-							@status[:playlist] += 1
+							incr_version
 						end
 					else
 						return(cmd_fail(sock,"ACK [50@0] {load} playlist \"#{args[0]}\" not found"))
@@ -415,10 +425,19 @@ class MPDTestServer < GServer
 					elsif args[1].to_i < 0 or args[1].to_i >= @the_playlist.length
 						return(cmd_fail(sock,"ACK [50@0] {move} song doesn't exist: \"#{args[1]}\""))
 					else
-						# Note: negative args should be checked
-						@status[:playlist] += 1
+						# TODO negative args should be checked
 						tmp = @the_playlist.delete_at args[0].to_i
 						@the_playlist.insert args[1].to_i, tmp
+						if args[0].to_i < args[1].to_i
+							args[0].to_i.upto args[1].to_i do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						else
+							args[1].to_i.upto args[0].to_i do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						end
+						incr_version
 						return true
 					end
 				end
@@ -430,7 +449,7 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {moveid} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: negative args should be checked
-						@status[:playlist] += 1
+						incr_version
 						sock.puts 'todo'
 					end
 				end
@@ -494,11 +513,13 @@ class MPDTestServer < GServer
 							else
 								song = @the_playlist[args[0].to_i]
 								send_song sock, song
+								sock.puts "Pos: #{args[0].to_i}"
 								return true
 							end
 						else
-							@the_playlist.each do |song|
+							@the_playlist.each_with_index do |song,i|
 								send_song sock, song
+								sock.puts "Pos: #{i}"
 							end
 							return true
 						end
@@ -519,7 +540,13 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,'ACK [2@0] {plchanges} need a positive integer'))
 					else
 						# Note: args[0] < 0 just return OK...
-						sock.puts 'todo'
+						@the_playlist.each_with_index do |song,i|
+							if args[0].to_i > @status[:playlist] or song['_mod_ver'] >= args[0].to_i or song['_mod_ver'] == 0
+								send_song sock, song
+								sock.puts "Pos: #{i}"
+							end
+						end
+						return true
 					end
 				end
 			when 'plchangesposid'
@@ -620,7 +647,10 @@ class MPDTestServer < GServer
 				end
 			when 'shuffle'
 				args_check( sock, cmd, args, 0 ) do
-					@status[:playlist] += 1
+					@the_playlist.each do |s|
+						s['_mod_ver'] = @status[:playlist]
+					end
+					incr_version
 					@the_playlist.reverse!
 					return true
 				end
@@ -666,7 +696,7 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {swap} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: args[0] < 0 are checked as valid song posititions...
-						@status[:playlist] += 1
+						incr_version
 						sock.puts 'todo'
 					end
 				end
@@ -678,13 +708,13 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {swapid} \"#{args[1]}\" is not a integer"))
 					else
 						# Note: args[0] < 0 are checked as valid songids...
-						@status[:playlist] += 1
+						incr_version
 						sock.puts 'todo'
 					end
 				end
 			when 'update'
 				args_check( sock, cmd, args, 0..1 ) do |args|
-					@status[:playlist] += 1
+					incr_version
 					sock.puts 'todo'
 				end
 			when 'volume'
@@ -701,6 +731,10 @@ class MPDTestServer < GServer
 			else
 				return(cmd_fail(sock,"ACK [5@0] {} unknown command #{cmd}"))
 		end # End Case cmd
+	end
+
+	def incr_version
+		@status[:playlist] += 1
 	end
 
 	def cmd_fail( sock, msg )
@@ -804,7 +838,8 @@ class MPDTestServer < GServer
 
 	def add_dir_to_pls( dir )
 		dir[:songs].each do |song|
-			@status[:playlist] += 1
+			song['_mod_ver'] = @status[:playlist]
+			incr_version
 			@the_playlist << song
 		end
 
