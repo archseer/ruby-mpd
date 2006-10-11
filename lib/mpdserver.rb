@@ -718,10 +718,25 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {swap} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {swap} \"#{args[1]}\" is not a integer"))
+					elsif args[0].to_i >= @the_playlist.length or args[0].to_i < 0
+						return(cmd_fail(sock,"ACK [50@0] {swap} song doesn't exist: \"#{args[0]}\""))
+					elsif args[1].to_i >= @the_playlist.length or args[1].to_i < 0
+						return(cmd_fail(sock,"ACK [50@0] {swap} song doesn't exist: \"#{args[1]}\""))
 					else
-						# Note: args[0] < 0 are checked as valid song posititions...
+						tmp = @the_playlist[args[1].to_i]
+						@the_playlist[args[1].to_i] = @the_playlist[args[0].to_i]
+						@the_playlist[args[0].to_i] = tmp
+						if args[0].to_i < args[1].to_i
+							args[0].to_i.upto args[1].to_i do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						else
+							args[1].to_i.upto args[0].to_i do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						end
 						incr_version
-						sock.puts 'todo'
+						return true
 					end
 				end
 			when 'swapid'
@@ -758,7 +773,14 @@ class MPDTestServer < GServer
 	end
 
 	def incr_version
-		@status[:playlist] += 1
+		if @status[:playlist] == 2147483647
+			@status[:playlist] = 1
+			@the_playlist.each do |song|
+				song['_mod_ver'] = 0
+			end
+		else
+			@status[:playlist] += 1
+		end
 	end
 
 	def cmd_fail( sock, msg )
