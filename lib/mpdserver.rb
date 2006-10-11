@@ -447,10 +447,34 @@ class MPDTestServer < GServer
 						return(cmd_fail(sock,"ACK [2@0] {moveid} \"#{args[0]}\" is not a integer"))
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {moveid} \"#{args[1]}\" is not a integer"))
+					elsif args[1].to_i < 0 or args[1].to_i >= @the_playlist.length
+						return(cmd_fail(sock,"ACK [50@0] {moveid} song doesn't exist: \"#{args[1]}\""))
 					else
 						# Note: negative args should be checked
+						the_song = nil
+						index = -1
+						@the_playlist.each_with_index do |song,i|
+							if song['id'] == args[0].to_i
+								the_song = song
+								index = i
+							end
+						end
+						if the_song.nil?
+							return(cmd_fail(sock,"ACK [50@0] {moveid} song id doesn't exist: \"#{args[0]}\""))
+						end
+						tmp = @the_playlist.delete_at index
+						@the_playlist.insert args[1].to_i, tmp
+						if index < args[1].to_i
+							index.upto args[1].to_i do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						else
+							args[1].to_i.upto index do |i|
+								@the_playlist[i]['_mod_ver'] = @status[:playlist]
+							end
+						end
 						incr_version
-						sock.puts 'todo'
+						return true
 					end
 				end
 			when 'next'

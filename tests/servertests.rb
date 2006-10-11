@@ -812,6 +812,9 @@ class MPDTester < Test::Unit::TestCase
 		@sock.puts 'move 1 7'
 		assert_equal "ACK [50@0] {move} song doesn't exist: \"7\"\n", @sock.gets
 
+		@sock.puts 'move 2 -3'
+		assert_equal "ACK [50@0] {move} song doesn't exist: \"-3\"\n", @sock.gets
+
 		@sock.puts 'playlist'
 		reply = get_response
 		lines = reply.split "\n"
@@ -882,7 +885,63 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_moveid
-		# TODO
+		@sock.gets
+
+		# Test args = 0
+		@sock.puts 'moveid'
+		assert_equal "ACK [2@0] {moveid} wrong number of arguments for \"moveid\"\n", @sock.gets
+
+		# Test args > 2
+		@sock.puts 'moveid 1 2 3'
+		assert_equal "ACK [2@0] {moveid} wrong number of arguments for \"moveid\"\n", @sock.gets
+
+		# Test args not ints
+		@sock.puts 'moveid a 2'
+		assert_equal "ACK [2@0] {moveid} \"a\" is not a integer\n", @sock.gets
+
+		@sock.puts 'moveid 1 b'
+		assert_equal "ACK [2@0] {moveid} \"b\" is not a integer\n", @sock.gets
+
+		# Load some songs
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Test id doesn't exist
+		@sock.puts 'moveid 9999 2'
+		assert_equal "ACK [50@0] {moveid} song id doesn't exist: \"9999\"\n", @sock.gets
+
+		# Test 'to' doesn't exist
+		@sock.puts 'moveid 8 8'
+		assert_equal "ACK [50@0] {moveid} song doesn't exist: \"8\"\n", @sock.gets
+
+		@sock.puts 'moveid 8 5'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.size
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[1]
+		assert_equal '4:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[4]
+		assert_equal '5:Astral_Projection/Dancing_Galaxy/2.Soundform.ogg', lines[5]
+		assert_equal '6:Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg', lines[6]
+
+		@sock.puts 'moveid 12 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.size
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[1]
+		assert_equal '2:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[2]
+		assert_equal '3:Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg', lines[3]
+		assert_equal '4:Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg', lines[4]
+		assert_equal '5:Astral_Projection/Dancing_Galaxy/2.Soundform.ogg', lines[5]
+		assert_equal '6:Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg', lines[6]
+		assert_equal '7:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[7]
 	end
 
 	def test_next
@@ -1159,11 +1218,96 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'Divine Moments of Truth', songs[0]['Title']
 		assert_equal '3', songs[0]['Pos']
 
-# TODO moveid test
+		# load test
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '22', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 21'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[0]['Title']
+		assert_equal '7', songs[0]['Pos']
+
+		@sock.puts 'plchanges 18'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[0]['Title']
+		assert_equal '4', songs[0]['Pos']
+		assert_equal 'Life On Mars', songs[1]['Title']
+		assert_equal '5', songs[1]['Pos']
+		assert_equal 'Liquid Sun', songs[2]['Title']
+		assert_equal '6', songs[2]['Pos']
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[3]['Title']
+		assert_equal '7', songs[3]['Pos']
+
+		# moveid test
+		@sock.puts 'moveid 8 5'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '23', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 22'
+		songs = build_songs get_response
+		assert_equal 5, songs.size
+		assert_equal 'Flying Into A Star', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'No One Ever Dreams', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+		assert_equal 'Life On Mars', songs[3]['Title']
+		assert_equal '4', songs[3]['Pos']
+		assert_equal 'Soundform', songs[4]['Title']
+		assert_equal '5', songs[4]['Pos']
+
+		@sock.puts 'moveid 12 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '24', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 23'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Life On Mars', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Flying Into A Star', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'No One Ever Dreams', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[3]['Title']
+		assert_equal '4', songs[3]['Pos']
+
+		@sock.puts 'plchanges 22'
+		songs = build_songs get_response
+		assert_equal 5, songs.size
+		assert_equal 'Life On Mars', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Flying Into A Star', songs[1]['Title']
+		assert_equal '2', songs[1]['Pos']
+		assert_equal 'No One Ever Dreams', songs[2]['Title']
+		assert_equal '3', songs[2]['Pos']
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[3]['Title']
+		assert_equal '4', songs[3]['Pos']
+		assert_equal 'Soundform', songs[4]['Title']
+		assert_equal '5', songs[4]['Pos']
+
 # TODO swap test
 # TODO swapid test
 # TODO shuffle test
-# TODO load test
 # TODO add single file test
 	end
 
