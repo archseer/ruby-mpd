@@ -1305,7 +1305,50 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'Soundform', songs[4]['Title']
 		assert_equal '5', songs[4]['Pos']
 
-# TODO swap test
+		@sock.puts 'swap 2 5'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '25', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 24'
+		songs = build_songs get_response
+		assert_equal 2, songs.size
+		assert_equal 'Soundform', songs[0]['Title']
+		assert_equal '2', songs[0]['Pos']
+		assert_equal 'Flying Into A Star', songs[1]['Title']
+		assert_equal '5', songs[1]['Pos']
+
+		@sock.puts 'swap 7 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '26', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 25'
+		songs = build_songs get_response
+		assert_equal 2, songs.size
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[0]['Title']
+		assert_equal '3', songs[0]['Pos']
+		assert_equal 'No One Ever Dreams', songs[1]['Title']
+		assert_equal '7', songs[1]['Pos']
+
+		@sock.puts 'plchanges 24'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Soundform', songs[0]['Title']
+		assert_equal '2', songs[0]['Pos']
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[1]['Title']
+		assert_equal '3', songs[1]['Pos']
+		assert_equal 'Flying Into A Star', songs[2]['Title']
+		assert_equal '5', songs[2]['Pos']
+		assert_equal 'No One Ever Dreams', songs[3]['Title']
+		assert_equal '7', songs[3]['Pos']
+
 # TODO swapid test
 # TODO shuffle test
 # TODO add single file test

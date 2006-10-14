@@ -726,15 +726,8 @@ class MPDTestServer < GServer
 						tmp = @the_playlist[args[1].to_i]
 						@the_playlist[args[1].to_i] = @the_playlist[args[0].to_i]
 						@the_playlist[args[0].to_i] = tmp
-						if args[0].to_i < args[1].to_i
-							args[0].to_i.upto args[1].to_i do |i|
-								@the_playlist[i]['_mod_ver'] = @status[:playlist]
-							end
-						else
-							args[1].to_i.upto args[0].to_i do |i|
-								@the_playlist[i]['_mod_ver'] = @status[:playlist]
-							end
-						end
+						@the_playlist[args[0].to_i]['_mod_ver'] = @status[:playlist]
+						@the_playlist[args[1].to_i]['_mod_ver'] = @status[:playlist]
 						incr_version
 						return true
 					end
