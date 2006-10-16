@@ -739,9 +739,28 @@ class MPDTestServer < GServer
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {swapid} \"#{args[1]}\" is not a integer"))
 					else
-						# Note: args[0] < 0 are checked as valid songids...
+						from = nil
+						to = nil
+						@the_playlist.each_with_index do |song,i|
+							if song['id'] == args[0].to_i
+								from = i
+							elsif song['id'] == args[1].to_i
+								to = i
+							end
+						end
+						if from.nil?
+							return(cmd_fail(sock,"ACK [50@0] {swapid} song id doesn't exist: \"#{args[0]}\""))
+						elsif to.nil?
+							return(cmd_fail(sock,"ACK [50@0] {swapid} song id doesn't exist: \"#{args[1]}\""))
+						end
+						tmp = @the_playlist[to]
+						@the_playlist[to] = @the_playlist[from]
+						@the_playlist[from] = tmp
+						@the_playlist[to]['_mod_ver'] = @status[:playlist]
+						@the_playlist[from]['_mod_ver'] = @status[:playlist]
+
 						incr_version
-						sock.puts 'todo'
+						return true
 					end
 				end
 			when 'update'

@@ -1782,7 +1782,82 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_swapid
-		# TODO
+		@sock.gets
+
+		# Test args = 0
+		@sock.puts 'swapid'
+		assert_equal "ACK [2@0] {swapid} wrong number of arguments for \"swapid\"\n", @sock.gets
+
+		# Test args > 2
+		@sock.puts 'swapid 1 2 3'
+		assert_equal "ACK [2@0] {swapid} wrong number of arguments for \"swapid\"\n", @sock.gets
+
+		# Test args not int
+		@sock.puts 'swapid a 3'
+		assert_equal "ACK [2@0] {swapid} \"a\" is not a integer\n", @sock.gets
+
+		@sock.puts 'swapid 1 b'
+		assert_equal "ACK [2@0] {swapid} \"b\" is not a integer\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Test args out of bounds
+		@sock.puts 'swapid 9999 7'
+		assert_equal "ACK [50@0] {swapid} song id doesn't exist: \"9999\"\n", @sock.gets
+
+		@sock.puts 'swapid 7 9999'
+		assert_equal "ACK [50@0] {swapid} song id doesn't exist: \"9999\"\n", @sock.gets
+
+		@sock.puts 'swapid -1 7'
+		assert_equal "ACK [50@0] {swapid} song id doesn't exist: \"-1\"\n", @sock.gets
+
+		@sock.puts 'swapid 7 -4'
+		assert_equal "ACK [50@0] {swapid} song id doesn't exist: \"-4\"\n", @sock.gets
+
+		@sock.puts 'swapid 8 12'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.size
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[1]
+		assert_equal '2:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[2]
+		assert_equal '3:Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg', lines[3]
+		assert_equal '4:Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg', lines[4]
+		assert_equal '5:Astral_Projection/Dancing_Galaxy/2.Soundform.ogg', lines[5]
+		assert_equal '6:Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg', lines[6]
+		assert_equal '7:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[7]
+
+		@sock.puts 'swapid 14 10'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.size
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[1]
+		assert_equal '2:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[2]
+		assert_equal '3:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[3]	
+		assert_equal '4:Astral_Projection/Dancing_Galaxy/5.Cosmic_Ascension_(ft._DJ_Jorg).ogg', lines[4]
+		assert_equal '5:Astral_Projection/Dancing_Galaxy/2.Soundform.ogg', lines[5]
+		assert_equal '6:Astral_Projection/Dancing_Galaxy/7.Liquid_Sun.ogg', lines[6]
+		assert_equal '7:Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg', lines[7]
+
+		@sock.puts 'swapid 7 9'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlist'
+		reply = get_response
+		lines = reply.split "\n"
+		assert_equal 8, lines.size
+		assert_equal '0:Astral_Projection/Dancing_Galaxy/3.Flying_Into_A_Star.ogg', lines[0]
+		assert_equal '1:Astral_Projection/Dancing_Galaxy/6.Life_On_Mars.ogg', lines[1]
+		assert_equal '2:Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', lines[2]
+		assert_equal '3:Astral_Projection/Dancing_Galaxy/8.Ambient_Galaxy_(Disco_Valley_Mix).ogg', lines[3]
 	end
 
 	def test_update
