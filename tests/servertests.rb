@@ -1349,9 +1349,91 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'No One Ever Dreams', songs[3]['Title']
 		assert_equal '7', songs[3]['Pos']
 
-# TODO swapid test
-# TODO shuffle test
-# TODO add single file test
+		@sock.puts 'swapid 7 13'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '27', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 26'
+		songs = build_songs get_response
+		assert_equal 2, songs.size
+		assert_equal 'Liquid Sun', songs[0]['Title']
+		assert_equal '0', songs[0]['Pos']
+		assert_equal 'Dancing Galaxy', songs[1]['Title']
+		assert_equal '6', songs[1]['Pos']
+
+		@sock.puts 'swapid 11 12'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '28', status['playlist']
+		assert_equal '8', status['playlistlength']
+		
+		@sock.puts 'plchanges 27'
+		songs = build_songs get_response
+		assert_equal 2, songs.size
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[0]['Title']
+		assert_equal '1', songs[0]['Pos']
+		assert_equal 'Life On Mars', songs[1]['Title']
+		assert_equal '4', songs[1]['Pos']
+
+		@sock.puts 'plchanges 26'
+		songs = build_songs get_response
+		assert_equal 4, songs.size
+		assert_equal 'Liquid Sun', songs[0]['Title']
+		assert_equal '0', songs[0]['Pos']
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[1]['Title']
+		assert_equal '1', songs[1]['Pos']
+		assert_equal 'Life On Mars', songs[2]['Title']
+		assert_equal '4', songs[2]['Pos']
+		assert_equal 'Dancing Galaxy', songs[3]['Title']
+		assert_equal '6', songs[3]['Pos']
+
+		@sock.puts 'shuffle'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '29', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchanges 28'
+		songs = build_songs get_response
+		assert_equal 8, songs.size
+		assert_equal 'No One Ever Dreams', songs[0]['Title']
+		assert_equal '0', songs[0]['Pos']
+		assert_equal 'Dancing Galaxy', songs[1]['Title']
+		assert_equal '1', songs[1]['Pos']
+		assert_equal 'Flying Into A Star', songs[2]['Title']
+		assert_equal '2', songs[2]['Pos']
+		assert_equal 'Life On Mars', songs[3]['Title']
+		assert_equal '3', songs[3]['Pos']
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', songs[4]['Title']
+		assert_equal '4', songs[4]['Pos']
+		assert_equal 'Soundform', songs[5]['Title']
+		assert_equal '5', songs[5]['Pos']
+		assert_equal 'Cosmic Ascension (ft. DJ Jorg)', songs[6]['Title']
+		assert_equal '6', songs[6]['Pos']
+		assert_equal 'Liquid Sun', songs[7]['Title']
+		assert_equal '7', songs[7]['Pos']
+
+		@sock.puts 'add Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '30', status['playlist']
+		assert_equal '9', status['playlistlength']
+		
+		@sock.puts 'plchanges 29'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal 'Divine Moments of Truth', songs[0]['Title']
+		assert_equal '8', songs[0]['Pos']
 	end
 
 	def test_plchangesposid
