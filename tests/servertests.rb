@@ -1947,6 +1947,40 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_volume
-		# TODO
+		@sock.gets
+
+		@sock.puts 'volume'
+		assert_equal "ACK [2@0] {volume} wrong number of arguments for \"volume\"\n", @sock.gets
+
+		@sock.puts 'volume 1 2'
+		assert_equal "ACK [2@0] {volume} wrong number of arguments for \"volume\"\n", @sock.gets
+
+		@sock.puts 'volume 30'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '30', status['volume']
+
+		@sock.puts 'volume 10'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '40', status['volume']
+
+		@sock.puts 'volume -15'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '25', status['volume']
+
+		@sock.puts 'volume 0'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '25', status['volume']
 	end
 end
