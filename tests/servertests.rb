@@ -405,7 +405,10 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_kill
-		# TODO
+		@sock.gets
+
+		@sock.puts 'kill'
+		assert_raises(Errno::EPIPE) { @sock.puts 'data' }
 	end
 
 	def test_list

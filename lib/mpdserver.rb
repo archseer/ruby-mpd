@@ -254,7 +254,8 @@ class MPDTestServer < GServer
 				end
 			when 'kill'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+					sock.close
+					return true
 				end
 			when 'list'
 				args_check( sock, cmd, args, 1..2 ) do |args|
