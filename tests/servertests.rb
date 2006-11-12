@@ -972,7 +972,56 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_play
-		# TODO
+		@sock.gets
+
+		# Test play w/ args > 1
+		@sock.puts 'play 1 2'
+		assert_equal "ACK [2@0] {play} wrong number of arguments for \"play\"\n", @sock.gets
+		
+		# Test play w/ arg != integer
+		@sock.puts 'play a'
+		assert_equal "ACK [2@0] {play} need a positive integer\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Test play w/o args
+		@sock.puts 'play'
+		assert_equal "OK\n", @sock.gets
+
+		# Wait for the thing to start playing
+		sleep 2
+ 
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_equal '0', status['song']
+		assert_equal '7', status['songid']
+		assert_equal 'play', status['state']
+		assert_not_nil status['time']
+		assert_not_equal '0', status['time']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		# Test play w/ args
+		@sock.puts 'play 2'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_equal '2', status['song']
+		assert_equal '9', status['songid']
+		assert_equal 'play', status['state']
+		assert_not_nil status['time']
+		assert_not_equal '0', status['time']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
 	end
 
 	def test_playid

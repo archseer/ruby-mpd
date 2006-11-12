@@ -13,6 +13,7 @@ class MPDTestServer < GServer
 			:state => 'stop',
 			:xfade => 0
 		}
+		@current_song = nil
 		@database = YAML::load( File.open( db_file ) )
 		@songs = @database[0]
 		@playlists = @database[1]
@@ -20,6 +21,7 @@ class MPDTestServer < GServer
 		@albums = []
 		@titles = []
 		@the_playlist = []
+		@playback_thread = nil
 		@filetree = {:name =>'', :dirs =>[], :songs =>[]}
 		@songs.each_with_index do |song,i|
 			song['id'] = i
@@ -60,6 +62,51 @@ class MPDTestServer < GServer
 		@titles.sort!
 	end
 
+	def start
+		super
+
+		@playback_thread = Thread.new(@status, self) do |status, server|
+			time = 0
+			while not server.stopped?
+				if status[:state] == 'play'
+					song = server.get_current_song
+					if song.nil?
+						time = 0
+						status[:state] = 'stop'
+						next
+					end
+
+					status[:time] = "#{time}:#{song['time']}"
+					status[:bitrate] = 192
+					status[:audio] = '44100:16:2'
+
+					if time >= song['time'].to_i
+						time = 0
+						server.next_song
+					end
+
+					time += 1
+				elsif status[:state] == 'pause'
+					song = server.get_current_song
+					if song.nil?
+						time = 0
+						status[:state] = 'stop'
+						next
+					end
+					status[:time] = "#{time}:#{song['time']}"
+					status[:bitrate] = 192
+					status[:audio] = '44100:16:2'
+				else
+					status[:time] = nil
+					status[:bitrate] = nil
+					status[:audio] = nil
+					time = 0
+				end
+				sleep 1
+			end
+		end
+	end
+	
 	def serve( sock )
 		command_list = []
 		in_cmd_list = false
@@ -503,9 +550,20 @@ class MPDTestServer < GServer
 					if args.length > 0 and !is_int(args[0])
 						return(cmd_fail(sock,'ACK [2@0] {play} need a positive integer'))
 					else
-						# Note: args[0] < 0 is checked to exist in pls...
-						# but -1 seems to just return OK...
-						sock.puts 'todo'
+						if args.length == 0
+							@current_song = 0;
+							if @the_playlist.length > 0
+								@status[:state] = 'play'
+							end
+						else
+							if args[0].to_i >= @the_playlist.length
+								return false
+							end
+
+							@current_song = args[0].to_i
+							@status[:state] = 'play'
+						end
+						return true
 					end
 				end
 			when 'playid'
@@ -704,14 +762,24 @@ class MPDTestServer < GServer
 			when 'status'
 				args_check( sock, cmd, args, 0 ) do
 					@status.each_pair do |key,val|
-						sock.puts "#{key}: #{val}"
+						sock.puts "#{key}: #{val}" unless val.nil?
 					end
 					sock.puts "playlistlength: #{@the_playlist.length}"
+
+					if @current_song != nil and @the_playlist.length > @current_song
+						sock.puts "song: #{@current_song}"
+						sock.puts "songid: #{@the_playlist[@current_song]['id']}"
+					end
+
 					return true
 				end
 			when 'stop'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+					@status[:state] = 'stop'
+					@status[:time] = nil
+					@status[:bitrate] = nil
+					@status[:audio] = nil
+					return true
 				end
 			when 'swap'
 				args_check( sock, cmd, args, 2 ) do |args|
@@ -783,6 +851,18 @@ class MPDTestServer < GServer
 			else
 				return(cmd_fail(sock,"ACK [5@0] {} unknown command #{cmd}"))
 		end # End Case cmd
+	end
+
+	def get_current_song
+		if @current_song != nil and @current_song < @the_playlist.length
+			return @the_playlist[@current_song]
+		else
+			return nil
+		end
+	end
+
+	def next_song
+		@current_song = (@current_song +1 < @the_playlist.length ? @current_song +1 : nil)
 	end
 
 	def incr_version
