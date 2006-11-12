@@ -530,12 +530,20 @@ class MPDTestServer < GServer
 					sock.puts 'todo'
 				end
 			when 'pause'
-				args_check( sock, cmd, args, 1 ) do |args|
-					if is_bool args[0]
-						sock.puts 'todo'
-					else
+				args_check( sock, cmd, args, 0..1 ) do |args|
+					if args.length > 0 and not is_bool args[0]
 						return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
 					end
+					
+					if @status[:state] != 'stop'
+						if args.length == 1
+							@status[:state] = ( args[0] == '1' ? 'pause' : 'play' )
+						else
+							@status[:state] = ( @status[:state] == 'pause' ? 'play' : 'pause' )
+						end
+					end
+
+					return true
 				end
 			when 'password'
 				args_check( sock, cmd, args, 1 ) do |args|
