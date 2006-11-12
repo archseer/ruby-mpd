@@ -206,6 +206,7 @@ class MPDTestServer < GServer
 				args_check( sock, cmd, args, 0 ) do
 					incr_version
 					@the_playlist = []
+					@current_song = nil
 					return true
 				end
 			when 'clearerror'
@@ -227,7 +228,10 @@ class MPDTestServer < GServer
 				end
 			when 'currentsong'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+					if @current_song != nil and @current_song < @the_playlist.length
+						send_song sock, @the_playlist[@current_song]
+					end
+					return true
 				end
 			when 'delete'
 				args_check( sock, cmd, args, 1 ) do |args|
@@ -990,9 +994,10 @@ class MPDTestServer < GServer
 	end
 
 	def send_song( sock, song )
+		return if song.nil?
 		sock.puts "file: #{song['file']}"
 		song.each_pair do |key,val|
-			sock.puts "#{key.capitalize}: #{val}" unless key == 'file'
+			sock.puts "#{key.capitalize}: #{val}" unless key == 'file' or key == '_mod_ver'
 		end
 	end
 

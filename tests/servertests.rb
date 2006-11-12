@@ -224,7 +224,59 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_currentsong
-		# TODO
+		@sock.gets
+
+		# Test args > 0
+		@sock.puts 'currentsong 1'
+		assert_equal "ACK [2@0] {currentsong} wrong number of arguments for \"currentsong\"\n", @sock.gets
+
+		@sock.puts 'currentsong'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'currentsong'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'play'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'currentsong'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal '7', songs[0]['Id']
+		assert_equal 'Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', songs[0]['file']
+
+		@sock.puts 'pause'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'currentsong'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal '7', songs[0]['Id']
+		assert_equal 'Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', songs[0]['file']
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'currentsong'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal '7', songs[0]['Id']
+		assert_equal 'Astral_Projection/Dancing_Galaxy/1.Dancing_Galaxy.ogg', songs[0]['file']
+
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'currentsong'
+		assert_equal "OK\n", @sock.gets
 	end
 
 	def test_delete
