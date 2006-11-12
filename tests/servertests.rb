@@ -1022,10 +1022,99 @@ class MPDTester < Test::Unit::TestCase
 		assert_not_equal '0', status['time']
 		assert_equal '44100:16:2', status['audio']
 		assert_equal '192', status['bitrate']
+
+		sleep 10
+
+		# Check that play doesn't start over if issued during playback
+		@sock.puts 'play'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_not_nil status['time']
+		assert status['time'].to_i > 10
+		assert_equal '2', status['song']
+		assert_equal '9', status['songid']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
+
+		# Test play w/ arg > length
+		@sock.puts 'play 99'
+		assert_equal "ACK [50@0] {play} song doesn't exist: \"99\"\n", @sock.gets
 	end
 
 	def test_playid
-		# TODO
+		@sock.gets
+
+		# Test playid w/ args > 1
+		@sock.puts 'playid 1 2'
+		assert_equal "ACK [2@0] {playid} wrong number of arguments for \"playid\"\n", @sock.gets
+		
+		# Test playid w/ arg != integer
+		@sock.puts 'playid a'
+		assert_equal "ACK [2@0] {playid} need a positive integer\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Test playid w/o args
+		@sock.puts 'playid'
+		assert_equal "OK\n", @sock.gets
+
+		# Wait for the thing to start playing
+		sleep 2
+ 
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_equal '0', status['song']
+		assert_equal '7', status['songid']
+		assert_equal 'play', status['state']
+		assert_not_nil status['time']
+		assert_not_equal '0', status['time']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		# Test playid w/ args
+		@sock.puts 'playid 12'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_equal '5', status['song']
+		assert_equal '12', status['songid']
+		assert_equal 'play', status['state']
+		assert_not_nil status['time']
+		assert_not_equal '0', status['time']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
+
+		sleep 10
+
+		# Check that play doesn't start over if issued during playback
+		@sock.puts 'playid'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.length
+		assert_not_nil status['time']
+		assert status['time'].to_i > 10
+		assert_equal '5', status['song']
+		assert_equal '12', status['songid']
+		assert_equal '44100:16:2', status['audio']
+		assert_equal '192', status['bitrate']
+
+		# Test playid w/ arg > length
+		@sock.puts 'playid 99'
+		assert_equal "ACK [50@0] {playid} song id doesn't exist: \"99\"\n", @sock.gets
 	end
 
 	def test_playlist
