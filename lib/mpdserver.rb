@@ -531,7 +531,12 @@ class MPDTestServer < GServer
 				end
 			when 'next'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+					if @status[:state] != 'stop'
+						next_song
+						@elapsed_time = 0
+						@status[:state] = 'play'
+					end
+					return true
 				end
 			when 'pause'
 				args_check( sock, cmd, args, 0..1 ) do |args|
