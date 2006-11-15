@@ -777,9 +777,27 @@ class MPDTestServer < GServer
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {seek} \"#{args[1]}\" is not a integer"))
 					else
-						# Note: arg[0] < 0 is checked as a song pos
-						# arg[1] < 0 causes the song to start from the beginning
-						sock.puts 'todo'
+						if args[0].to_i > @the_playlist.length or args[0].to_i < 0
+							return(cmd_fail(sock,"ACK [50@0] {seek} song doesn't exist: \"#{args[0]}\""))
+						end
+						args[1] = '0' if args[1].to_i < 0
+						song = @the_playlist[args[0].to_i]
+						if args[1].to_i >= song['time'].to_i
+							if args[0].to_i + 1 < @the_playlist.length
+								@current_song = args[0].to_i + 1
+								@elapsed_time = 0
+								@status[:state] = 'play' unless @status[:state] == 'pause'
+							else
+								@current_song = nil
+								@elapsed_time = 0
+								@status[:state] = 'stop'
+							end
+						else
+							@current_song = args[0].to_i
+							@elapsed_time = args[1].to_i
+							@status[:state] = 'play' unless @status[:state] == 'pause'
+						end
+						return true
 					end
 				end
 			when 'seekid'
