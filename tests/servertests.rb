@@ -1930,7 +1930,391 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_plchangesposid
-		# TODO
+		@sock.gets
+
+		# Test args = 0
+		@sock.puts 'plchangesposid'
+		assert_equal "ACK [2@0] {plchangesposid} wrong number of arguments for \"plchangesposid\"\n", @sock.gets
+
+		# Test args > 1
+		@sock.puts 'plchangesposid 1 2'
+		assert_equal "ACK [2@0] {plchangesposid} wrong number of arguments for \"plchangesposid\"\n", @sock.gets
+
+		# Test arg not integer
+		@sock.puts 'plchangesposid a'
+		assert_equal "ACK [2@0] {plchangesposid} need a positive integer\n", @sock.gets
+
+		# Add some stuff to manipulate
+		@sock.puts 'add Shpongle/Are_You_Shpongled'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '8', status['playlist']
+		assert_equal '7', status['playlistlength']
+
+		@sock.puts 'plchangesposid 7'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 2, songs.size
+		assert_equal 'cpos: 6', songs[0]
+		assert_equal 'Id: 6', songs[1]
+
+		@sock.puts 'plchangesposid 6'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 4, songs.size
+		assert_equal 'cpos: 5', songs[0]
+		assert_equal 'Id: 5', songs[1]
+		assert_equal 'cpos: 6', songs[2]
+		assert_equal 'Id: 6', songs[3]
+
+		@sock.puts 'delete 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '9', status['playlist']
+		assert_equal '6', status['playlistlength']
+
+		@sock.puts 'plchangesposid 8'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.size
+		assert_equal 'cpos: 3', songs[0]
+		assert_equal 'Id: 4', songs[1]
+		assert_equal 'cpos: 4', songs[2]
+		assert_equal 'Id: 5', songs[3]
+		assert_equal 'cpos: 5', songs[4]
+		assert_equal 'Id: 6', songs[5]
+
+		@sock.puts 'plchangesposid 5'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.size
+		assert_equal 'cpos: 3', songs[0]
+		assert_equal 'Id: 4', songs[1]
+		assert_equal 'cpos: 4', songs[2]
+		assert_equal 'Id: 5', songs[3]
+		assert_equal 'cpos: 5', songs[4]
+		assert_equal 'Id: 6', songs[5]
+
+		@sock.puts 'deleteid 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '10', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchangesposid 9'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 2', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 4', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 5', songs[5]
+		assert_equal 'cpos: 4', songs[6]
+		assert_equal 'Id: 6', songs[7]
+
+		@sock.puts 'plchangesposid 8'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 2', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 4', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 5', songs[5]
+		assert_equal 'cpos: 4', songs[6]
+		assert_equal 'Id: 6', songs[7]
+
+		@sock.puts 'move 1 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '11', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchangesposid 10'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 4', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 5', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 2', songs[5]
+
+		@sock.puts 'move 4 2'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '12', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchangesposid 11'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 6, songs.size
+		assert_equal 'cpos: 2', songs[0]
+		assert_equal 'Id: 6', songs[1]
+		assert_equal 'cpos: 3', songs[2]
+		assert_equal 'Id: 5', songs[3]
+		assert_equal 'cpos: 4', songs[4]
+		assert_equal 'Id: 2', songs[5]
+
+		@sock.puts 'move 3 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '13', status['playlist']
+		assert_equal '5', status['playlistlength']
+
+		@sock.puts 'plchangesposid 12'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 2, songs.size
+		assert_equal 'cpos: 3', songs[0]
+		assert_equal 'Id: 5', songs[1]
+
+		# load test
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '22', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 21'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 2, songs.size
+		assert_equal 'cpos: 7', songs[0]
+		assert_equal 'Id: 14', songs[1]
+
+		@sock.puts 'plchangesposid 18'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 4', songs[0]
+		assert_equal 'Id: 11', songs[1]
+		assert_equal 'cpos: 5', songs[2]
+		assert_equal 'Id: 12', songs[3]
+		assert_equal 'cpos: 6', songs[4]
+		assert_equal 'Id: 13', songs[5]
+		assert_equal 'cpos: 7', songs[6]
+		assert_equal 'Id: 14', songs[7]
+
+		# moveid test
+		@sock.puts 'moveid 8 5'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '23', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 22'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 10, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 9', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 10', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 11', songs[5]
+		assert_equal 'cpos: 4', songs[6]
+		assert_equal 'Id: 12', songs[7]
+		assert_equal 'cpos: 5', songs[8]
+		assert_equal 'Id: 8', songs[9]
+
+		@sock.puts 'moveid 12 1'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '24', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 23'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 12', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 9', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 10', songs[5]
+		assert_equal 'cpos: 4', songs[6]
+		assert_equal 'Id: 11', songs[7]
+
+		@sock.puts 'plchangesposid 22'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 10, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 12', songs[1]
+		assert_equal 'cpos: 2', songs[2]
+		assert_equal 'Id: 9', songs[3]
+		assert_equal 'cpos: 3', songs[4]
+		assert_equal 'Id: 10', songs[5]
+		assert_equal 'cpos: 4', songs[6]
+		assert_equal 'Id: 11', songs[7]
+		assert_equal 'cpos: 5', songs[8]
+		assert_equal 'Id: 8', songs[9]
+
+		@sock.puts 'swap 2 5'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '25', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 24'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 4, songs.size
+		assert_equal 'cpos: 2', songs[0]
+		assert_equal 'Id: 8', songs[1]
+		assert_equal 'cpos: 5', songs[2]
+		assert_equal 'Id: 9', songs[3]
+
+		@sock.puts 'swap 7 3'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '26', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 25'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 4, songs.size
+		assert_equal 'cpos: 3', songs[0]
+		assert_equal 'Id: 14', songs[1]
+		assert_equal 'cpos: 7', songs[2]
+		assert_equal 'Id: 10', songs[3]
+
+		@sock.puts 'plchangesposid 24'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 2', songs[0]
+		assert_equal 'Id: 8', songs[1]
+		assert_equal 'cpos: 3', songs[2]
+		assert_equal 'Id: 14', songs[3]
+		assert_equal 'cpos: 5', songs[4]
+		assert_equal 'Id: 9', songs[5]
+		assert_equal 'cpos: 7', songs[6]
+		assert_equal 'Id: 10', songs[7]
+
+		@sock.puts 'swapid 7 13'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '27', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 26'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 4, songs.size
+		assert_equal 'cpos: 0', songs[0]
+		assert_equal 'Id: 13', songs[1]
+		assert_equal 'cpos: 6', songs[2]
+		assert_equal 'Id: 7', songs[3]
+
+		@sock.puts 'swapid 11 12'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '28', status['playlist']
+		assert_equal '8', status['playlistlength']
+		
+		@sock.puts 'plchangesposid 27'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 4, songs.size
+		assert_equal 'cpos: 1', songs[0]
+		assert_equal 'Id: 11', songs[1]
+		assert_equal 'cpos: 4', songs[2]
+		assert_equal 'Id: 12', songs[3]
+
+		@sock.puts 'plchangesposid 26'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 8, songs.size
+		assert_equal 'cpos: 0', songs[0]
+		assert_equal 'Id: 13', songs[1]
+		assert_equal 'cpos: 1', songs[2]
+		assert_equal 'Id: 11', songs[3]
+		assert_equal 'cpos: 4', songs[4]
+		assert_equal 'Id: 12', songs[5]
+		assert_equal 'cpos: 6', songs[6]
+		assert_equal 'Id: 7', songs[7]
+
+		@sock.puts 'shuffle'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '29', status['playlist']
+		assert_equal '8', status['playlistlength']
+
+		@sock.puts 'plchangesposid 28'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 16, songs.size
+		assert_equal 'cpos: 0', songs[0]
+		assert_equal 'Id: 10', songs[1]
+		assert_equal 'cpos: 1', songs[2]
+		assert_equal 'Id: 7', songs[3]
+		assert_equal 'cpos: 2', songs[4]
+		assert_equal 'Id: 9', songs[5]
+		assert_equal 'cpos: 3', songs[6]
+		assert_equal 'Id: 12', songs[7]
+		assert_equal 'cpos: 4', songs[8]
+		assert_equal 'Id: 14', songs[9]
+		assert_equal 'cpos: 5', songs[10]
+		assert_equal 'Id: 8', songs[11]
+		assert_equal 'cpos: 6', songs[12]
+		assert_equal 'Id: 11', songs[13]
+		assert_equal 'cpos: 7', songs[14]
+		assert_equal 'Id: 13', songs[15]
+
+		@sock.puts 'add Shpongle/Are_You_Shpongled/6.Divine_Moments_of_Truth.ogg'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal '30', status['playlist']
+		assert_equal '9', status['playlistlength']
+		
+		@sock.puts 'plchangesposid 29'
+		reply = get_response
+		songs = reply.split "\n"
+		assert_equal 2, songs.size
+		assert_equal 'cpos: 8', songs[0]
+		assert_equal 'Id: 5', songs[1]
 	end
 
 	def test_previous

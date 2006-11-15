@@ -695,8 +695,18 @@ class MPDTestServer < GServer
 				end
 			when 'plchangesposid'
 				args_check( sock, cmd, args, 1 ) do |args|
-					# Note: my server doesn't seem to implement it yet
-					sock.puts 'todo'
+					if args.length > 0 and !is_int(args[0])
+						return(cmd_fail(sock,'ACK [2@0] {plchangesposid} need a positive integer'))
+					else
+						# Note: args[0] < 0 just return OK...
+						@the_playlist.each_with_index do |song,i|
+							if args[0].to_i > @status[:playlist] or song['_mod_ver'] >= args[0].to_i or song['_mod_ver'] == 0
+								sock.puts "cpos: #{i}"
+								sock.puts "Id: #{song['id']}"
+							end
+						end
+						return true
+					end
 				end
 			when 'previous'
 				args_check( sock, cmd, args, 0 ) do
