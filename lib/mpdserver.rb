@@ -813,6 +813,7 @@ class MPDTestServer < GServer
 						sock.puts "songid: #{@the_playlist[@current_song]['id']}"
 					end
 
+					@status[:updating_db] = nil
 					return true
 				end
 			when 'stop'
@@ -877,7 +878,9 @@ class MPDTestServer < GServer
 			when 'update'
 				args_check( sock, cmd, args, 0..1 ) do |args|
 					incr_version
-					sock.puts 'todo'
+					sock.puts 'updating_db: 1'
+					@status[:updating_db] = '1'
+					return true
 				end
 			when 'volume'
 				log 'MPD Warning: Call to Deprecated API: "volume"' if audit

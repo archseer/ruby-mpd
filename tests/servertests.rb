@@ -2592,7 +2592,38 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_update
-		# TODO
+		@sock.gets
+
+		@sock.puts 'update 1 2'
+		assert_equal "ACK [2@0] {update} wrong number of arguments for \"update\"\n", @sock.gets
+
+		@sock.puts 'update a'
+		assert_equal "updating_db: 1\n", @sock.gets
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 8, status.size
+		assert_equal '1', status['updating_db']
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_nil status['updating_db']
+
+		@sock.puts 'update'
+		assert_equal "updating_db: 1\n", @sock.gets
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 8, status.size
+		assert_equal '1', status['updating_db']
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_nil status['updating_db']
 	end
 
 	def test_volume
