@@ -1085,6 +1085,21 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal '2', status['song']
 		assert_equal '9', status['songid']
 		assert_equal 'play', status['state']
+
+		@sock.puts 'play 7'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'next'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal 'stop', status['state']
 	end
 
 	def test_pause
@@ -1845,7 +1860,133 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_previous
-		# TODO
+		@sock.gets
+
+		# Test with too many args
+		@sock.puts 'previous 1'
+		assert_equal "ACK [2@0] {previous} wrong number of arguments for \"previous\"\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		# Shouldn't do anything
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal 'stop', status['state']
+
+		@sock.puts 'play 7'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal '6', status['song']
+		assert_equal '13', status['songid']
+		assert_equal 'play', status['state']
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal '0', status['song']
+		assert_equal '7', status['songid']
+		assert_equal 'play', status['state']
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal '0', status['song']
+		assert_equal '7', status['songid']
+		assert_equal 'play', status['state']
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'play 4'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'pause'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal '3', status['song']
+		assert_equal '10', status['songid']
+		assert_equal 'play', status['state']
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'play 6'
+		assert_equal "OK\n", @sock.gets
+		
+		sleep 2
+
+		@sock.puts 'stop'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'previous'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 9, status.size
+		assert_equal 'stop', status['state']
+		assert_equal '6', status['song']
+		assert_equal '13', status['songid']
 	end
 
 	def test_random

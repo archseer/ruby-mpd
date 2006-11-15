@@ -677,7 +677,11 @@ class MPDTestServer < GServer
 				end
 			when 'previous'
 				args_check( sock, cmd, args, 0 ) do
-					sock.puts 'todo'
+					return true if @status[:state] == 'stop'
+					prev_song
+					@elapsed_time = 0
+					@status[:state] = 'play'
+					return true
 				end
 			when 'random'
 				args_check( sock, cmd, args, 1 ) do |args|
@@ -896,6 +900,15 @@ class MPDTestServer < GServer
 			return @the_playlist[@current_song]
 		else
 			return nil
+		end
+	end
+
+	def prev_song
+		return if @current_song.nil?
+		if @current_song == 0
+			@elapsed_time = 0
+		else
+			@current_song -= 1
 		end
 	end
 
