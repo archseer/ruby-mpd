@@ -176,7 +176,13 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_clearerror
-		# TODO
+		@sock.gets
+
+		@sock.puts 'clearerror 1'
+		assert_equal "ACK [2@0] {clearerror} wrong number of arguments for \"clearerror\"\n", @sock.gets
+
+		@sock.puts 'clearerror'
+		assert_equal "OK\n", @sock.gets
 	end
 
 	def test_close
