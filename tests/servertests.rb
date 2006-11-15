@@ -1501,7 +1501,66 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_playlistid
-		# TODO
+		@sock.gets
+
+		# Test with too many args
+		@sock.puts 'playlistid blah blah'
+		assert_equal "ACK [2@0] {playlistid} wrong number of arguments for \"playlistid\"\n", @sock.gets
+
+		# Test with no args
+		@sock.puts 'clear'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'playlistid'
+		songs = build_songs get_response
+		assert_equal 8, songs.length
+
+		songs.each_with_index do |s,i|
+			assert s['file'] =~ /^Astral_Projection\/Dancing_Galaxy\//
+			assert_equal 'Astral Projection', s['Artist']
+			assert_equal 'Dancing Galaxy', s['Album']
+			assert_not_nil s['Title']
+			assert_not_nil s['Time']
+			assert_equal (i+1).to_s, s['Track']
+			assert_equal (i+7).to_s, s['Id']
+			assert_equal (i).to_s, s['Pos']
+		end
+
+		# Test with arg doesn't exist 
+		@sock.puts 'playlistid 900'
+		assert_equal "ACK [50@0] {playlistid} song id doesn't exist: \"900\"\n", @sock.gets
+
+		# Test with arg < 0
+		@sock.puts 'playlistid -10'
+		songs = build_songs get_response
+		assert_equal 8, songs.length
+
+		songs.each_with_index do |s,i|
+			assert s['file'] =~ /^Astral_Projection\/Dancing_Galaxy\//
+			assert_equal 'Astral Projection', s['Artist']
+			assert_equal 'Dancing Galaxy', s['Album']
+			assert_not_nil s['Title']
+			assert_not_nil s['Time']
+			assert_equal (i+1).to_s, s['Track']
+			assert_equal (i+7).to_s, s['Id']
+			assert_equal (i).to_s, s['Pos']
+		end
+		
+		#Test with valid arg
+		@sock.puts 'playlistid 10'
+		songs = build_songs get_response
+		assert_equal 1, songs.length
+		assert_equal 'Astral_Projection/Dancing_Galaxy/4.No_One_Ever_Dreams.ogg', songs[0]['file']
+		assert_equal 'Astral Projection', songs[0]['Artist']
+		assert_equal 'Dancing Galaxy', songs[0]['Album']
+		assert_equal 'No One Ever Dreams', songs[0]['Title']
+		assert_equal '505', songs[0]['Time']
+		assert_equal '4', songs[0]['Track']
+		assert_equal '10', songs[0]['Id']
+		assert_equal '3', songs[0]['Pos']
 	end
 
 	def test_plchanges

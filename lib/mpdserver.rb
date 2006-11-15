@@ -652,8 +652,30 @@ class MPDTestServer < GServer
 					if args.length > 0 and !is_int(args[0])
 						return(cmd_fail(sock,'ACK [2@0] {playlistid} need a positive integer'))
 					else
-						# Note: args[0] < 0 just return OK...
-						sock.puts 'todo'
+						song = nil
+						pos = nil
+						args.clear if args[0].to_i < 0
+						if args.length != 0
+							@the_playlist.each_with_index do |s,i|
+								if s['id'] == args[0].to_i
+									song = s
+									pos = i
+									break;
+								end
+							end
+
+							return(cmd_fail(sock,"ACK [50@0] {playlistid} song id doesn't exist: \"#{args[0]}\"")) if song.nil?
+
+							send_song sock, song
+							sock.puts "Pos: #{pos}"
+							return true
+						else
+							@the_playlist.each_with_index do |song,i|
+								send_song sock, song
+								sock.puts "Pos: #{i}"
+							end
+							return true
+						end
 					end
 				end
 			when 'plchanges'
