@@ -1240,7 +1240,16 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_password
-		# TODO
+		@sock.gets
+
+		@sock.puts 'password'
+		assert_equal "ACK [2@0] {password} wrong number of arguments for \"password\"\n", @sock.gets
+
+		@sock.puts 'password test'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'password wrong'
+		assert_equal "ACK [3@0] {password} incorrect password\n", @sock.gets
 	end
 
 	def test_ping

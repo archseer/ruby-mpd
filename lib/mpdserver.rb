@@ -556,7 +556,8 @@ class MPDTestServer < GServer
 				end
 			when 'password'
 				args_check( sock, cmd, args, 1 ) do |args|
-					sock.puts 'todo'
+				return true if args[0] == 'test'
+				return(cmd_fail(sock,"ACK [3@0] {password} incorrect password"))
 				end
 			when 'ping'
 				args_check( sock, cmd, args, 0 ) do
