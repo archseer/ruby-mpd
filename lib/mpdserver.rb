@@ -1,3 +1,14 @@
+#
+#== mpdserver.rb
+#
+# This is the test server for librmpd. It as a 'shallow' server,
+# it implements only the client/server protocol in a highly
+# scriptable manner. This means you can set up your own simple
+# test music database for testing an mpd client. You can now
+# distribute your unit tests (you do have unit tests, yes?) along
+# with a test database (a YAML file), and anyone can check that
+# your client is in working order.
+
 require 'gserver'
 require 'yaml'
 
@@ -477,7 +488,6 @@ class MPDTestServer < GServer
 					elsif args[1].to_i < 0 or args[1].to_i >= @the_playlist.length
 						return(cmd_fail(sock,"ACK [50@0] {move} song doesn't exist: \"#{args[1]}\""))
 					else
-						# TODO negative args should be checked
 						tmp = @the_playlist.delete_at args[0].to_i
 						@the_playlist.insert args[1].to_i, tmp
 						if args[0].to_i < args[1].to_i
@@ -568,6 +578,7 @@ class MPDTestServer < GServer
 					if args.length > 0 and !is_int(args[0])
 						return(cmd_fail(sock,'ACK [2@0] {play} need a positive integer'))
 					else
+						args.clear if args[0] == '-1'
 						if args.length == 0
 							if @the_playlist.length > 0 and @status[:state] != 'play'
 								@current_song = 0 if @current_song.nil?
@@ -575,7 +586,7 @@ class MPDTestServer < GServer
 								@status[:state] = 'play'
 							end
 						else
-							if args[0].to_i >= @the_playlist.length
+							if args[0].to_i < 0 or args[0].to_i >= @the_playlist.length
 								return(cmd_fail(sock,"ACK [50@0] {play} song doesn't exist: \"#{args[0]}\""))
 							end
 
@@ -591,6 +602,7 @@ class MPDTestServer < GServer
 					if args.length > 0 and !is_int(args[0])
 						return(cmd_fail(sock,'ACK [2@0] {playid} need a positive integer'))
 					else
+						args.clear if args[0] == '-1'
 						if args.length == 0
 							if @the_playlist.length > 0 and @status[:state] != 'play'
 								@current_song = 0 if @current_song.nil?
@@ -756,19 +768,22 @@ class MPDTestServer < GServer
 			when 'save'
 				args_check( sock, cmd, args, 1 ) do |args|
 					new_playlist = {'file' => args[0]+'.m3u', 'songs' => @the_playlist}
-#@the_playlist.each do |song|
-#						new_playlist['songs'] << song
-#					end
 					@playlists << new_playlist
 					return true
 				end
 			when 'search'
 				args_check( sock, cmd, args, 2 ) do |args|
 					if args[0] != 'title' and args[0] != 'artist' and args[0] != 'album' and args[0] != 'filename'
-						return(cmd_fail(sock,'ACK [2@0] {search} unknown table'))
-					else
-						sock.puts 'todo'
+						return(cmd_fail(sock,'ACK [2@0] {search} incorrect arguments'))
 					end
+					args[0] = 'file' if args[0] == 'filename'
+					@songs.each do |song|
+						data = song[args[0]]
+						if not data.nil? and data.downcase.include? args[1]
+							send_song sock, song
+						end
+					end
+					return true
 				end
 			when 'seek'
 				args_check( sock, cmd, args, 2 ) do |args|

@@ -2627,7 +2627,71 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_search
-		# TODO
+		@sock.gets
+
+		@sock.puts 'search'
+		assert_equal "ACK [2@0] {search} wrong number of arguments for \"search\"\n", @sock.gets
+
+		@sock.puts 'search 1 2 3'
+		assert_equal "ACK [2@0] {search} wrong number of arguments for \"search\"\n", @sock.gets
+
+		@sock.puts 'search wrong Shpongle'
+		assert_equal "ACK [2@0] {search} incorrect arguments\n", @sock.gets
+
+		@sock.puts 'search artist "arbon based life"'
+		songs = build_songs get_response
+		assert_equal 11, songs.size
+		songs.each_with_index do |song,i|
+			assert_equal i+1, song['Track'].to_i
+			assert_equal i+15, song['Id'].to_i
+			assert_equal 'Carbon Based Lifeforms', song['Artist']
+			assert_equal 'Hydroponic Garden', song['Album']
+			assert song['file'] =~ /^Carbon_Based_Lifeforms\/Hydroponic_Garden\//
+		end
+
+		@sock.puts 'search album hydroponic'
+		songs = build_songs get_response
+		assert_equal 11, songs.size
+		songs.each_with_index do |song,i|
+			assert_equal i+1, song['Track'].to_i
+			assert_equal i+15, song['Id'].to_i
+			assert_equal 'Carbon Based Lifeforms', song['Artist']
+			assert_equal 'Hydroponic Garden', song['Album']
+			assert song['file'] =~ /^Carbon_Based_Lifeforms\/Hydroponic_Garden\//
+		end
+
+		@sock.puts 'search filename hydropo'
+		songs = build_songs get_response
+		assert_equal 11, songs.size
+		songs.each_with_index do |song,i|
+			assert_equal i+1, song['Track'].to_i
+			assert_equal i+15, song['Id'].to_i
+			assert_equal 'Carbon Based Lifeforms', song['Artist']
+			assert_equal 'Hydroponic Garden', song['Album']
+			assert song['file'] =~ /^Carbon_Based_Lifeforms\/Hydroponic_Garden\//
+		end
+
+		@sock.puts 'search title "silent running"'
+		songs = build_songs get_response
+		assert_equal 1, songs.size
+		assert_equal '4', songs[0]['Track']
+		assert_equal '18', songs[0]['Id']
+		assert_equal 'Carbon_Based_Lifeforms/Hydroponic_Garden/04.Silent_Running.ogg', songs[0]['file']
+		assert_equal 'Silent Running', songs[0]['Title']
+		assert_equal 'Hydroponic Garden', songs[0]['Album']
+		assert_equal 'Carbon Based Lifeforms', songs[0]['Artist']
+
+		@sock.puts 'search title "no title"'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'search artist "no artist"'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'search album "no album"'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'search filename "no file"'
+		assert_equal "OK\n", @sock.gets
 	end
 
 	def test_seek
