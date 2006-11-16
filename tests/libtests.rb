@@ -1,32 +1,34 @@
 #
 # Unit tests for librmpd
 #
-# These tests assume you have MPD installed and running
-# on localhost:6600
-#
-# Also note: due to the nature of Unit tests,
-# not all functionality is tested here. Namely,
-# things such as mpd.songs that list server
-# centric info can't be tested reliably. Thus,
-# I recommend testing on your own setup with more
-# specific tests
+# This uses the included mpdserver.rb test server
 
 require 'rubygems'
 require 'librmpd'
+load '../lib/mpdserver.rb'
 require 'test/unit'
 
 class MPDTester < Test::Unit::TestCase
 
 	def setup
-		@mpd = MPD.new
+		begin
+			@port = 9393
+			@server = MPDTestServer.new @port, '../lib/database.yaml'
+			@server.start
+		rescue Errno::EADDRINUSE
+			@port = 9494
+			@server = MPDTestServer.new @port, '../lib/database.yaml'
+			@server.start
+		end
+		@mpd = MPD.new 'localhost', @port
 	end
 
 	def teardown
 		@mpd.disconnect
+		@server.stop
 	end
 
 	def test_connect
-		# test against a real daemon
 		ret = @mpd.connect
 		assert_match /OK MPD [0-9.]*\n/, ret
 	end
@@ -35,6 +37,10 @@ class MPDTester < Test::Unit::TestCase
 		# test a good connection
 		@mpd.connect
 		assert @mpd.connected?
+
+		# Test a disconnect
+		@server.stop
+		assert !@mpd.connected?
 
 		# test a bad connection
 		bad = MPD.new 'no-connection', 6600
@@ -61,6 +67,8 @@ class MPDTester < Test::Unit::TestCase
 		@mpd.connect
 		assert @mpd.connected?
 
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+
 		# test no arguments
 		assert @mpd.play
 
@@ -75,15 +83,23 @@ class MPDTester < Test::Unit::TestCase
 		assert_raise(RuntimeError) {@mpd.playing?}
 	end
 
+	def test_playid
+		#TODO
+	end
+
 	def test_stop
 		@mpd.connect
 		assert @mpd.connected?
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
 
 		assert @mpd.play
 		assert @mpd.playing?
 
 		assert @mpd.stop
 		assert @mpd.stopped?
+
+		assert !@mpd.playing?
 
 		@mpd.disconnect
 		assert_raise(RuntimeError) {@mpd.stop}
@@ -93,6 +109,8 @@ class MPDTester < Test::Unit::TestCase
 	def test_pause
 		@mpd.connect
 		assert @mpd.connected?
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
 
 		assert @mpd.play
 		assert @mpd.playing?
@@ -109,6 +127,8 @@ class MPDTester < Test::Unit::TestCase
 		@mpd.pause = true
 		assert @mpd.stopped?
 
+		assert !@mpd.paused?
+
 		@mpd.disconnect
 		assert_raise(RuntimeError) {@mpd.pause = true}
 		assert_raise(RuntimeError) {@mpd.paused?}
@@ -116,6 +136,14 @@ class MPDTester < Test::Unit::TestCase
 
 	def test_previous
 		@mpd.connect
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+
+		@mpd.play 3
+
+		sleep 2
+
+		assert @mpd.playing?
 
 		pos = @mpd.status['song'].to_i
 
@@ -129,6 +157,10 @@ class MPDTester < Test::Unit::TestCase
 
 	def test_next
 		@mpd.connect
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+
+		@mpd.play 3
 
 		pos = @mpd.status['song'].to_i
 
