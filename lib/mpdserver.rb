@@ -807,8 +807,37 @@ class MPDTestServer < GServer
 					elsif !is_int args[1]
 						return(cmd_fail(sock,"ACK [2@0] {seekid} \"#{args[1]}\" is not a integer"))
 					else
-						# See above notes
-						sock.puts 'todo'
+						pos = nil
+						song = nil
+						@the_playlist.each_with_index do |s,i|
+							if s['id'] == args[0].to_i
+								song = s
+								pos = i
+								break;
+							end
+						end
+
+						if song.nil?
+							return(cmd_fail(sock,"ACK [50@0] {seekid} song id doesn't exist: \"#{args[0]}\""))
+						end
+
+						args[1] = '0' if args[1].to_i < 0
+						if args[1].to_i >= song['time'].to_i
+							if pos + 1 < @the_playlist.length
+								@current_song = pos + 1
+								@elapsed_time = 0
+								@status[:state] = 'play' unless @status[:state] == 'pause'
+							else
+								@current_song = nil
+								@elapsed_time = 0
+								@status[:state] = 'stop'
+							end
+						else
+							@current_song = pos
+							@elapsed_time = args[1].to_i
+							@status[:state] = 'play' unless @status[:state] == 'pause'
+						end
+						return true
 					end
 				end
 			when 'setvol'
@@ -967,6 +996,7 @@ class MPDTestServer < GServer
 	end
 
 	def next_song
+		return if @current_song.nil?
 		@current_song = (@current_song +1 < @the_playlist.length ? @current_song +1 : nil)
 	end
 

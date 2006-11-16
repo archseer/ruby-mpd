@@ -2744,7 +2744,116 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_seekid
-		# TODO
+		@sock.gets
+
+		@sock.puts 'seekid'
+		assert_equal "ACK [2@0] {seekid} wrong number of arguments for \"seekid\"\n", @sock.gets
+
+		@sock.puts 'seekid 1 2 3'
+		assert_equal "ACK [2@0] {seekid} wrong number of arguments for \"seekid\"\n", @sock.gets
+
+		@sock.puts 'seekid a 2'
+		assert_equal "ACK [2@0] {seekid} \"a\" is not a integer\n", @sock.gets
+
+		@sock.puts 'seekid 1 a'
+		assert_equal "ACK [2@0] {seekid} \"a\" is not a integer\n", @sock.gets
+
+		@sock.puts 'load Astral_Projection_-_Dancing_Galaxy'
+		assert_equal "OK\n", @sock.gets
+
+		@sock.puts 'seekid 99 10'
+		assert_equal "ACK [50@0] {seekid} song id doesn't exist: \"99\"\n", @sock.gets
+
+		@sock.puts 'seekid -1 10'
+		assert_equal "ACK [50@0] {seekid} song id doesn't exist: \"-1\"\n", @sock.gets
+
+		@sock.puts 'seekid 7 40'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 4
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal 'play', status['state']
+		assert_equal '0', status['song']
+		assert_equal '7', status['songid']
+		assert_not_nil status['time']
+		assert 40 < status['time'].to_i
+		assert 55 > status['time'].to_i
+
+		@sock.puts 'pause 1'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'seekid 11 100'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal 'pause', status['state']
+		assert_equal '4', status['song']
+		assert_equal '11', status['songid']
+		assert_equal 100, status['time'].to_i
+
+		@sock.puts 'pause 0'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'seekid 13 200'
+		assert_equal "OK\n", @sock.gets
+		
+		sleep 4
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal 'play', status['state']
+		assert_equal '6', status['song']
+		assert_equal '13', status['songid']
+		assert 200 < status['time'].to_i
+		assert 215 > status['time'].to_i
+
+		@sock.puts 'seekid 9 10000'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal 'play', status['state']
+		assert_equal '3', status['song']
+		assert_equal '10', status['songid']
+		assert 10 > status['time'].to_i
+
+		@sock.puts 'seekid 14 10000'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 7, status.size
+		assert_equal 'stop', status['state']
+
+		@sock.puts 'seekid 9 -100'
+		assert_equal "OK\n", @sock.gets
+
+		sleep 2
+
+		@sock.puts 'status'
+		status = build_hash get_response
+		assert_equal 12, status.size
+		assert_equal 'play', status['state']
+		assert_equal '2', status['song']
+		assert_equal '9', status['songid']
+		assert 5 > status['time'].to_i
 	end
 
 	def test_setvol
