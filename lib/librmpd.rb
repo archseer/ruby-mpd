@@ -589,7 +589,6 @@ class MPD
 			lines = response.split "\n"
 			re = Regexp.new "\\A#{type}: ", 'i'
 			for line in lines
-				puts line.gsub( re, '' )
 				list << line.gsub( re, '' )
 			end
 		end
@@ -1038,7 +1037,6 @@ class MPD
 		end
 
 		return ret
-
 	end
 
 	#
@@ -1060,10 +1058,12 @@ class MPD
 			line = @socket.gets
 			case line
 				when "OK\n"
-					reading = false;
+					reading = false
 				when /^ACK/
 					error = line
-					reading = false;
+					reading = false
+				when nil
+					reading = false
 				else
 					msg += line
 			end
