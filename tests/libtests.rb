@@ -62,48 +62,130 @@ class MPDTester < Test::Unit::TestCase
 		assert !bad.connected?
 	end
 
-	def test_play
-		# test a good connection
+	def test_add
 		@mpd.connect
 		assert @mpd.connected?
 
-		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+		assert @mpd.add('Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg')
 
-		# test no arguments
-		assert @mpd.play
-
-		assert @mpd.playing?
-
-		# test an argument
-		assert @mpd.play(2)
-		assert @mpd.playing?
-
-		@mpd.disconnect
-		assert_raise(RuntimeError) {@mpd.play}
-		assert_raise(RuntimeError) {@mpd.playing?}
+		pls = @mpd.playlist
+		assert_equal 1, pls.size
+		assert_equal 'Shpongle', pls[0].artist
+		assert_equal 'Are You Shpongled?', pls[0].album
+		assert_equal 'Shpongle Falls', pls[0].title
 	end
 
-	def test_playid
+	def test_clear
+		@mpd.connect
+		assert @mpd.connected?
+
+		assert @mpd.add('Shpongle')
+
+		pls = @mpd.playlist
+		assert_equal 27, pls.size
+
+		assert @mpd.clear
+
+		pls = @mpd.playlist
+		assert_equal 0, pls.size
+	end
+
+	def test_clearerror
 		#TODO
 	end
 
-	def test_stop
+	def test_crossfade
 		@mpd.connect
-		assert @mpd.connected?
+
+		@mpd.crossfade = 40
+
+		assert_equal 40, @mpd.crossfade
+		assert_equal '40', @mpd.status['xfade']
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.crossfade = 20}
+		assert_raise(RuntimeError) {@mpd.crossfade}
+	end
+
+	def test_current_song
+		#TODO
+	end
+
+	def test_delete
+		#TODO
+	end
+
+	def test_deleteid
+		#TODO
+	end
+
+	def test_find
+		#TODO
+	end
+
+	def test_kill
+		#TODO
+	end
+
+	def test_albums
+		#TODO
+	end
+
+	def test_artists
+		#TODO
+	end
+
+	def test_list
+		#TODO
+	end
+
+	def test_directories
+		#TODO
+	end
+
+	def test_files
+		#TODO
+	end
+
+	def test_playlists
+		#TODO
+	end
+
+	def test_songs
+		#TODO
+	end
+
+	def test_songs_by_artist
+		#TODO
+	end
+
+	def test_load
+		#TODO
+	end
+
+	def test_move
+		#TODO
+	end
+
+	def test_moveid
+		#TODO
+	end
+
+	def test_next
+		@mpd.connect
 
 		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
 
-		assert @mpd.play
-		assert @mpd.playing?
+		@mpd.play 3
 
-		assert @mpd.stop
-		assert @mpd.stopped?
+		pos = @mpd.status['song'].to_i
 
-		assert !@mpd.playing?
+		assert @mpd.next
+
+		assert_equal pos + 1, @mpd.status['song'].to_i
 
 		@mpd.disconnect
-		assert_raise(RuntimeError) {@mpd.stop}
-		assert_raise(RuntimeError) {@mpd.stopped?}
+		assert_raise(RuntimeError) {@mpd.next}
 	end
 
 	def test_pause
@@ -134,6 +216,59 @@ class MPDTester < Test::Unit::TestCase
 		assert_raise(RuntimeError) {@mpd.paused?}
 	end
 
+	def test_password
+		#TODO
+	end
+
+	def test_ping
+		#TODO
+	end
+
+	def test_play
+		# test a good connection
+		@mpd.connect
+		assert @mpd.connected?
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+
+		# test no arguments
+		assert @mpd.play
+
+		assert @mpd.playing?
+
+		# test an argument
+		assert @mpd.play(2)
+		assert @mpd.playing?
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.play}
+		assert_raise(RuntimeError) {@mpd.playing?}
+	end
+
+	def test_playid
+		#TODO
+	end
+
+	def test_playlist_version
+		#TODO
+	end
+
+	def test_playlist
+		#TODO
+	end
+
+	def test_song_at_pos
+		#TODO
+	end
+
+	def test_song_with_id
+		#TODO
+	end
+
+	def test_playlist_changes
+		#TODO
+	end
+
 	def test_previous
 		@mpd.connect
 
@@ -153,36 +288,6 @@ class MPDTester < Test::Unit::TestCase
 
 		@mpd.disconnect
 		assert_raise(RuntimeError) {@mpd.previous}
-	end
-
-	def test_next
-		@mpd.connect
-
-		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
-
-		@mpd.play 3
-
-		pos = @mpd.status['song'].to_i
-
-		assert @mpd.next
-
-		assert_equal pos + 1, @mpd.status['song'].to_i
-
-		@mpd.disconnect
-		assert_raise(RuntimeError) {@mpd.next}
-	end
-
-	def test_crossfade
-		@mpd.connect
-
-		@mpd.crossfade = 40
-
-		assert_equal 40, @mpd.crossfade
-		assert_equal '40', @mpd.status['xfade']
-
-		@mpd.disconnect
-		assert_raise(RuntimeError) {@mpd.crossfade = 20}
-		assert_raise(RuntimeError) {@mpd.crossfade}
 	end
 
 	def test_random
@@ -213,6 +318,30 @@ class MPDTester < Test::Unit::TestCase
 		assert_raise(RuntimeError) {@mpd.repeat?}
 	end
 
+	def test_rm
+		#TODO
+	end
+
+	def test_remove_playlist
+		#TODO
+	end
+
+	def test_save
+		#TODO
+	end
+
+	def test_search
+		#TODO
+	end
+
+	def test_seek
+		#TODO
+	end
+
+	def test_seekid
+		#TODO
+	end
+
 	def test_volume
 		@mpd.connect
 		
@@ -227,6 +356,49 @@ class MPDTester < Test::Unit::TestCase
 		@mpd.disconnect
 		assert_raise(RuntimeError) {@mpd.volume = 10}
 		assert_raise(RuntimeError) {@mpd.volume}
+	end
+
+	def test_shuffle
+		#TODO
+	end
+
+	def test_stats
+		#TODO
+	end
+
+	def test_status
+		#TODO
+	end
+
+	def test_stop
+		@mpd.connect
+		assert @mpd.connected?
+
+		@mpd.load 'Astral_Projection_-_Dancing_Galaxy'
+
+		assert @mpd.play
+		assert @mpd.playing?
+
+		assert @mpd.stop
+		assert @mpd.stopped?
+
+		assert !@mpd.playing?
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.stop}
+		assert_raise(RuntimeError) {@mpd.stopped?}
+	end
+
+	def test_swap
+		#TODO
+	end
+
+	def test_swapid
+		#TODO
+	end
+
+	def test_update
+		#TODO
 	end
 
 end
