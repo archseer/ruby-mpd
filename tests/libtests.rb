@@ -4,7 +4,8 @@
 # This uses the included mpdserver.rb test server
 
 require 'rubygems'
-require 'librmpd'
+#require 'librmpd'
+load '../lib/librmpd.rb'
 load '../lib/mpdserver.rb'
 require 'test/unit'
 
@@ -73,6 +74,9 @@ class MPDTester < Test::Unit::TestCase
 		assert_equal 'Shpongle', pls[0].artist
 		assert_equal 'Are You Shpongled?', pls[0].album
 		assert_equal 'Shpongle Falls', pls[0].title
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.add('Shpongle')}
 	end
 
 	def test_clear
@@ -88,10 +92,19 @@ class MPDTester < Test::Unit::TestCase
 
 		pls = @mpd.playlist
 		assert_equal 0, pls.size
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.clear}
 	end
 
 	def test_clearerror
-		#TODO
+		@mpd.connect
+		assert @mpd.connected?
+
+		assert @mpd.clearerror
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.clearerror}
 	end
 
 	def test_crossfade
@@ -108,15 +121,59 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_current_song
-		#TODO
+		@mpd.connect
+
+		assert @mpd.add('Shpongle/Are_You_Shpongled/1.Shpongle_Falls.ogg')
+
+		assert @mpd.play
+
+		sleep 2
+
+		assert @mpd.playing?
+
+		s = @mpd.current_song
+
+		assert_equal 'Shpongle', s.artist
+		assert_equal 'Are You Shpongled?', s.album
+		assert_equal 'Shpongle Falls', s.title
+		assert_equal '1', s.track
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.current_song}
 	end
 
 	def test_delete
-		#TODO
+		@mpd.connect
+
+		assert @mpd.load('Astral_Projection_-_Dancing_Galaxy')
+
+		assert @mpd.delete(3)
+
+		pls = @mpd.playlist
+		assert_equal 7, pls.size
+		pls.each do |song|
+			assert_not_equal 'No On Ever Dreams', song.title
+		end
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.delete(3)}
 	end
 
 	def test_deleteid
-		#TODO
+		@mpd.connect
+
+		assert @mpd.load('Astral_Projection_-_Dancing_Galaxy')
+
+		assert @mpd.deleteid(10)
+
+		pls = @mpd.playlist
+		assert_equal 7, pls.size
+		pls.each do |song|
+			assert_not_equal 'No One Ever Dreams', song.title
+		end
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.deleteid(11)}
 	end
 
 	def test_find
@@ -124,15 +181,42 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_kill
-		#TODO
+		@mpd.connect
+
+		assert @mpd.kill
+
+		assert !@mpd.connected?
+
+		assert_raise(RuntimeError) {@mpd.kill}
 	end
 
 	def test_albums
-		#TODO
+		@mpd.connect
+
+		albums = @mpd.albums
+
+		assert_equal 4, albums.size
+		assert_equal 'Are You Shpongled?', albums[0]
+		assert_equal 'Dancing Galaxy', albums[1]
+		assert_equal 'Hydroponic Garden', albums[2]
+		assert_equal 'Nothing Lasts... But Nothing Is Lost', albums[3]
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.albums}
 	end
 
 	def test_artists
-		#TODO
+		@mpd.connect
+
+		artists = @mpd.artists
+
+		assert_equal 3, artists.size
+		assert_equal 'Astral Projection', artists[0]
+		assert_equal 'Carbon Based Lifeforms', artists[1]
+		assert_equal 'Shpongle', artists[2]
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.artists}
 	end
 
 	def test_list
