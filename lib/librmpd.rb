@@ -462,7 +462,7 @@ class MPD
 	# Returns true if this was successful,
 	# Raises a RuntimeError if the command failed
 	def add( path )
-		send_command "add #{path}"
+		send_command "add \"#{path}\""
 	end
 
 	#
@@ -537,7 +537,7 @@ class MPD
 	# This returns an Array of MPD::Songs,
 	# Raises a RuntimeError if the command failed
 	def find( type, what )
-		response = send_command "find #{type} #{what}"
+		response = send_command "find \"#{type}\" \"#{what}\""
 		build_songs_list response
 	end
 
@@ -604,7 +604,7 @@ class MPD
 	# Raises a RuntimeError if the command failed
 	def directories( path = nil )
 		if not path.nil?
-			response = send_command "listall #{path}"
+			response = send_command "listall \"#{path}\""
 		else
 			response = send_command 'listall'
 		end
@@ -620,7 +620,7 @@ class MPD
 	# Raises a RuntimeError if the command failed
 	def files( path = nil )
 		if not path.nil?
-			response = send_command "listall #{path}"
+			response = send_command "listall \"#{path}\""
 		else
 			response = send_command 'listall'
 		end
@@ -646,7 +646,7 @@ class MPD
 	# Raises a RuntimeError if the command failed
 	def songs( path = nil )
 		if not path.nil?
-			response = send_command "listallinfo #{path}"
+			response = send_command "listallinfo \"#{path}\""
 		else
 			response = send_command 'listallinfo'
 		end
@@ -679,7 +679,7 @@ class MPD
 	# Returns true if successful,
 	# Raises a RuntimeError if the command failed
 	def load( name )
-		send_command "load #{name}"
+		send_command "load \"#{name}\""
 	end
 
 	#
@@ -697,7 +697,7 @@ class MPD
 	# Returns true if successful,
 	# Raises a RuntimeError if the command failed
 	def moveid( songid, to )
-		send_command "moveid #{songid} {to}"
+		send_command "moveid #{songid} #{to}"
 	end
 
 	#
@@ -732,8 +732,8 @@ class MPD
 	# `pass` is simply the plaintext password
 	#
 	# Raises a RuntimeError if the command failed
-	def password=( pass )
-		send_command "password #{pass}"
+	def password( pass )
+		send_command "password \"#{pass}\""
 	end
 
 	#
@@ -869,7 +869,7 @@ class MPD
 	# Returns true if successful,
 	# Raises a RuntimeError if the command failed
 	def rm( playlist )
-		send_command "rm #{playlist}"
+		send_command "rm \"#{playlist}\""
 	end
 
 	#
@@ -885,7 +885,7 @@ class MPD
 	# Returns true if successful,
 	# Raises a RuntimeError if the command failed
 	def save( playlist )
-		send_command "save #{playlist}"
+		send_command "save \"#{playlist}\""
 	end
 
 	#
@@ -896,7 +896,7 @@ class MPD
 	# Returns an Array of MPD::Songs,
 	# Raises a RuntimeError if the command failed
 	def search( type, what )
-		build_song_list( send_command("search #{type} #{what}") )
+		build_song_list( send_command("search #{type} \"#{what}\"") )
 	end
 
 	#
@@ -1005,7 +1005,7 @@ class MPD
 	# TODO What should this return? I think a job id...
 	def update( path = nil )
 		if not path.nil?
-			return(send_command("update #{path}"))
+			return(send_command("update \"#{path}\""))
 		else
 			return(send_command('update'))
 		end
