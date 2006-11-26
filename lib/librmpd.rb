@@ -896,7 +896,7 @@ class MPD
 	# Returns an Array of MPD::Songs,
 	# Raises a RuntimeError if the command failed
 	def search( type, what )
-		build_song_list( send_command("search #{type} \"#{what}\"") )
+		build_songs_list( send_command("search #{type} \"#{what}\"") )
 	end
 
 	#
@@ -1001,14 +1001,15 @@ class MPD
 	#
 	# Tell the server to update the database. Optionally,
 	# specify the path to update
-	#
-	# TODO What should this return? I think a job id...
 	def update( path = nil )
+		ret = ''
 		if not path.nil?
-			return(send_command("update \"#{path}\""))
+			ret = send_command("update \"#{path}\"")
 		else
-			return(send_command('update'))
+			ret = send_command('update')
 		end
+
+		return(ret.gsub('updating_db: ', '').to_i)
 	end
 
 	#
