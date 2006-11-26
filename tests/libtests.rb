@@ -878,15 +878,100 @@ class MPDTester < Test::Unit::TestCase
 	end
 
 	def test_search
-		#TODO
+		@mpd.connect
+
+		a = @mpd.search 'album', 'ydroponic gar'
+
+		assert_equal 11, a.size
+		a.each do |song|
+			assert_equal 'Carbon Based Lifeforms', song.artist
+			assert_equal 'Hydroponic Garden', song.album
+		end
+
+		b = @mpd.search 'artist', 'hpon'
+
+		assert_equal 27, b.size
+		b.each do |song|
+			assert_equal 'Shpongle', song.artist
+		end
+
+		c = @mpd.search 'title', 'falls'
+		assert_equal 1, c.size
+		assert_equal 'Shpongle', c[0].artist
+		assert_equal 'Shpongle Falls', c[0].title
+		assert_equal 'Are You Shpongled?', c[0].album
+
+		d = @mpd.search 'filename', 'disco_valley'
+		assert_equal 1, d.size
+		assert_equal 'Astral Projection', d[0].artist
+		assert_equal 'Dancing Galaxy', d[0].album
+		assert_equal 'Ambient Galaxy (Disco Valley Mix)', d[0].title
+
+		z = @mpd.search 'title', 'no-title'
+		assert_equal 0, z.size
+
+		assert_raise(RuntimeError) {@mpd.search('error', 'nosuch')}
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.search('artist','searching')}
 	end
 
 	def test_seek
-		#TODO
+		@mpd.connect
+
+		assert @mpd.load('Astral_Projection_-_Dancing_Galaxy')
+
+		assert @mpd.play
+
+		sleep 2
+		
+		assert @mpd.pause = true
+
+		sleep 2
+
+		assert @mpd.seek(2, 200)
+
+		sleep 2
+
+		song = @mpd.current_song
+
+		assert_equal 'Flying Into A Star', song.title
+		
+		status = @mpd.status
+
+		assert_equal '200:585', status['time']
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.seek(1, 100)}
 	end
 
 	def test_seekid
-		#TODO
+		@mpd.connect
+
+		assert @mpd.load('Astral_Projection_-_Dancing_Galaxy')
+
+		assert @mpd.play
+
+		sleep 2
+		
+		assert @mpd.pause = true
+
+		sleep 2
+
+		assert @mpd.seekid(9, 200)
+
+		sleep 2
+
+		song = @mpd.current_song
+
+		assert_equal 'Flying Into A Star', song.title
+		
+		status = @mpd.status
+
+		assert_equal '200:585', status['time']
+
+		@mpd.disconnect
+		assert_raise(RuntimeError) {@mpd.seekid(1, 100)}
 	end
 
 	def test_volume
@@ -1044,7 +1129,9 @@ class MPDTester < Test::Unit::TestCase
 	def test_update
 		@mpd.connect
 
-		assert @mpd.update
+		ret = @mpd.update
+
+		assert_equal 1, ret
 
 		status = @mpd.status
 		
