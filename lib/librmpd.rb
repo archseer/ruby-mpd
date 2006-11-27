@@ -26,7 +26,8 @@
 #
 #  require 'rubygems'
 #  require 'librmpd'
-#  mpd = MPD.new
+#
+#  mpd = MPD.new 'localhost', 6600
 #
 # and connect it to the server
 #

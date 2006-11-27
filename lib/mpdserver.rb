@@ -23,7 +23,8 @@
 #  require 'rubygems'
 #  require 'librmpd'
 #  require 'mpdserver'
-#  server = MPDTesetServer.new 7700
+#
+#  server = MPDTestServer.new 7700
 #  server.start
 #
 # You can then enable auditing to see what commands are run by a client:
