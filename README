@@ -51,7 +51,7 @@ Once connected, you can issue commands to talk to the server
     song = mpd.current_song
     puts "Current Song: #{song.artist} - #{song.title}"
 
-You can find documentation for each command [here](http://docs.nymb.us/librmpd/doc/)
+You can find documentation for each command [here](http://librmpd.rubyforge.org/docs)
 
 ## Callbacks ##
 
@@ -75,7 +75,7 @@ Ok, so the first three are all you really need. Lets look at step one: Setup a m
       ...
     end
 
-That's it. As long as your defined method matches what the callback's requirements are, you're good to go. You can see the requirements for each callback under the CONSTANTS section [here](http://docs.nymb.us/librmpd/doc/classes/MPD.html)
+That's it. As long as your defined method matches what the callback's requirements are, you're good to go. You can see the requirements for each callback under the CONSTANTS section [here](http://librmpd.rubyforge.org/docs/classes/MPD.html)
 
 In step two, you have to actually inform librmpd about the callback, and which callback it belongs to. This is done by the `register_callback` method. `register_callback` takes two arguments, first, the Method object of the callback method, and second, the type of callback to register this method as. Sound complicated? its not. Using the above example callback, here's how we'd tell librmpd about it:
 
