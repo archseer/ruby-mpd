@@ -8,14 +8,58 @@
 # distribute your unit tests (you do have unit tests, yes?) along
 # with a test database (a YAML file), and anyone can check that
 # your client is in working order.
+#
+#== Usage
+#
+# The MPD Server is a subclass of GServer, so you have a lot of
+# flexibility at your disposal. The constructor of the server object
+# takes the port, an optional YAML database file, and any args for GServer.
+#
+# The YAML database file can be one of your own creation, or you can use
+# one supplied by librmpd (default)
+#
+# Example:
+#
+#  require 'rubygems'
+#  require 'librmpd'
+#  require 'mpdserver'
+#  server = MPDTesetServer.new 7700
+#  server.start
+#
+# You can then enable auditing to see what commands are run by a client:
+#
+#  server.audit = true
+#
+# This will print any commands from a client to stdout
+#
+#=== Unit Testing
+#
+# For unit testing a client using the test server, I recommend using the
+# set up and tear down methods to initialize and destroy a test server.
+#
+#  def setup
+#   @server = MPDTestServer.new 7700
+#   @server.start
+#  end
+#
+#  def teardown
+#   @server.stop
+#  end
+#
+# This will ensure you are using a clean server instance for each test.
 
 require 'gserver'
 require 'yaml'
 
 class MPDTestServer < GServer
 
-	def initialize( port, db_file = 'database.yaml', *args )
+	def initialize( port, db_file = nil, *args )
 		super port, *args
+
+		if db_file.nil?
+			db_file = __FILE__.gsub(/\/[^\/]*$/, '') + '/../data/database.yaml'
+		end
+
 		@status = {
 			:volume => 0,
 			:repeat => 0,
