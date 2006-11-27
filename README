@@ -26,9 +26,10 @@ such as `artists` to get all artists and `songs` to get all songs.
 All functionality is contained in the MPD class. Creating an instance of this
 class is as simple as
 
-    require 'path/to/lib/librmpd.rb'
+    require 'rubygems'
+    require 'librmpd'
     
-    mpd = MPD.new
+    mpd = MPD.new 'localhost', 6600
 
 Once you have an instance of the MPD class, start by connecting to the server:
 
