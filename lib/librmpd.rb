@@ -24,6 +24,8 @@
 #
 # First create an MPD object
 #
+#  require 'rubygems'
+#  require 'librmpd'
 #  mpd = MPD.new
 #
 # and connect it to the server

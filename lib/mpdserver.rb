@@ -1,7 +1,7 @@
 #
 #== mpdserver.rb
 #
-# This is the test server for librmpd. It as a 'shallow' server,
+# This is the test server for librmpd. It is a 'shallow' server,
 # it implements only the client/server protocol in a highly
 # scriptable manner. This means you can set up your own simple
 # test music database for testing an mpd client. You can now
