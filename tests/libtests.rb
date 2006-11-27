@@ -4,9 +4,8 @@
 # This uses the included mpdserver.rb test server
 
 require 'rubygems'
-#require 'librmpd'
-load '../lib/librmpd.rb'
-load '../lib/mpdserver.rb'
+require 'librmpd'
+require 'mpdserver'
 require 'test/unit'
 
 class MPDTester < Test::Unit::TestCase
@@ -14,11 +13,11 @@ class MPDTester < Test::Unit::TestCase
 	def setup
 		begin
 			@port = 9393
-			@server = MPDTestServer.new @port, '../lib/database.yaml'
+			@server = MPDTestServer.new @port
 			@server.start
 		rescue Errno::EADDRINUSE
 			@port = 9494
-			@server = MPDTestServer.new @port, '../lib/database.yaml'
+			@server = MPDTestServer.new @port
 			@server.start
 		end
 		@mpd = MPD.new 'localhost', @port

@@ -3,23 +3,23 @@
 #
 # This tests the MPDTestServer class
 
-#require 'rubygems'
-#require 'librmpd'
-load '../lib/mpdserver.rb'
+require 'rubygems'
+require 'librmpd'
+require 'mpdserver'
 require 'test/unit'
 require 'socket'
 
-class MPDTester < Test::Unit::TestCase
+class MPDServerTester < Test::Unit::TestCase
 
 	def setup
 		begin
 			@port = 9393
-			@mpd = MPDTestServer.new @port, '../lib/database.yaml'
+			@mpd = MPDTestServer.new @port
 			@mpd.start
 			@sock = TCPSocket.new 'localhost', @port
 		rescue Errno::EADDRINUSE
 			@port = 9494
-			@mpd = MPDTestServer.new @port, '../lib/database.yaml'
+			@mpd = MPDTestServer.new @port
 			@mpd.start
 			@sock = TCPSocket.new 'localhost', @port
 		end
