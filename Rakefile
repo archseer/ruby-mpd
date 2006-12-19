@@ -5,7 +5,7 @@ require 'rake/gempackagetask'
 spec = Gem::Specification.new do |s|
 	s.platform	=	Gem::Platform::RUBY
 	s.name			=	"librmpd"
-	s.version		=	"0.1.0"
+	s.version		=	"0.1.1"
 	s.author		=	"Andrew Rader"
 	s.email			=	"bitwise_mcgee @nospam@ yahoo.com"
 	s.summary		=	"A library for the Music Player Daemon (MPD)"
