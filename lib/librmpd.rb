@@ -92,7 +92,8 @@ class MPD
 	# which may an empty string.
 	STATE_CALLBACK = 0
 
-  # CURRENT_SONG_CALLBACK: This is used to listen for changes in the current
+    # CURRENT_SONG_CALLBACK: This is used to listen for changes in the current
+    #
 	# song being played by the server.
 	#
 	# The callback will always be called with a single argument, an MPD::Song
@@ -180,66 +181,23 @@ class MPD
 	#== Song
 	#
 	# This class is a glorified Hash used to represent a song
-	# It provides several reader methods for accessing common tags of a song,
-	# If a tag doesn't have a reader method, just use the normal hash method of
-	# accessing it
+    # You can access the various fields of a song (such as title) by
+    # either the normal hash method (song['title']) or by using
+    # the field as a method name (song.title).
+    #
+    # If the field doesn't exist or isn't set, nil will be returned
 	#
 	class Song < Hash
-		def songid
-			self['id']
-		end
-
-		def pos
-			self['pos']
-		end
-
-		def artist
-			self['artist']
-		end
-
-		def album
-			self['album']
-		end
-
-		def title
-			self['title']
-		end
-
-		def track
-			self['track']
-		end
-
-		def name
-			self['name']
-		end
-
-		def genre
-			self['genre']
-		end
-
-		def date
-			self['date']
-		end
-
-		def composer
-			self['composer']
-		end
-
-		def performer
-			self['performer']
-		end
-
-		def comment
-			self['comment']
-		end
-
-		def disc
-			self['disc']
-		end
-
-		def file
-			self['file']
-		end
+        def method_missing(m, *a)
+            key = m.to_s
+            if key =~ /=$/
+                self[$`] = a[0]
+            elsif a.empty?
+                self[key]
+            else
+                raise NoMethodError, "#{m}"
+            end
+        end
 	end
 
 	# Initialize an MPD object with the specified hostname and port
@@ -267,6 +225,18 @@ class MPD
 		@callbacks[CONNECTION_CALLBACK] = []
 	end
 
+    # This will store the given method onto the given type's callback
+    # list. First you must get a reference to the method to call by
+    # the following:
+    #
+    #   callback_method = my_object.method 'method name'
+    #
+    # Then you can call register_callback:
+    #
+    #   mpd.register_callback( callback_method, MPD::STATE_CALLBACK )
+    #
+    # Now my_object's 'method name' method will be called whenever the
+    # state changes
 	def register_callback( method, type )
 		@callbacks[type].push method
 	end
@@ -496,8 +466,8 @@ class MPD
 	end
 
 	#
-	#	Read the crossfade between songs in seconds,
-	#	Raises a RuntimeError if the command failed
+	# Read the crossfade between songs in seconds,
+	# Raises a RuntimeError if the command failed
 	def crossfade
 		status = self.status
 		return if status.nil?
@@ -505,7 +475,7 @@ class MPD
 	end
 
 	#
-	# Read the current song in seconds
+	# Read the currently playing song
 	#
 	# Returns a Song object with the current song's data,
 	# Raises a RuntimeError if the command failed
