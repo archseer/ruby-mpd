@@ -33,7 +33,7 @@ else
 		mpd.connect
 		case ARGV[0]
 			when 'play'
-				mpd.play ARGV[1]
+				mpd.play ARGV[1].to_i - 1
 			when 'pause'
 				mpd.pause = !mpd.paused?
 			when 'stop'
