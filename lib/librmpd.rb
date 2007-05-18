@@ -986,6 +986,25 @@ class MPD
 	end
 
 	#
+    # Gives a list of all outputs
+    def outputs
+            build_outputs_list(send_command("outputs"))
+    end
+
+    #
+    # Enables output num
+    def enableoutput(num)
+            send_command("enableoutput #{num.to_s}")
+    end
+
+    #
+    # Disables output num
+    def disableoutput(num)
+            send_command("disableoutput #{num.to_s}")
+    end
+
+
+    #
 	# Private Method
 	#
 	# Used to send a command to the server. This synchronizes
@@ -1124,6 +1143,37 @@ class MPD
 	#
 	# Private Method
 	#
+    # This first creates an array of lines as returned from the server
+    # Then each entry is processed and added to an Hash
+    # Whenever a new 'outputid:' entry is found, the current Hash
+    # is added to an array, and a new one is created
+    #
+    # The end result is an Array of Hashes(containing the outputs)
+    def build_outputs_list( string )
+            return [] if string.nil? or !string.kind_of? String
+
+            list = []
+            output = {}
+            lines = string.split "\n"
+            lines.each do |line|
+                    key = line.gsub(/:.*/, '')
+                    line.gsub!(/\A[^:]*: /, '')
+
+                    if key == 'outputid' && !output['outputid'].nil?
+                            list << output
+                    end
+
+                    output[key.downcase] = line
+            end
+
+            list << output
+
+            return list
+    end
+
+    #
+    # Private Method
+    #
 	# This filters each line from the server to return
 	# only those matching the regexp. The regexp is removed
 	# from the line before it is added to an Array
@@ -1147,6 +1197,7 @@ class MPD
 	private :build_hash
 	private :build_song
 	private :build_songs_list
+    private :build_outputs_list
 	private :filter_response
 
 end
