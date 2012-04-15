@@ -177,6 +177,29 @@ class MPD
   # and a boolean false if it has been disconnected
   CONNECTION_CALLBACK = 12
 
+  MPD_IDLE_MASK_DATABASE = 0x1 # song database has been updated
+  MPD_IDLE_MASK_STORED_PLAYLIST = 0x2 # a stored playlist has been modified, created, deleted or renamed
+  MPD_IDLE_MASK_QUEUE = 0x4 # the queue has been modified 
+  MPD_IDLE_MASK_PLAYER = 0x8 # the player state has changed: play, stop, pause, seek, ...
+  MPD_IDLE_MASK_MIXER = 0x10 # the volume has been modified
+  MPD_IDLE_MASK_OUTPUT = 0x20 # an audio output device has been enabled or disabled 
+  MPD_IDLE_MASK_OPTIONS = 0x40 # options have changed: crossfade, random, repeat, ...
+  MPD_IDLE_MASK_UPDATE = 0x80 # a database update has started or finished.
+  MPD_IDLE_MASK_ALL = MPD_IDLE_MASK_DATABASE | MPD_IDLE_MASK_STORED_PLAYLIST |
+    MPD_IDLE_MASK_QUEUE | MPD_IDLE_MASK_PLAYER | MPD_IDLE_MASK_MIXER | MPD_IDLE_MASK_OUTPUT |
+    MPD_IDLE_MASK_OPTIONS | MPD_IDLE_MASK_UPDATE
+  idle_names = {
+      MPD_IDLE_MASK_DATABASE => "database", 
+      MPD_IDLE_MASK_STORED_PLAYLIST => "stored_playlist", 
+      MPD_IDLE_MASK_QUEUE => "playlist",
+      MPD_IDLE_MASK_PLAYER => "player",
+      MPD_IDLE_MASK_MIXER => "mixer",
+      MPD_IDLE_MASK_OUTPUT => "output",
+      MPD_IDLE_MASK_OPTIONS => "options",
+      MPD_IDLE_MASK_UPDATE => "update",
+      MPD_IDLE_MASK_ALL => nil
+  }
+
   #
   #== Song
   #
@@ -412,6 +435,22 @@ class MPD
 
     return ret
   end
+
+  def idle(mask = MPD_IDLE_MASK_ALL)
+      begin
+          if mask == MPD_IDLE_MASK_ALL
+              ret = send_command 'idle'
+          else
+              idle_name = idle_names[mask]
+              ret = send_command "idle #{idle_name}"
+          end
+      rescue
+          ret = nil
+      end
+
+     return ret
+  end 
+
 
   #
   # Disconnect from the server. This has no effect
