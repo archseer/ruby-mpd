@@ -188,16 +188,16 @@ class MPD
   MPD_IDLE_MASK_ALL = MPD_IDLE_MASK_DATABASE | MPD_IDLE_MASK_STORED_PLAYLIST |
     MPD_IDLE_MASK_QUEUE | MPD_IDLE_MASK_PLAYER | MPD_IDLE_MASK_MIXER | MPD_IDLE_MASK_OUTPUT |
     MPD_IDLE_MASK_OPTIONS | MPD_IDLE_MASK_UPDATE
-  idle_names = {
-      MPD_IDLE_MASK_DATABASE => "database", 
-      MPD_IDLE_MASK_STORED_PLAYLIST => "stored_playlist", 
-      MPD_IDLE_MASK_QUEUE => "playlist",
-      MPD_IDLE_MASK_PLAYER => "player",
-      MPD_IDLE_MASK_MIXER => "mixer",
-      MPD_IDLE_MASK_OUTPUT => "output",
-      MPD_IDLE_MASK_OPTIONS => "options",
-      MPD_IDLE_MASK_UPDATE => "update",
-      MPD_IDLE_MASK_ALL => nil
+
+  IDLE_NAMES = {
+    MPD_IDLE_MASK_DATABASE => "database", 
+    MPD_IDLE_MASK_STORED_PLAYLIST => "stored_playlist", 
+    MPD_IDLE_MASK_QUEUE => "playlist",
+    MPD_IDLE_MASK_PLAYER => "player",
+    MPD_IDLE_MASK_MIXER => "mixer",
+    MPD_IDLE_MASK_OUTPUT => "output",
+    MPD_IDLE_MASK_OPTIONS => "options",
+    MPD_IDLE_MASK_UPDATE => "update"
   }
 
   #
@@ -437,24 +437,24 @@ class MPD
   end
 
   def idle(mask = MPD_IDLE_MASK_ALL)
-      begin
-          if mask == MPD_IDLE_MASK_ALL
-              ret = send_command 'idle'
-          else
-              idle_masks = []
-              idle_names.keys.each do |idle_mask|
-                if (mask & idle_mask) == idle_mask
-                    idle_masks << idle_names[idle_mask] 
-                end 
-              end
-              idle_name = idle_masks.join(",")
-              ret = send_command "idle #{idle_name}"
+    begin
+      if mask == MPD_IDLE_MASK_ALL
+        ret = send_command 'idle'
+      else
+        idle_masks = []
+        IDLE_NAMES.keys.each do |idle_mask_key|
+          if (mask & idle_mask_key) == idle_mask_key
+            idle_masks << IDLE_NAMES[idle_mask_key]
           end
-      rescue
-          ret = nil
+        end
+        idle_name = idle_masks.join(",")
+        ret = send_command "idle #{idle_name}"
       end
+    rescue
+      ret = nil
+    end
 
-     return ret
+    return ret
   end 
 
 
