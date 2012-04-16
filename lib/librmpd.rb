@@ -441,7 +441,13 @@ class MPD
           if mask == MPD_IDLE_MASK_ALL
               ret = send_command 'idle'
           else
-              idle_name = idle_names[mask]
+              idle_masks = []
+              idle_names.keys.each do |idle_mask|
+                if (mask & idle_mask) == idle_mask
+                    idle_masks << idle_names[idle_mask] 
+                end 
+              end
+              idle_name = idle_masks.join(",")
               ret = send_command "idle #{idle_name}"
           end
       rescue
