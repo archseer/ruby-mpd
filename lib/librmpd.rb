@@ -1166,23 +1166,13 @@ class MPD
     return [] if string.nil? or !string.kind_of? String
 
     list = []
-    song = Song.new
+
     lines = string.split "\n"
     lines.each do |line|
-      key = line.gsub(/:.*/, '')
-      line.gsub!(/\A[^:]*: /, '')
-
-      if key == 'file' && !song.file.nil?
-        list << song
-        song = Song.new
-      end
-
-      song[key.downcase] = line
+      list << build_song(line)
     end
 
-    list << song
-
-    return list
+    return list.compact
   end
 
   #
