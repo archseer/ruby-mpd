@@ -1156,18 +1156,15 @@ class MPD
   #
   # Private Method
   #
-  # This first creates an array of lines as returned from the server
-  # Then each entry is processed and added to an MPD::Song
-  # Whenever a new 'file:' entry is found, the current MPD::Song
-  # is added to an array, and a new one is created
+  # Splits the string that the server retuned at lines starting 
+  # with 'file:', then uses the chunks to create MPD::Song objects.
   #
   # The end result is an Array of MPD::Songs
   def build_songs_list( string )
     return [] if string.nil? or !string.kind_of? String
-
     list = []
 
-    lines = string.split "\n"
+    lines = string.split(/\n(?=file)/)
     lines.each do |line|
       list << build_song(line)
     end

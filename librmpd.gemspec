@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   s.platform         = Gem::Platform::RUBY
   s.name             = "librmpd"
-  s.version          = "0.1.2"
+  s.version          = "0.1.3"
   s.authors           = ["Blaž Hrastnik", "Andrew Rader"]
   s.email             = ['speed.the.bboy@gmail.com']
   s.summary          = "Ruby library for mpd"
