@@ -1,98 +1,11 @@
-#
-#== librmpd.rb
-#
-# librmpd.rb is another Ruby MPD Library with a goal of greater
-# ease of use, more functionality, and thread safety
-#
-# Author:: Andrew Rader (bitwise_mcgee AT yahoo.com | http://nymb.us)
-# Copyright:: Copyright (c) 2006 Andrew Rader
-# License:: Distributed under the GNU GPL v2 (See COPYING file)
-#
-# This was written with MPD version 0.11.5 (http://www.musicpd.org)
-#
-# The main class is the MPD class. This provides the functionality for
-# talking to the server as well as setting up callbacks for when events
-# occur (such as song changes, state changes, etc). The use of callbacks
-# is optional, if they are used a seperate thread will continuously poll
-# the server on its status, when something is changed, your program will
-# be notified via any callbacks you have set. Most methods are the same
-# as specified in the MPD Server Protocol, however some have been modified
-# or renamed. Most notable is the list* and lsinfo functions have been
-# replace with more sane methods (such as `files` for all files)
-#
-#== Usage
-#
-# First create an MPD object
-#
-#  require 'rubygems'
-#  require 'librmpd'
-#
-#  mpd = MPD.new 'localhost', 6600
-#
-# and connect it to the server
-#
-#  mpd.connect
-#
-# You can now issue any of the commands. Each command is documented below.
-#
-#=== Callbacks
-#
-# Callbacks are a way to easily setup your client as event based, rather
-# than polling based. This means rather than having to check for changes
-# in the server, you setup a few methods that will be called when those
-# changes occur. For example, you could have a 'state_changed' method
-# that will be called whenever the server changes state. You could then
-# have this method change a label to reflect to the new state.
-#
-# To use callbacks in your program, first setup your callback methods. For
-# example, say you have the class MyClient. Simply define whatever
-# callbacks you want inside your class. See the documentation on the
-# callback type constants in the MPD class for details on how each callback
-# is called
-#
-# Once you have your callback methods defined, use the register_callback
-# methods to inform librmpd about them. You can have multiple callbacks
-# for each type of callback without problems. Simply use object.method('method_name')
-# to get a reference to a Method object. Pass this object to the
-# register_callback (along with the proper type value), and you're set.
-#       
-# An Example:
-#
-#   class MyClient
-#    ...
-#    def state_callback(newstate)
-#     puts "MPD Changed State: #{newstate}"
-#    end
-#    ...
-#   end
-#
-#   client = MyClient.new
-#   mpd = MPD.new
-#   mpd.register_callback(client.method('state_callback'), MPD::STATE_CALLBACK)
-#       
-#   # Connect and Enable Callbacks
-#   mpd.connect(true)
-#
-# In order for the callback to be used, you must enable callbacks when you
-# connect by passing true to the connect method. Now, whenever the state changes
-# on the server, myclientobj's state_callback method will be called (and passed
-# the new state as an argument)
+require_relative 'song'
+
+# TODO: add support for config (music_directory) - UNIX domain socket!
 
 class MPD
 
   require 'socket'
   require 'thread'
-
-  STATUS_KEYS = [
-    :volume, :repeat, :random, :single, :consume, 
-    :playlist, :playlistlength, :state, 
-    :song, :songid, :nextsong, :nextsongid, 
-    :time, :elapsed, :bitrate, :xfade, 
-    :audio
-  ]
-  STRING_KEYS = [:state]
-  BOOL_KEYS = [:repeat, :random, :single, :consume]
-  IGNORE_KEYS = [:song, :time, :audio]
 
   MPD_IDLE_MASK_DATABASE = 0x1 # song database has been updated
   MPD_IDLE_MASK_STORED_PLAYLIST = 0x2 # a stored playlist has been modified, created, deleted or renamed
@@ -116,37 +29,6 @@ class MPD
     MPD_IDLE_MASK_OPTIONS => "options",
     MPD_IDLE_MASK_UPDATE => "update"
   }
-
-  #
-  #== Song
-  #
-  # This class is a glorified Hash used to represent a song.
-  #
-  # If the field doesn't exist or isn't set, nil will be returned
-  #
-  class Song
-    def initialize(options)
-      @data = {}
-
-      @length = options.delete(:time).to_i
-      @data.merge! options
-    end
-
-    def time
-      return "#{(@length / 60)}:#{"%02d" % (@length % 60)}"
-    end
-
-    def method_missing(m, *a)
-      key = m #.to_s
-      if key =~ /=$/
-        @data[$`] = a[0]
-      elsif a.empty?
-        @data[key]
-      else
-        raise NoMethodError, "#{m}"
-      end
-    end
-  end
 
   # Initialize an MPD object with the specified hostname and port
   # When called without arguments, 'localhost' and 6600 are used
@@ -222,34 +104,21 @@ class MPD
             emit(:connection, connected)
           end
 
-          MPD::STATUS_KEYS.each do |key|
-            next if MPD::IGNORE_KEYS.include?(key)
-            emit(key, status[key]) if status[key] != old_status[key]
+          status.each do |key, val|
+            next if [:song, :time, :audio].include?(key)
+            emit(key, val) if val != old_status[key]
           end
 
           if old_status[:time] != status[:time]
-            if status[:time].nil? || status[:time].empty?
-              emit(:time, 0, 0)
-            else
-              args = status[:time].split(':').map(&:to_i)
-              #elapsed, total = args
-
-              emit(:time, *args)
-              # time emits elapsed, total
-            end
+            status[:time] = [0,0] if status[:time].nil?
+            emit(:time, *status[:time])  # elapsed, total
           end
 
           emit(:song, mpd.current_song) if status[:song] != old_status[:song]
 
           if status[:audio] != old_status[:audio]
-            if status[:audio].nil? || status[:audio].empty?
-              emit(:audio, 0, 0, 0)
-            else
-              args = status[:audio].split(':').map(&:to_i)
-
-              emit(:audio, *args)
-              # audio emits samp, bits, chans
-            end
+            status[:audio] = [0,0,0] if status[:audio].nil?
+            emit(:audio, *status[:audio]) # samp, bits, chans
           end
           
           old_status = status
@@ -276,14 +145,14 @@ class MPD
   def connected?
     return false if @socket.nil?
 
-    ret = send_command('ping') rescue false
+    ret = send_command(:ping) rescue false
     return ret
   end
 
   def idle(mask = MPD_IDLE_MASK_ALL)
     begin
       if mask == MPD_IDLE_MASK_ALL
-        ret = send_command 'idle'
+        ret = send_command :idle
       else
         idle_masks = []
         IDLE_NAMES.keys.each do |idle_mask_key|
@@ -319,7 +188,6 @@ class MPD
   # directory, it will be added recursively.
   #
   # Returns true if this was successful,
-  # Raises a RuntimeError if the command failed
   def add(path)
     send_command "add \"#{path}\""
   end
@@ -327,7 +195,6 @@ class MPD
   # Clears the current playlist
   #
   # Returns true if this was successful,
-  # Raises a RuntimeError if the command failed
   def clear
     send_command :clear
   end
@@ -336,29 +203,23 @@ class MPD
   # (This is also accomplished by any command that starts playback)
   #
   # Returns true if this was successful,
-  # Raises a RuntimeError if the command failed
   def clearerror
     send_command :clearerror
   end
 
   # Set the crossfade between songs in seconds
-  #
-  # Raises a RuntimeError if the command failed
   def crossfade=(seconds)
     send_command "crossfade #{seconds}"
   end
 
   # Read the crossfade between songs in seconds,
-  # Raises a RuntimeError if the command failed
   def crossfade
-    status = self.status
     return status[:xfade]
   end
 
   # Read the currently playing song
   #
   # Returns a Song object with the current song's data,
-  # Raises a RuntimeError if the command failed
   def current_song
     build_song(send_command(:currentsong))
   end
@@ -367,7 +228,6 @@ class MPD
   # is the song's position in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def delete(pos)
     send_command "delete #{pos}"
   end
@@ -375,7 +235,6 @@ class MPD
   # Delete the song with the songid from the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def deleteid(songid)
     send_command "deleteid #{songid}"
   end
@@ -385,7 +244,6 @@ class MPD
   # 'album', 'artist', or 'title'
   # 
   # This returns an Array of MPD::Songs,
-  # Raises a RuntimeError if the command failed
   def find(type, what)
     response = send_command "find \"#{type}\" \"#{what}\""
     build_songs_list response
@@ -394,7 +252,6 @@ class MPD
   # Kills MPD
   #
   # Returns true if successful.
-  # Raises a RuntimeError if the command failed
   def kill
     send_command :kill
   end
@@ -404,7 +261,6 @@ class MPD
   # artist to list the albums for
   #
   # Returns an Array of Album names (Strings),
-  # Raises a RuntimeError if the command failed
   def albums(artist = nil)
     list :album, artist
   end
@@ -412,7 +268,6 @@ class MPD
   # Lists all of the artists in the database
   #
   # Returns an Array of Artist names (Strings),
-  # Raises a RuntimeError if the command failed
   def artists
     list :artist
   end
@@ -422,7 +277,6 @@ class MPD
   # then arg can be a specific artist to list the albums for
   #
   # Returns an Array of Strings,
-  # Raises a RuntimeError if the command failed
   def list(type, arg = nil)
     if not arg.nil?
       response = send_command "list #{type} \"#{arg}\""
@@ -446,7 +300,6 @@ class MPD
   # If path isn't specified, the root of the database is used
   #
   # Returns an Array of directory names (Strings),
-  # Raises a RuntimeError if the command failed
   def directories(path = nil)
     if not path.nil?
       response = send_command "listall \"#{path}\""
@@ -454,14 +307,13 @@ class MPD
       response = send_command :listall
     end
 
-    filter_response response, /\Adirectory: /i
+    filter_response response, :directory
   end
 
   # List all of the files in the database, starting at path.
   # If path isn't specified, the root of the database is used
   #
   # Returns an Array of file names (Strings).
-  # Raises a RuntimeError if the command failed
   def files(path = nil)
     if not path.nil?
       response = send_command "listall \"#{path}\""
@@ -469,7 +321,7 @@ class MPD
       response = send_command :listall
     end
 
-    filter_response response, /\Afile: /i
+    filter_response response, :file
   end
 
   # List all of the playlists in the database
@@ -478,14 +330,13 @@ class MPD
   def playlists
     response = send_command :lsinfo
 
-    filter_response response, /\Aplaylist: /i
+    filter_response response, :playlist
   end
 
   # List all of the songs in the database starting at path.
   # If path isn't specified, the root of the database is used
   #
   # Returns an Array of MPD::Songs,
-  # Raises a RuntimeError if the command failed
   def songs(path = nil)
     if not path.nil?
       response = send_command "listallinfo \"#{path}\""
@@ -499,7 +350,6 @@ class MPD
   # List all of the songs by an artist
   #
   # Returns an Array of MPD::Songs by the artist `artist`,
-  # Raises a RuntimeError if the command failed
   def songs_by_artist(artist)
     all_songs = self.songs
     artist_songs = []
@@ -517,7 +367,6 @@ class MPD
   # to what playlists are available
   # 
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def load(name)
     send_command "load \"#{name}\""
   end
@@ -525,7 +374,6 @@ class MPD
   # Move the song at `from` to `to` in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def move(from, to)
     send_command "move #{from} #{to}"
   end
@@ -533,7 +381,6 @@ class MPD
   # Move the song with the `songid` to `to` in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def moveid(songid, to)
     send_command "moveid #{songid} #{to}"
   end
@@ -541,7 +388,6 @@ class MPD
   # Plays the next song in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def next
     send_command :next
   end
@@ -549,22 +395,17 @@ class MPD
   # Set / Unset paused playback
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def pause=(toggle)
     send_command 'pause ' + (toggle ? '1' : '0')
   end
 
   # Returns true if MPD is paused,
-  # Raises a RuntimeError if the command failed
   def paused?
-    status = self.status
-    return status[:state] == 'pause'
+    return status[:state] == :pause
   end
 
   # This is used for authentication with the server
   # `pass` is simply the plaintext password
-  #
-  # Raises a RuntimeError if the command failed
   def password(pass)
     send_command "password \"#{pass}\""
   end
@@ -572,7 +413,6 @@ class MPD
   # Ping the server
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def ping
     send_command :ping
   end
@@ -581,7 +421,6 @@ class MPD
   # specify the pos to start on
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def play(pos = nil)
     if pos.nil?
       return send_command(:play)
@@ -590,18 +429,15 @@ class MPD
     end
   end
 
-  # Returns true if the server's state is set to 'play',
-  # Raises a RuntimeError if the command failed
+  # Returns true if MPD is playing.
   def playing?
-    state = self.status[:state]
-    return state == 'play'
+    return status[:state] == :play
   end
 
   # Begin playing the playlist. Optionally
   # specify the songid to start on
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def playid(songid = nil)
     if not songid.nil?
       return (send_command("playid #{songid}"))
@@ -611,29 +447,25 @@ class MPD
   end
 
   # Returns the current playlist version number,
-  # Raises a RuntimeError if the command failed
   def playlist_version
-    self.status[:playlist]
+    status[:playlist]
   end
 
   # List the current playlist
   # This is the same as playlistinfo w/o args
   #
   # Returns an Array of MPD::Songs,
-  # Raises a RuntimeError if the command failed
   def playlist
     response = send_command :playlistinfo
     build_songs_list response
   end
 
   # Returns the MPD::Song at the position `pos` in the playlist,
-  # Raises a RuntimeError if the command failed
   def song_at_pos(pos)
     build_song(send_command("playlistinfo #{pos}"))
   end
 
   # Returns the MPD::Song with the `songid` in the playlist,
-  # Raises a RuntimeError if the command failed
   def song_with_id(songid)
     build_song(send_command("playlistid #{songid}"))
   end
@@ -641,7 +473,6 @@ class MPD
   # List the changes since the specified version in the playlist
   #
   # Returns an Array of MPD::Songs,
-  # Raises a RuntimeError if the command failed
   def playlist_changes(version)
     response = send_command "plchanges #{version}"
     build_songs_list response
@@ -650,40 +481,34 @@ class MPD
   # Plays the previous song in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def previous
     send_command :previous
   end
 
   # Enable / Disable random playback,
-  # Raises a RuntimeError if the command failed
   def random=(toggle)
     send_command 'random ' + (toggle ? '1' : '0')
   end
 
   # Returns true if random playback is currently enabled,
-  # Raises a RuntimeError if the command failed
   def random?
-    return self.status[:random]
+    return status[:random]
   end
 
   # Enable / Disable repeat,
-  # Raises a RuntimeError if the command failed
   def repeat=(toggle)
     send_command 'repeat ' + (toggle ? '1' : '0')
   end
 
   # Returns true if repeat is enabled,
-  # Raises a RuntimeError if the command failed
   def repeat?
-    return self.status[:repeat]
+    return status[:repeat]
   end
 
   # Removes (PERMANENTLY!) the playlist `playlist.m3u` from
   # the playlist directory
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def rm(playlist)
     send_command "rm \"#{playlist}\""
   end
@@ -697,7 +522,6 @@ class MPD
   # playlist directory
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def save(playlist)
     send_command "save \"#{playlist}\""
   end
@@ -707,7 +531,6 @@ class MPD
   # Searches are NOT case sensitive
   #
   # Returns an Array of MPD::Songs,
-  # Raises a RuntimeError if the command failed
   def search(type, what)
     build_songs_list(send_command("search #{type} \"#{what}\""))
   end
@@ -716,7 +539,6 @@ class MPD
   # song at `pos` in the playlist
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def seek(pos, time)
     send_command "seek #{pos} #{time}"
   end
@@ -725,74 +547,48 @@ class MPD
   # the id `songid`
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def seekid(songid, time)
     send_command "seekid #{songid} #{time}"
   end
 
   # Set the volume
   # The argument `vol` will automatically be bounded to 0 - 100
-  #
-  # Raises a RuntimeError if the command failed
   def volume=(vol)
     send_command "setvol #{vol}"
   end
 
   # Returns the volume,
-  # Raises a RuntimeError if the command failed
   def volume
-    status = self.status
     return status[:volume]
   end
 
   # Shuffles the playlist,
-  # Raises a RuntimeError if the command failed
   def shuffle
     send_command :shuffle
   end
 
   # Returns a Hash of MPD's stats,
-  # Raises a RuntimeError if the command failed
   def stats
     response = send_command :stats
     build_hash response
   end
 
   # Returns a Hash of the current status,
-  # Raises a RuntimeError if the command failed
   def status
-    response = build_hash(send_command :status)
-
-    response.each do |key, val|
-      next if IGNORE_KEYS.include? key
-
-      # parse keys
-      if STRING_KEYS.include? key
-        # skip
-      elsif BOOL_KEYS.include? key
-        response[key] = !val.to_i.zero?
-      else
-        response[key] = val.to_i
-      end
-    end
-
-    return response
+    response = send_command :status
+    return build_hash response
   end
 
   # Stop playing
   #
   # Returns true if successful,
-  # Raises a RuntimeError if the command failed
   def stop
     send_command :stop
   end
 
   # Returns true if the server's state is 'stop',
-  # Raises a RuntimeError if the command failed
   def stopped?
-    status = self.status
-    return false if status.nil?
-    return status[:state] == 'stop'
+    return status[:state] == :stop
   end
 
   # Swaps the song at position `posA` with the song
@@ -815,20 +611,22 @@ class MPD
 
   # Tell the server to update the database. Optionally,
   # specify the path to update
+  #
+  # Returns the update job id.
   def update(path = nil)
     ret = ''
     if not path.nil?
       ret = send_command("update \"#{path}\"")
     else
-      ret = send_command('update')
+      ret = send_command(:update)
     end
-
-    return(ret.gsub('updating_db: ', '').to_i)
+    ret = build_hash(ret)
+    return ret[:updating_db]
   end
 
   # Gives a list of all outputs
   def outputs
-    build_outputs_list(send_command("outputs"))
+    build_outputs_list(send_command(:outputs))
   end
 
   # Enables output num
@@ -907,9 +705,8 @@ class MPD
   # Private Method
   #
   # This builds a hash out of lines returned from the server.
-  # First the response is turned into an array of lines
-  # then each entry is parsed so that the line is viewed as
-  # "key: value"
+  # It detects the key types and converts them into the correct
+  # class.
   #
   # The end result is a hash containing the proper key/value pairs
   def build_hash(string)
@@ -917,10 +714,49 @@ class MPD
 
     hash = {}
     string.split("\n").each do |line|
-      hash[line.gsub(/:.*/, '').downcase.to_sym] = line.gsub(/\A[^:]*: /, '')
+      key, value = line.split(': ', 2)
+      key = key.downcase.to_sym
+      value = parse_key(key, value.chomp)
+
+      hash[key] = value
     end
 
     return hash
+  end
+
+  INT_KEYS = [
+    :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
+    :playlistlength, :xfade, :pos, :id, :date, :track, :disc, :outputid, :mixrampdelay,
+    :bitrate, :nextsong, :nextsongid, :songid, :playlist, :updating_db,
+    # musicbrainz
+    :musicbrainz_trackid, :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartistid
+  ]
+  SYM_KEYS = [:command, :state, :changed, :replay_gain_mode]
+  FLOAT_KEYS = [:mixrampdb, :elapsed]
+  BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
+
+  # parses keys into correct class
+  require 'time'
+  def parse_key key, value
+    if INT_KEYS.include? key
+      value.to_i
+    elsif FLOAT_KEYS.include? key
+      value == 'nan' ? Float::NAN : value.to_f
+    elsif BOOL_KEYS.include? key
+      value != '0'
+    elsif SYM_KEYS.include? key
+      value.to_sym
+    elsif key == :db_update
+      Time.at(value.to_i)
+    elsif key == :"last-modified"
+      Time.iso8601(value)
+    elsif key == :time
+      value.split(':').map(&:to_i)
+    elsif key == :audio
+      value.split(':').map(&:to_i)
+    else
+      value.force_encoding('UTF-8')
+    end
   end
 
   # Private Method
@@ -928,7 +764,7 @@ class MPD
   # This is similar to build_hash, but instead of building a Hash,
   # a MPD::Song is built.
   def build_song(string)
-    return nil if string.nil?
+    return nil if string.nil? || !string.is_a?(String)
 
     options = build_hash(string)
     return Song.new(options)
@@ -941,10 +777,10 @@ class MPD
   #
   # The end result is an Array of MPD::Songs
   def build_songs_list(string)
-    return [] if string.nil?
+    return [] if string.nil? || !string.is_a?(String)
 
-    lines = string.split(/\n(?=file)/)
-    list = lines.inject([]) do |result, chunk|
+    chunks = string.split(/\n(?=file)/)
+    list = chunks.inject([]) do |result, chunk|
       result << build_song(chunk)
     end
 
@@ -960,23 +796,12 @@ class MPD
   #
   # The end result is an Array of Hashes(containing the outputs)
   def build_outputs_list(string)
-    return [] if string.nil?
+    return [] if string.nil? || !string.is_a?(String)
 
-    list = []
-    output = {}
-    lines = string.split "\n"
-    lines.each do |line|
-      key = line.gsub(/:.*/, '')
-      line.gsub!(/\A[^:]*: /, '')
-
-      if key == 'outputid' && !output['outputid'].nil?
-        list << output
-      end
-
-      output[key.downcase] = line
+    chunks = string.split(/\n(?=outputid)/)
+    list = chunks.inject([]) do |result, chunk|
+      result << build_hash(chunk)
     end
-
-    list << output
 
     return list
   end
@@ -989,10 +814,10 @@ class MPD
   #
   # This is used in the `directories`, `files`, etc methods
   # to return only the directory/file names
-  def filter_response(string, regexp)
+  def filter_response(string, filter)
+    regexp = Regexp.new("\A#{filter}: ", Regexp::IGNORECASE)
     list = []
-    lines = string.split "\n"
-    lines.each do |line|
+    string.split("\n").each do |line|
       if line =~ regexp
         list << line.gsub(regexp, '')
       end
@@ -1004,6 +829,7 @@ class MPD
   private :send_command
   private :handle_server_response
   private :build_hash
+  private :parse_key
   private :build_song
   private :build_songs_list
   private :build_outputs_list

@@ -1,0 +1,79 @@
+#
+#== librmpd.rb
+#
+# librmpd.rb is another Ruby MPD Library with a goal of greater
+# ease of use, more functionality, and thread safety
+#
+# Author:: Andrew Rader (bitwise_mcgee AT yahoo.com | http://nymb.us)
+# Copyright:: Copyright (c) 2006 Andrew Rader
+# License:: Distributed under the GNU GPL v2 (See COPYING file)
+#
+# This was written with MPD version 0.11.5 (http://www.musicpd.org)
+#
+# The main class is the MPD class. This provides the functionality for
+# talking to the server as well as setting up callbacks for when events
+# occur (such as song changes, state changes, etc). The use of callbacks
+# is optional, if they are used a seperate thread will continuously poll
+# the server on its status, when something is changed, your program will
+# be notified via any callbacks you have set. Most methods are the same
+# as specified in the MPD Server Protocol, however some have been modified
+# or renamed. Most notable is the list* and lsinfo functions have been
+# replace with more sane methods (such as `files` for all files)
+#
+#== Usage
+#
+# First create an MPD object
+#
+#  require 'rubygems'
+#  require 'librmpd'
+#
+#  mpd = MPD.new 'localhost', 6600
+#
+# and connect it to the server
+#
+#  mpd.connect
+#
+# You can now issue any of the commands. Each command is documented below.
+#
+#=== Callbacks
+#
+# Callbacks are a way to easily setup your client as event based, rather
+# than polling based. This means rather than having to check for changes
+# in the server, you setup a few methods that will be called when those
+# changes occur. For example, you could have a 'state_changed' method
+# that will be called whenever the server changes state. You could then
+# have this method change a label to reflect to the new state.
+#
+# To use callbacks in your program, first setup your callback methods. For
+# example, say you have the class MyClient. Simply define whatever
+# callbacks you want inside your class. See the documentation on the
+# callback type constants in the MPD class for details on how each callback
+# is called
+#
+# Once you have your callback methods defined, use the register_callback
+# methods to inform librmpd about them. You can have multiple callbacks
+# for each type of callback without problems. Simply use object.method('method_name')
+# to get a reference to a Method object. Pass this object to the
+# register_callback (along with the proper type value), and you're set.
+#       
+# An Example:
+#
+#   class MyClient
+#    ...
+#    def state_callback(newstate)
+#     puts "MPD Changed State: #{newstate}"
+#    end
+#    ...
+#   end
+#
+#   client = MyClient.new
+#   mpd = MPD.new
+#   mpd.register_callback(client.method('state_callback'), MPD::STATE_CALLBACK)
+#       
+#   # Connect and Enable Callbacks
+#   mpd.connect(true)
+#
+# In order for the callback to be used, you must enable callbacks when you
+# connect by passing true to the connect method. Now, whenever the state changes
+# on the server, myclientobj's state_callback method will be called (and passed
+# the new state as an argument)
