@@ -472,14 +472,14 @@ class MPD
 
   # Returns the MPD::Song with the `songid` in the playlist,
   def song_with_id(songid)
-    build_song(send_command(:playlistid songid))
+    build_song(send_command(:playlistid, songid))
   end
 
   # List the changes since the specified version in the playlist
   #
   # Returns an Array of MPD::Songs,
   def playlist_changes(version)
-    response = send_command :plchanges, version
+    response = send_command(:plchanges, version)
     build_songs_list response
   end
 
@@ -557,7 +557,7 @@ class MPD
   #
   # Returns true if successful,
   def seek(pos, time)
-    send_command :seek, pos time
+    send_command :seek, pos, time
   end
 
   # Seeks to the position `time` (in seconds) of the song with
@@ -623,7 +623,7 @@ class MPD
   # Returns true if successful,
   # Raises a RuntimeError if the command failed
   def swapid(songidA, songidB)
-    send_command :swapid, songidA}, songidB
+    send_command :swapid, songidA, songidB
   end
 
   # Tell the server to update the database. Optionally,
