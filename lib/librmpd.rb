@@ -42,21 +42,22 @@ class MPD
     @callbacks = {}
   end
 
-  # This will store the given method onto the given type's callback
-  # list. First you must get a reference to the method to call by
-  # the following:
+  # This will register a block callback that will trigger whenever
+  # that  specific event happens.
   #
-  #   callback_method = my_object.method 'method name'
+  #   mpd.on :volume do |volume|
+  #     puts "Volume was set to #{volume}"!
+  #   end
   #
-  # Then you can call register_callback:
+  # You can also define separate methods or Procs and whatnot,
+  # just pass them in as a parameter.
   #
-  #   mpd.register_callback(event, callback_method)
+  #  method = Proc.new {|volume| puts "Volume was set to #{volume}"! }
+  #  mpd.on :volume, &method
   #
-  # Now my_object's 'method name' method will be called whenever the
-  # state changes
-  def register_callback(event, method)
+  def on(event, &block)
     @callbacks[event] ||= []
-    @callbacks[event].push method
+    @callbacks[event].push block
   end
 
   # Trigger a callback
@@ -86,8 +87,8 @@ class MPD
       raise 'MPD Error: Already Connected'
     end
 
-    @socket = TCPSocket::new @hostname, @port
-    ret = @socket.gets # Read the version
+    @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
+    ret = @socket.gets.chomp # Read the version
 
     if callbacks and (@cb_thread.nil? or !@cb_thread.alive?)
       @stop_cb_thread = false
@@ -104,21 +105,15 @@ class MPD
             emit(:connection, connected)
           end
 
+          status[:time] = [nil, nil] if status[:time].nil? # elapsed, total
+          status[:audio] = [nil, nil, nil] if status[:audio].nil? # samp, bits, chans
+          
           status.each do |key, val|
-            next if [:song, :time, :audio].include?(key)
-            emit(key, val) if val != old_status[key]
-          end
-
-          if old_status[:time] != status[:time]
-            status[:time] = [0,0] if status[:time].nil?
-            emit(:time, *status[:time])  # elapsed, total
-          end
-
-          emit(:song, mpd.current_song) if status[:song] != old_status[:song]
-
-          if status[:audio] != old_status[:audio]
-            status[:audio] = [0,0,0] if status[:audio].nil?
-            emit(:audio, *status[:audio]) # samp, bits, chans
+            if key == :song
+              emit(:song, mpd.current_song) if status[:song] != old_status[:song]
+            else # convert arrays to splat arguments
+              val.is_a?(Array) ? emit(key, *val) : emit(key, val) if val != old_status[key]
+            end
           end
           
           old_status = status
@@ -626,17 +621,17 @@ class MPD
 
   # Gives a list of all outputs
   def outputs
-    build_outputs_list(send_command(:outputs))
+    build_list(send_command :outputs)
   end
 
   # Enables output num
   def enableoutput(num)
-    send_command("enableoutput #{num.to_s}")
+    send_command("enableoutput #{num}")
   end
 
   # Disables output num
   def disableoutput(num)
-    send_command("disableoutput #{num.to_s}")
+    send_command("disableoutput #{num}")
   end
 
 
@@ -682,19 +677,17 @@ class MPD
     while reading
       line = @socket.gets
       case line
-      when "OK\n"
+      when "OK\n", nil
         reading = false
       when /^ACK/
         error = line
-        reading = false
-      when nil
         reading = false
       else
         msg += line
       end
     end
 
-    if error.nil?
+    if !error
       return true if msg.empty?
       return msg
     else
@@ -759,6 +752,16 @@ class MPD
     end
   end
 
+  # Make chunks from string.
+  def make_chunks(string)
+    first_key = string.match(/\A(.+?): /)[1]
+
+    chunks = string.split(/\n(?=#{first_key})/)
+    list = chunks.inject([]) do |result, chunk|
+      result << chunk
+    end
+  end
+
   # Private Method
   #
   # This is similar to build_hash, but instead of building a Hash,
@@ -779,7 +782,7 @@ class MPD
   def build_songs_list(string)
     return [] if string.nil? || !string.is_a?(String)
 
-    chunks = string.split(/\n(?=file)/)
+    chunks = make_chunks(string)
     list = chunks.inject([]) do |result, chunk|
       result << build_song(chunk)
     end
@@ -795,10 +798,10 @@ class MPD
   # is added to an array, and a new one is created
   #
   # The end result is an Array of Hashes(containing the outputs)
-  def build_outputs_list(string)
+  def build_list(string)
     return [] if string.nil? || !string.is_a?(String)
 
-    chunks = string.split(/\n(?=outputid)/)
+    chunks = make_chunks(string)
     list = chunks.inject([]) do |result, chunk|
       result << build_hash(chunk)
     end
@@ -832,7 +835,7 @@ class MPD
   private :parse_key
   private :build_song
   private :build_songs_list
-  private :build_outputs_list
+  private :build_list
   private :filter_response
 
 end

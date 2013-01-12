@@ -14,6 +14,11 @@ class MPD::Song
     @data.merge! options
   end
 
+  # Two songs are the same when they are the same file.
+  def ==(another)
+    self.file == another.file
+  end
+
   def time
     return "#{(@length / 60)}:#{"%02d" % (@length % 60)}"
   end
