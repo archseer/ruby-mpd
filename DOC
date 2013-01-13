@@ -24,7 +24,6 @@
 #
 # First create an MPD object
 #
-#  require 'rubygems'
 #  require 'librmpd'
 #
 #  mpd = MPD.new 'localhost', 6600

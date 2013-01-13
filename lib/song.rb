@@ -1,11 +1,8 @@
-#
-#== Song
-#
+class MPD; end
+
 # This class is a glorified Hash used to represent a song.
 #
 # If the field doesn't exist or isn't set, nil will be returned
-class MPD; end
-
 class MPD::Song
   def initialize(options)
     @data = {}
