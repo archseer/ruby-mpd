@@ -6,8 +6,6 @@ class MPD; end
 class MPD::Song
   def initialize(options)
     @data = {}
-
-    @length = options.delete(:time)
     @data.merge! options
   end
 
@@ -16,8 +14,8 @@ class MPD::Song
     self.file == another.file
   end
 
-  def time
-    return "#{(@length / 60)}:#{"%02d" % (@length % 60)}"
+  def length
+    return "#{(@data.time / 60)}:#{"%02d" % (@data.time % 60)}"
   end
 
   def method_missing(m, *a)

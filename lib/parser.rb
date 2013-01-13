@@ -5,8 +5,6 @@ class MPD
   module Parser
     private
 
-    # Private Method
-    #
     # Parses the command into MPD format.
     def convert_command(command, *args)
       args.map! do |word| 

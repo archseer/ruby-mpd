@@ -25,9 +25,12 @@ require_relative 'parser'
 #  - add range parameter to command "load"
 #  - new commands "searchadd", "searchaddpl"
 
+# @!macro [new] error_raise
+#   @raise (see #send_command)
 # @!macro [new] returnraise
 #   @return [Boolean] returns true if successful.
-#   @raise (see #send_command)
+#   @macro error_raise
+
 
 class MPD
 
@@ -39,8 +42,8 @@ class MPD
   # The version of the MPD protocol the server is using.
   attr_reader :version
  
-  # Initialize an MPD object with the specified hostname and port
-  # When called without arguments, 'localhost' and 6600 are used
+  # Initialize an MPD object with the specified hostname and port.
+  # When called without arguments, 'localhost' and 6600 are used.
   def initialize(hostname = 'localhost', port = 6600)
     @hostname = hostname
     @port = port
@@ -59,7 +62,7 @@ class MPD
   #     puts "Volume was set to #{volume}"!
   #   end
   #
-  # You can also define separate methods or Procs and whatnot,
+  # One can also define separate methods or Procs and whatnot,
   # just pass them in as a parameter.
   #
   #  method = Proc.new {|volume| puts "Volume was set to #{volume}"! }
@@ -89,9 +92,8 @@ class MPD
   # a seperate polling thread, which will also automatically reconnect if disconnected 
   # for whatever reason.
   #
-  # connect will return true if successful, otherwise an error will be raised
-  #
-  # @raise [RuntimeError] If connect is called on an already connected instance.
+  # @return [true] Successfully connected.
+  # @raise [MPDError] If connect is called on an already connected instance.
   def connect(callbacks = false)
     raise MPDError, 'Already Connected!' if self.connected?
 
@@ -142,7 +144,7 @@ class MPD
 
   # Check if the client is connected
   #
-  # @return [Boolean] True only if the server responds otherwise false
+  # @return [Boolean] True only if the server responds otherwise false.
   def connected?
     return false if !@socket
 
@@ -150,9 +152,8 @@ class MPD
     return ret
   end
 
-  # Disconnect from the server. This has no effect
-  # if the client is not connected. Reconnect using
-  # the connect method. This will also stop the
+  # Disconnect from the server. This has no effect if the client is not
+  # connected. Reconnect using the {#connect} method. This will also stop the
   # callback thread, thus disabling callbacks
   def disconnect
     @stop_cb_thread = true
@@ -198,21 +199,21 @@ class MPD
     send_command :config
   end
 
-  # Add the file _path_ to the playlist. If path is a
-  # directory, it will be added recursively.
+  # Add the file _path_ to the playlist. If path is a directory, 
+  # it will be added recursively.
   # @macro returnraise
   def add(path)
     send_command :add, path
   end
 
-  # Clears the current playlist
+  # Clears the current playlist.
   # @macro returnraise
   def clear
     send_command :clear
   end
 
   # Clears the current error message reported in status
-  # (also accomplished by any command that starts playback)
+  # (also accomplished by any command that starts playback).
   #
   # @macro returnraise
   def clearerror
@@ -428,13 +429,13 @@ class MPD
     Song.new send_command(:playlistid, songid)
   end
 
-  # List the changes since the specified version in the playlist
+  # List the changes since the specified version in the playlist.
   # @return [Array<MPD::Song>]
   def playlist_changes(version)
     build_songs_list send_command(:plchanges, version)
   end
 
-  # Plays the previous song in the playlist
+  # Plays the previous song in the playlist.
   # @macro returnraise
   def previous
     send_command :previous
@@ -500,7 +501,7 @@ class MPD
   alias :remove_playlist :rm
 
   # Saves the current playlist to `playlist`.m3u in the
-  # playlist directory
+  # playlist directory.
   # @macro returnraise
   def save(playlist)
     send_command :save, playlist
@@ -509,7 +510,7 @@ class MPD
   # Searches for any song that contains `what` in the `type` field
   # `type` can be 'title', 'artist', 'album' or 'filename'
   # `type`can also be 'any'
-  # Searches are NOT case sensitive.
+  # Searches are *NOT* case sensitive.
   #
   # @return [Array<MPD::Song>] Songs that matched.
   def search(type, what)
@@ -534,8 +535,8 @@ class MPD
     send_command :seek, pos, time
   end
 
-  # Seeks to the position `time` (in seconds) of the song with
-  # the id `songid`.
+  # Seeks to the position +time+ (in seconds) of the song with
+  # the id of +songid+.
   # @macro returnraise
   def seekid(songid, time)
     send_command :seekid, songid, time
@@ -570,7 +571,7 @@ class MPD
     send_command :status
   end
 
-  # Stop playing
+  # Stop playing music.
   # @macro returnraise
   def stop
     send_command :stop
@@ -596,7 +597,7 @@ class MPD
   end
 
   # Tell the server to update the database. Optionally,
-  # specify the path to update
+  # specify the path to update.
   #
   # @return [Integer] Update job ID
   def update(path = nil)
@@ -644,7 +645,7 @@ class MPD
     end
   end
 
-  # Handles the server's response (called inside send_command).
+  # Handles the server's response (called inside {#send_command}).
   # Repeatedly reads the server's response from the socket and
   # processes the output.
   #
@@ -683,8 +684,9 @@ class MPD
   # only those matching the regexp. The regexp is removed
   # from the line before it is added to an Array
   #
-  # This is used in the `directories`, `files`, etc methods
+  # This is used in the `directories` and `files` methods
   # to return only the directory/file names
+  # @note Broken.
   def filter_response(string, filter)
     regexp = Regexp.new("\A#{filter}: ", Regexp::IGNORECASE)
     list = []
