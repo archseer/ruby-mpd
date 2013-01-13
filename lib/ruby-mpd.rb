@@ -213,7 +213,7 @@ class MPD
   end
 
   # Add the file _path_ to the playlist. If path is a directory, 
-  # it will be added recursively.
+  # it will be added *recursively*.
   # @macro returnraise
   def add(path)
     send_command :add, path
@@ -562,7 +562,7 @@ class MPD
     send_command :seekid, songid, time
   end
 
-  # Sets the volume level.
+  # Sets the volume level. (Maps to MPD's +setvol+)
   # @param [Integer] vol Volume level between 0 and 100.
   # @macro returnraise
   def volume=(vol)
@@ -603,14 +603,14 @@ class MPD
   end
 
   # Swaps the song at position `posA` with the song
-  # as position `posB` in the playlist
+  # as position `posB` in the playlist.
   # @macro returnraise
   def swap(posA, posB)
     send_command :swap, posA, posB
   end
 
-  # Swaps the song with the id `songidA` with the song
-  # with the id `songidB`
+  # Swaps the positions of the song with the id `songidA`
+  # with the song with the id `songidB`.
   # @macro returnraise
   def swapid(songidA, songidB)
     send_command :swapid, songidA, songidB
