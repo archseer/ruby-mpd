@@ -14,7 +14,7 @@ class MPD
           if word.end == -1 #negative means to end of range
             "#{word.begin}:"
           else
-            "#{argument.begin}:#{argument.end + (argument.exclude_end? ? 0 : 1)}"
+            "#{word.begin}:#{word.end + (word.exclude_end? ? 0 : 1)}"
           end
         else
           # escape any strings with space (wrap in double quotes)

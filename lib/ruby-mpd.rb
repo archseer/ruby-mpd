@@ -4,25 +4,36 @@ require 'thread'
 require_relative 'song'
 require_relative 'parser'
 
+# todo: get idle to work
+#
+# todo: command list as a do block
+# mpd.command_list do
+#   volume 10
+#   play xyz
+# end
+
+
+# error codes in ack.h
+# valid tags in tag.h
+# tags = {:artist, :artistsort, :album, :albumartist, :albumartistsort,
+#  :title, :track, :name, :genre, :date, :composer, :performer, :comment, :disk,
+#  :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartist_id, :musicbrainz_trackid
+# }
+
 # TODO:
-# 0.14
+# 0.15 - added range support
 # * commands:
-#  - "addid" takes optional second argument to specify position
-# 0.15
-# * commands:
-#  - "playlistinfo" and "move" supports a range now
+#  - "playlistinfo" supports a range now
 #  - added "sticker database", command "sticker", which allows clients
 #     to implement features like "song rating"
 # * protocol:
 #  - added the "findadd" command
-#  - range support for "delete"
 #  - allow changing replay gain mode on-the-fly
 #  - omitting the range end is possible
 
 # ver 0.17 (2012/06/27)
 # * protocol:
 #  - support client-to-client communication
-#  - add range parameter to command "load"
 #  - new commands "searchadd", "searchaddpl"
 
 # @!macro [new] error_raise
@@ -134,7 +145,7 @@ class MPD
           if !connected
             sleep 2
             unless @stop_cb_thread
-              mpd.connect rescue
+              mpd.connect rescue nil
             end
           end
         end
@@ -240,8 +251,11 @@ class MPD
     Song.new send_command :currentsong
   end
 
-  # Delete the song from the playlist, where pos is the song's
-  # position in the playlist
+  # Deletes the song from the playlist.
+  #
+  # Since MPD 0.15 a range can also be passed.
+  # @param [Integer] pos Song with position in the playlist will be deleted.
+  # @param [Range] pos Songs with positions within range will be deleted.
   # @macro returnraise
   def delete(pos)
     send_command :delete, pos
@@ -338,13 +352,17 @@ class MPD
   # Loads the playlist name.m3u (do not pass the m3u extension
   # when calling) from the playlist directory. Use `playlists`
   # to what playlists are available
+  #
+  # Since 0.17, a range can be passed to load, to load only a
+  # part of the playlist.
   # 
   # @macro returnraise
-  def load(name)
-    send_command :load, name
+  def load(name, range=nil)
+    send_command :load, name, range
   end
 
   # Move the song at `from` to `to` in the playlist.
+  # Since 0.15, +from+ can be a range of songs to move.
   # @macro returnraise
   def move(from, to)
     send_command :move, from, to
