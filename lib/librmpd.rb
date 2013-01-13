@@ -587,7 +587,7 @@ class MPD
 
   # @return [Hash] Current MPD status.
   def status
-    response = send_command(:status)
+    response = send_command :status
     return build_hash response
   end
 
