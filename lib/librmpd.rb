@@ -318,10 +318,9 @@ class MPD
 
   # List all of the playlists in the database
   # 
-  # @return [Array<String>] Array of playlist names
+  # @return [Array<Hash>] Array of playlists
   def playlists
-    response = send_command :lsinfo
-    filter_response response, :playlist
+    send_command :listplaylists
   end
 
   # List all of the songs in the database starting at path.
@@ -615,8 +614,7 @@ class MPD
   #
   # @return [Integer] Update job ID
   def update(path = nil)
-    ret = send_command(:update, path)
-    return ret #ret[:updating_db]
+    send_command :update, path
   end
 
   # Gives a list of all outputs
@@ -720,16 +718,6 @@ class MPD
     end
   end
 
-  # Private Method
-  #
-  # Parses response line into an object.
-  def parse_line(string)
-    return nil if string.nil?
-    key, value = string.split(': ', 2)
-    key = key.downcase.to_sym
-    return parse_key(key, value.chomp)
-  end
-
 
   # Private Method
   #
@@ -764,6 +752,7 @@ class MPD
   # Private Method
   #
   # parses key-value pairs into correct class
+  # TODO: special parsing of playlist, it's a int in :status and a string in :listplaylists
   require 'time'
   def parse_key key, value
     if INT_KEYS.include? key
@@ -787,6 +776,25 @@ class MPD
 
   # Private Method
   #
+  # Parses response line into an object.
+  def parse_line(string)
+    return nil if string.nil?
+    key, value = string.split(': ', 2)
+    key = key.downcase.to_sym
+    return parse_key(key, value.chomp)
+  end
+
+
+  # Private Method
+  #
+  # Converts the response to MPD::Song objects.
+  # @return [Array<MPD::Song>] An array of songs.
+  def build_songs_list(array)
+    return array.map {|hash| Song.new(hash) }
+  end
+
+  # Private Method
+  #
   # Make chunks from string.
   def make_chunks(string)
     first_key = string.match(/\A(.+?): /)[1]
@@ -799,18 +807,11 @@ class MPD
 
   # Private Method
   #
-  # Uses the chunks to create MPD::Song objects.
-  # @return [Array<MPD::Song>] An array of songs.
-  def build_songs_list(array)
-    return array.map {|hash| Song.new(hash) }
-  end
-
-  # Private Method
-  #
   # Generates chunks from a lines string and then parses
   # the chunks into an array of hashes.
   #
   # The end result is an Array of Hashes(containing the outputs)
+  # TODO: fix parsing of :listall
   def build_response(string)
     return [] if string.nil? || !string.is_a?(String)
 
