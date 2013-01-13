@@ -1,4 +1,8 @@
+require 'socket'
+require 'thread'
+
 require_relative 'song'
+require_relative 'parser'
 
 # TODO:
 # 0.14
@@ -23,14 +27,14 @@ require_relative 'song'
 
 # @!macro [new] returnraise
 #   @return [Boolean] returns true if successful.
-#   @raise [RuntimeError] if the command failed.
+#   @raise (see #send_command)
 
 class MPD
 
-  require 'socket'
-  require 'thread'
-
+  # Standard MPD error.
   class MPDError < StandardError; end
+
+  include Parser
 
   # The version of the MPD protocol the server is using.
   attr_reader :version
@@ -146,6 +150,19 @@ class MPD
     return ret
   end
 
+  # Disconnect from the server. This has no effect
+  # if the client is not connected. Reconnect using
+  # the connect method. This will also stop the
+  # callback thread, thus disabling callbacks
+  def disconnect
+    @stop_cb_thread = true
+
+    return if @socket.nil?
+
+    @socket.puts 'close'
+    @socket.close
+    @socket = nil
+  end
 
   # Waits until there is a noteworthy change in one or more of MPD's subsystems. 
   # As soon as there is one, it lists all changed systems in a line in the format 
@@ -173,20 +190,6 @@ class MPD
   def idle(*masks)
     send_command(:idle, *masks)
   end 
-
-  # Disconnect from the server. This has no effect
-  # if the client is not connected. Reconnect using
-  # the connect method. This will also stop the
-  # callback thread, thus disabling callbacks
-  def disconnect
-    @stop_cb_thread = true
-
-    return if @socket.nil?
-
-    @socket.puts 'close'
-    @socket.close
-    @socket = nil
-  end
 
   # Returns the config of MPD (currently only music_directory).
   # Only works if connected trough an UNIX domain socket.
@@ -262,16 +265,16 @@ class MPD
     send_command :kill
   end
 
-  # Lists all of the albums in the database
-  # The optional argument is for specifying an
-  # artist to list the albums for
+  # Lists all of the albums in the database.
+  # The optional argument is for specifying an artist to list 
+  # the albums for
   #
   # @return [Array<String>] An array of album names.
   def albums(artist = nil)
     list :album, artist
   end
 
-  # Lists all of the artists in the database
+  # Lists all of the artists in the database.
   #
   # @return [Array<String>] An array of artist names.
   def artists
@@ -282,20 +285,11 @@ class MPD
   # type should be 'album' or 'artist'. If type is 'album'
   # then arg can be a specific artist to list the albums for
   #
+  # type can be any MPD type
+  #
   # @return [Array<String>]
   def list(type, arg = nil)
-    response = send_command :list, type, arg
-
-    list = []
-    if not response.nil? and response.kind_of? String
-      lines = response.split "\n"
-      re = Regexp.new "\\A#{type}: ", 'i'
-      for line in lines
-        list << line.gsub(re, '')
-      end
-    end
-
-    return list
+    send_command :list, type, arg
   end
 
   # List all of the directories in the database, starting at path.
@@ -312,7 +306,7 @@ class MPD
   #
   # @return [Array<String>] Array of file names
   def files(path = nil)
-    response = send_command :listall, path
+    response = send_command(:listall, path)
     filter_response response, :file
   end
 
@@ -335,15 +329,7 @@ class MPD
   #
   # @return [Array<MPD::Song>]
   def songs_by_artist(artist)
-    all_songs = self.songs
-    artist_songs = []
-    all_songs.each do |song|
-      if song.artist == artist
-        artist_songs << song
-      end
-    end
-
-    return artist_songs
+    find :artist, artist
   end
 
   # Loads the playlist name.m3u (do not pass the m3u extension
@@ -637,59 +623,34 @@ class MPD
     send_command :disableoutput, num
   end
 
-
   private # Private Methods below
 
-  # Private Method
-  #
   # Used to send a command to the server. This synchronizes
   # on a mutex to be thread safe
   #
-  # Returns the server response as processed by `handle_server_response`,
-  # Raises a RuntimeError if the command failed
+  # @return (see #handle_server_response)
+  # @raise [MPDError] if the command failed.
   def send_command(command, *args)
     raise MPDError, "Not Connected to the Server" if @socket.nil?
 
-    data = convert_command(command, *args)
-    ret = nil
-
     @mutex.synchronize do
       begin
-        @socket.puts data
-        ret = handle_server_response
+        @socket.puts convert_command(command, *args)
+        return handle_server_response
       rescue Errno::EPIPE
         @socket = nil
         raise MPDError, 'Broken Pipe (Disconnected)'
       end
     end
-
-    return ret
   end
 
-  # Private Method
+  # Handles the server's response (called inside send_command).
+  # Repeatedly reads the server's response from the socket and
+  # processes the output.
   #
-  # Parses the command into MPD format.
-  def convert_command(command, *args)
-    args.map! {|word| 
-      if word.is_a?(TrueClass) || word.is_a?(FalseClass) 
-        word ? '1' : '0' # convert bool to 1 or 0
-      else
-        word.to_s
-      end
-    }
-    # escape any strings with space (wrap in double quotes)
-    args.map! {|word| word.match(/\s/) ? %Q["#{word}"] : word }
-    return [command, args].join(' ').strip
-  end
-
-  # Private Method
-  #
-  # Handles the server's response (called inside send_command)
-  #
-  # This will repeatedly read the server's response from the socket
-  # and will process the output. If a string is returned by the server
-  # that is what is returned. If just an "OK" is returned, this returns
-  # true. If an "ACK" is returned, this raises an error
+  # @return (see Parser#build_response)
+  # @return [true] If "OK" is returned.
+  # @raise [MPDError] If an "ACK" is returned.
   def handle_server_response
     return if @socket.nil?
 
@@ -713,124 +674,11 @@ class MPD
       return true if msg.empty?
       return build_response(msg)
     else
-      err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.+)\} (?<message>.+)$/)
+      err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
       raise MPDError, "#{err[:code]}: #{err[:command]}: #{err[:message]}"
     end
   end
 
-
-  # Private Method
-  #
-  # This builds a hash out of lines returned from the server,
-  # elements parsed into the correct type.
-  #
-  # The end result is a hash containing the proper key/value pairs
-  def build_hash(string)
-    return {} if string.nil?
-
-    hash = {}
-    string.split("\n").each do |line|
-      key, value = line.split(': ', 2)
-      key = key.downcase.to_sym
-      hash[key] = parse_key(key, value.chomp)
-    end
-
-    return hash
-  end
-
-  INT_KEYS = [
-    :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
-    :playlistlength, :xfade, :pos, :id, :date, :track, :disc, :outputid, :mixrampdelay,
-    :bitrate, :nextsong, :nextsongid, :songid, :playlist, :updating_db,
-    # musicbrainz
-    :musicbrainz_trackid, :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartistid
-  ]
-  SYM_KEYS = [:command, :state, :changed, :replay_gain_mode]
-  FLOAT_KEYS = [:mixrampdb, :elapsed]
-  BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
-
-  # Private Method
-  #
-  # parses key-value pairs into correct class
-  # TODO: special parsing of playlist, it's a int in :status and a string in :listplaylists
-  require 'time'
-  def parse_key key, value
-    if INT_KEYS.include? key
-      value.to_i
-    elsif FLOAT_KEYS.include? key
-      value == 'nan' ? Float::NAN : value.to_f
-    elsif BOOL_KEYS.include? key
-      value != '0'
-    elsif SYM_KEYS.include? key
-      value.to_sym
-    elsif key == :db_update
-      Time.at(value.to_i)
-    elsif key == :"last-modified"
-      Time.iso8601(value)
-    elsif [:time, :audio].include? key
-      value.split(':').map(&:to_i)
-    else
-      value.force_encoding('UTF-8')
-    end
-  end
-
-  # Private Method
-  #
-  # Parses response line into an object.
-  def parse_line(string)
-    return nil if string.nil?
-    key, value = string.split(': ', 2)
-    key = key.downcase.to_sym
-    return parse_key(key, value.chomp)
-  end
-
-
-  # Private Method
-  #
-  # Converts the response to MPD::Song objects.
-  # @return [Array<MPD::Song>] An array of songs.
-  def build_songs_list(array)
-    return array.map {|hash| Song.new(hash) }
-  end
-
-  # Private Method
-  #
-  # Make chunks from string.
-  def make_chunks(string)
-    first_key = string.match(/\A(.+?): /)[1]
-
-    chunks = string.split(/\n(?=#{first_key})/)
-    list = chunks.inject([]) do |result, chunk|
-      result << chunk.strip
-    end
-  end
-
-  # Private Method
-  #
-  # Generates chunks from a lines string and then parses
-  # the chunks into an array of hashes.
-  #
-  # The end result is an Array of Hashes(containing the outputs)
-  # TODO: fix parsing of :listall
-  def build_response(string)
-    return [] if string.nil? || !string.is_a?(String)
-
-    chunks = make_chunks(string)
-    # if there are any new lines (more than one data piece), it's a hash, else an object.
-    is_hash = chunks.any? {|chunk| chunk.include? "\n"}
-
-    list = chunks.inject([]) do |result, chunk|
-      result << (is_hash ? build_hash(chunk) : parse_line(chunk))
-    end
-
-    # if list has only one element, return it, else return array
-    result = list.length == 1 ? list.first : list
-
-    return result
-  end
-
-  # Private Method
-  #
   # This filters each line from the server to return
   # only those matching the regexp. The regexp is removed
   # from the line before it is added to an Array
