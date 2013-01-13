@@ -231,7 +231,7 @@ class MPD
   #
   # @return [MPD::Song]
   def current_song
-    build_song(send_command :currentsong)
+    Song.new send_command :currentsong
   end
 
   # Delete the song from the playlist, where pos is the song's
@@ -253,8 +253,7 @@ class MPD
   # 
   # @return [Array<MPD::Song>] Songs that matched.
   def find(type, what)
-    response = send_command(:find, type, what)
-    build_songs_list response
+    build_songs_list send_command(:find, type, what)
   end
 
   # Kills the MPD process.
@@ -330,8 +329,7 @@ class MPD
   #
   # @return [Array<MPD::Song>]
   def songs(path = nil)
-    response = send_command :listallinfo, path
-    build_songs_list response
+    build_songs_list send_command(:listallinfo, path)
   end
 
   # List all of the songs by an artist
@@ -430,27 +428,25 @@ class MPD
   #
   # @return [Array<MPD::Song>] Array of songs in the playlist.
   def playlist
-    response = send_command :playlistinfo
-    build_songs_list response
+    build_songs_list send_command(:playlistinfo)
   end
 
   # Returns the song at the position +pos+ in the playlist,
   # @return [MPD::Song]
   def song_at_pos(pos)
-    build_song(send_command(:playlistinfo, pos))
+    Song.new send_command(:playlistinfo, pos)
   end
 
   # Returns the song with the +songid+ in the playlist,
   # @return [MPD::Song]
   def song_with_id(songid)
-    build_song(send_command(:playlistid, songid))
+    Song.new send_command(:playlistid, songid)
   end
 
   # List the changes since the specified version in the playlist
   # @return [Array<MPD::Song>]
   def playlist_changes(version)
-    response = send_command(:plchanges, version)
-    build_songs_list response
+    build_songs_list send_command(:plchanges, version)
   end
 
   # Plays the previous song in the playlist
@@ -581,14 +577,12 @@ class MPD
 
   # @return [Hash] MPD statistics.
   def stats
-    response = send_command :stats
-    build_hash response
+    send_command :stats
   end
 
   # @return [Hash] Current MPD status.
   def status
-    response = send_command :status
-    return build_hash response
+    send_command :status
   end
 
   # Stop playing
@@ -621,14 +615,14 @@ class MPD
   #
   # @return [Integer] Update job ID
   def update(path = nil)
-    ret = build_hash(send_command(:update, path))
-    return ret[:updating_db]
+    ret = send_command(:update, path)
+    return ret #ret[:updating_db]
   end
 
   # Gives a list of all outputs
   # @return [Array<Hash>] An array of outputs.
   def outputs
-    build_list(send_command :outputs)
+    send_command :outputs
   end
 
   # Enables specified output.
@@ -646,6 +640,8 @@ class MPD
   end
 
 
+  private # Private Methods below
+
   # Private Method
   #
   # Used to send a command to the server. This synchronizes
@@ -658,7 +654,7 @@ class MPD
 
     data = convert_command(command, *args)
     ret = nil
-    p data
+
     @mutex.synchronize do
       begin
         @socket.puts data
@@ -717,7 +713,7 @@ class MPD
 
     if !error
       return true if msg.empty?
-      return msg
+      return build_response(msg)
     else
       err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.+)\} (?<message>.+)$/)
       raise MPDError, "#{err[:code]}: #{err[:command]}: #{err[:message]}"
@@ -726,9 +722,19 @@ class MPD
 
   # Private Method
   #
-  # This builds a hash out of lines returned from the server.
-  # It detects the key types and converts them into the correct
-  # class.
+  # Parses response line into an object.
+  def parse_line(string)
+    return nil if string.nil?
+    key, value = string.split(': ', 2)
+    key = key.downcase.to_sym
+    return parse_key(key, value.chomp)
+  end
+
+
+  # Private Method
+  #
+  # This builds a hash out of lines returned from the server,
+  # elements parsed into the correct type.
   #
   # The end result is a hash containing the proper key/value pairs
   def build_hash(string)
@@ -738,9 +744,7 @@ class MPD
     string.split("\n").each do |line|
       key, value = line.split(': ', 2)
       key = key.downcase.to_sym
-      value = parse_key(key, value.chomp)
-
-      hash[key] = value
+      hash[key] = parse_key(key, value.chomp)
     end
 
     return hash
@@ -757,7 +761,9 @@ class MPD
   FLOAT_KEYS = [:mixrampdb, :elapsed]
   BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
-  # parses keys into correct class
+  # Private Method
+  #
+  # parses key-value pairs into correct class
   require 'time'
   def parse_key key, value
     if INT_KEYS.include? key
@@ -772,49 +778,31 @@ class MPD
       Time.at(value.to_i)
     elsif key == :"last-modified"
       Time.iso8601(value)
-    elsif key == :time
-      value.split(':').map(&:to_i)
-    elsif key == :audio
+    elsif [:time, :audio].include? key
       value.split(':').map(&:to_i)
     else
       value.force_encoding('UTF-8')
     end
   end
 
+  # Private Method
+  #
   # Make chunks from string.
   def make_chunks(string)
     first_key = string.match(/\A(.+?): /)[1]
 
     chunks = string.split(/\n(?=#{first_key})/)
     list = chunks.inject([]) do |result, chunk|
-      result << chunk
+      result << chunk.strip
     end
-  end
-
-  # Private Method
-  #
-  # This is similar to build_hash, but instead of building a Hash,
-  # a MPD::Song is built.
-  def build_song(string)
-    return nil if string.nil? || !string.is_a?(String)
-
-    options = build_hash(string)
-    return Song.new(options)
   end
 
   # Private Method
   #
   # Uses the chunks to create MPD::Song objects.
   # @return [Array<MPD::Song>] An array of songs.
-  def build_songs_list(string)
-    return [] if string.nil? || !string.is_a?(String)
-
-    chunks = make_chunks(string)
-    list = chunks.inject([]) do |result, chunk|
-      result << build_song(chunk)
-    end
-
-    return list.compact
+  def build_songs_list(array)
+    return array.map {|hash| Song.new(hash) }
   end
 
   # Private Method
@@ -823,15 +811,21 @@ class MPD
   # the chunks into an array of hashes.
   #
   # The end result is an Array of Hashes(containing the outputs)
-  def build_list(string)
+  def build_response(string)
     return [] if string.nil? || !string.is_a?(String)
 
     chunks = make_chunks(string)
+    # if there are any new lines (more than one data piece), it's a hash, else an object.
+    is_hash = chunks.any? {|chunk| chunk.include? "\n"}
+
     list = chunks.inject([]) do |result, chunk|
-      result << build_hash(chunk)
+      result << (is_hash ? build_hash(chunk) : parse_line(chunk))
     end
 
-    return list
+    # if list has only one element, return it, else return array
+    result = list.length == 1 ? list.first : list
+
+    return result
   end
 
   # Private Method
@@ -853,15 +847,5 @@ class MPD
 
     return list
   end
-
-  private :send_command
-  private :convert_command
-  private :handle_server_response
-  private :build_hash
-  private :parse_key
-  private :build_song
-  private :build_songs_list
-  private :build_list
-  private :filter_response
 
 end
