@@ -693,12 +693,14 @@ class MPDTestServer < GServer
               song = @the_playlist[args[0].to_i]
               send_song sock, song
               sock.puts "Pos: #{args[0].to_i}"
+              sock.puts "Id: #{song['id']}"
               return true
             end
           else
             @the_playlist.each_with_index do |song,i|
               send_song sock, song
               sock.puts "Pos: #{i}"
+              sock.puts "Id: #{song['id']}"
             end
             return true
           end

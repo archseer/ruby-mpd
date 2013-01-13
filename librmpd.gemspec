@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.platform         = Gem::Platform::RUBY
-  s.name             = "librmpd"
+  s.name             = "ruby-mpd"
   s.version          = "0.1.3"
-  s.authors           = ["Blaž Hrastnik", "Andrew Rader"]
+  s.authors           = ["Blaž Hrastnik"]
   s.email             = ['speed.the.bboy@gmail.com']
-  s.summary          = "Ruby library for mpd"
+  s.summary          = "Ruby client library for MPD"
   s.description      = "A simple yet powerful library for the Music Player Daemon, written in Ruby."
 
   s.has_rdoc         = true

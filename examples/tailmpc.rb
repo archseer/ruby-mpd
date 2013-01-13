@@ -7,9 +7,7 @@
 # Copyright 2006 Andrew Rader ( bitwise_mcgee AT yahoo.com | http://nymb.us )
 #
 
-require 'rubygems'
 require 'librmpd'
-require 'thread'
 
 class TailMPC
 

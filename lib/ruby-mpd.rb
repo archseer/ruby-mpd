@@ -109,6 +109,7 @@ class MPD
           status = mpd.status rescue {}
           c = mpd.connected?
 
+          # @todo Move into status?
           if connected != c
             connected = c
             emit(:connection, connected)
@@ -118,10 +119,12 @@ class MPD
           status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
 
           status.each do |key, val|
+            next if val == old_status[key] # skip unchanged keys
+
             if key == :song
-              emit(:song, mpd.current_song) if status[:song] != old_status[:song]
+              emit(:song, mpd.current_song)
             else # convert arrays to splat arguments
-              val.is_a?(Array) ? emit(key, *val) : emit(key, val) if val != old_status[key]
+              val.is_a?(Array) ? emit(key, *val) : emit(key, val) 
             end
           end
           
@@ -130,9 +133,8 @@ class MPD
 
           if !connected
             sleep 2
-            begin
-              mpd.connect unless @stop_cb_thread
-            rescue
+            unless @stop_cb_thread
+              mpd.connect rescue
             end
           end
         end

@@ -3,9 +3,8 @@
 #
 # This tests the MPDTestServer class
 
-require 'rubygems'
-require 'librmpd'
-require 'mpdserver'
+require '../lib/librmpd'
+require '../lib/mpdserver'
 require 'test/unit'
 require 'socket'
 
@@ -13,12 +12,12 @@ class MPDServerTester < Test::Unit::TestCase
 
   def setup
     begin
-      @port = 9393
+      @port = 93932
       @mpd = MPDTestServer.new @port
       @mpd.start
       @sock = TCPSocket.new 'localhost', @port
     rescue Errno::EADDRINUSE
-      @port = 9494
+      @port = 94942
       @mpd = MPDTestServer.new @port
       @mpd.start
       @sock = TCPSocket.new 'localhost', @port

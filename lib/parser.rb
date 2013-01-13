@@ -10,10 +10,16 @@ class MPD
       args.map! do |word| 
         if word.is_a?(TrueClass) || word.is_a?(FalseClass) 
           word ? '1' : '0' # convert bool to 1 or 0
+        elsif word.is_a?(Range)
+          if word.end == -1 #negative means to end of range
+            "#{word.begin}:"
+          else
+            "#{argument.begin}:#{argument.end + (argument.exclude_end? ? 0 : 1)}"
+          end
         else
           # escape any strings with space (wrap in double quotes)
           word = word.to_s
-          word.match(/\s/) ? %Q["#{word}"] : word
+          word.match(/\s|'/) ? %Q["#{word}"] : word
         end
       end
       return [command, args].join(' ').strip
@@ -88,9 +94,9 @@ class MPD
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
     def build_songs_list(array)
+      return [] if !array.is_a?(Array)
       return array.map {|hash| Song.new(hash) }
     end
-
 
     # Make chunks from string.
     # @return [Array<String>]

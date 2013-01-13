@@ -6,9 +6,7 @@
 # Copyright 2006 Andrew Rader ( bitwise_mcgee AT yahoo.com | http://nymb.us )
 #
 
-require 'rubygems'
 require 'librmpd'
-require 'thread'
 
 if ARGV.length == 0
   puts "Usage: rmpc.rb <command> <command options>"
@@ -48,6 +46,10 @@ else
       else
         mpd.volume = ARGV[1].to_i
       end
+    when 'consume'
+      mpd.consume = !mpd.consume?
+    when 'single'
+      mpd.single = !mpd.single?
     when 'repeat'
       mpd.repeat = !mpd.repeat?
     when 'random'
