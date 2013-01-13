@@ -219,6 +219,12 @@ class MPD
     send_command :add, path
   end
 
+  # Adds a song to the playlist (*non-recursive*) and returns the song id.
+  # Optionally, one can specify the position on which to add the song (since MPD 0.14).
+  def addid(path, pos=nil)
+    send_command :addid, pos
+  end
+
   # Clears the current playlist.
   # @macro returnraise
   def clear
@@ -265,6 +271,13 @@ class MPD
   # @macro returnraise
   def deleteid(songid)
     send_command :deleteid, songid
+  end
+
+  # Counts the number of songs and their total playtime
+  # in the db matching, matching the searched tag exactly.
+  # @return [Hash] a hash with +songs+ and +playtime+ keys.
+  def count(type, what)
+    send_command :count, type, what
   end
 
   # Finds songs in the database that are EXACTLY
@@ -622,6 +635,13 @@ class MPD
   # @return [Integer] Update job ID
   def update(path = nil)
     send_command :update, path
+  end
+
+  # Same as {#update}, but also rescans unmodified files.
+  #
+  # @return [Integer] Update job ID
+  def rescan(path = nil)
+    send_command :rescan, path
   end
 
   # Gives a list of all outputs
