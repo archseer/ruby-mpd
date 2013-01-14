@@ -5,6 +5,7 @@ require_relative 'song'
 require_relative 'parser'
 
 require_relative 'plugins/information'
+require_relative 'plugins/playback_options'
 require_relative 'plugins/controls'
 require_relative 'plugins/stickers'
 require_relative 'plugins/outputs'
@@ -13,7 +14,7 @@ require_relative 'plugins/channels'
 
 # manual pages todo:
 # Querying MPD's status -> idle
-# Playback options -> mixrampdb, mixrampdelay, replay_gain_mode, replay_gain_status
+# Playback options -> mixrampdb, mixrampdelay
 # The current playlist
 # Stored playlists
 # The music database
@@ -52,6 +53,7 @@ class MPD
   include Parser
 
   include Plugins::Information
+  include Plugins::PlaybackOptions
   include Plugins::Controls
   include Plugins::Stickers
   include Plugins::Outputs
@@ -175,9 +177,9 @@ class MPD
     return ret
   end
 
-  # Disconnect from the server. This has no effect if the client is not
-  # connected. Reconnect using the {#connect} method. This will also stop the
-  # callback thread, thus disabling callbacks
+  # Disconnect from the MPD daemon. This has no effect if the client is not
+  # connected. Reconnect using the {#connect} method. This will also stop
+  # the callback thread, thus disabling callbacks.
   def disconnect
     @stop_cb_thread = true
 
@@ -186,6 +188,24 @@ class MPD
     @socket.puts 'close'
     @socket.close
     @socket = nil
+  end
+
+  # Kills the MPD process.
+  # @macro returnraise
+  def kill
+    send_command :kill
+  end
+
+  # Used for authentication with the server
+  # @param [String] pass Plaintext password
+  def password(pass)
+    send_command :password, pass
+  end
+
+  # Ping the server.
+  # @macro returnraise
+  def ping
+    send_command :ping
   end
 
   # Add the file _path_ to the playlist. If path is a directory, 
@@ -205,12 +225,6 @@ class MPD
   # @macro returnraise
   def clear
     send_command :clear
-  end
-
-  # Set the crossfade between songs in seconds.
-  # @macro returnraise
-  def crossfade=(seconds)
-    send_command :crossfade, seconds
   end
 
   # @return [Integer] Crossfade in seconds.
@@ -248,12 +262,6 @@ class MPD
   # @return [Array<MPD::Song>] Songs that matched.
   def find(type, what)
     build_songs_list send_command(:find, type, what)
-  end
-
-  # Kills the MPD process.
-  # @macro returnraise
-  def kill
-    send_command :kill
   end
 
   # Lists all of the albums in the database.
@@ -359,22 +367,15 @@ class MPD
     return status[:state] == :pause
   end
 
-  # Used for authentication with the server
-  # @param [String] pass Plaintext password
-  def password(pass)
-    send_command :password, pass
-  end
-
-  # Ping the server.
-  # @macro returnraise
-  def ping
-    send_command :ping
-  end
-
   # Is MPD playing?
   # @return [Boolean]
   def playing?
     return status[:state] == :play
+  end
+
+  # @return [Boolean] Is MPD stopped?
+  def stopped?
+    return status[:state] == :stop
   end
 
   # @return [Integer] Current playlist version number.
@@ -408,27 +409,9 @@ class MPD
     build_songs_list send_command(:plchanges, version)
   end
 
-  # Enable/disable consume mode.
-  # @since MPD 0.16
-  # When consume is activated, each song played is removed from playlist 
-  # after playing.
-  # @macro returnraise
-  def consume=(toggle)
-    send_command :consume, toggle
-  end
-
   # Returns true if consume is enabled.
   def consume?
     return status[:consume]
-  end
-
-  # Enable/disable single mode.
-  # @since MPD 0.15
-  # When single is activated, playback is stopped after current song,
-  # or song is repeated if the 'repeat' mode is enabled.
-  # @macro returnraise
-  def single=(toggle)
-    send_command :single, toggle
   end
 
   # Returns true if single is enabled.
@@ -436,21 +419,9 @@ class MPD
     return status[:single]
   end
 
-  # Enable/disable random playback.
-  # @macro returnraise
-  def random=(toggle)
-    send_command :random, toggle
-  end
-
   # Returns true if random playback is currently enabled,
   def random?
     return status[:random]
-  end
-
-  # Enable/disable repeat mode.
-  # @macro returnraise
-  def repeat=(toggle)
-    send_command :repeat, toggle
   end
 
   # Returns true if repeat is enabled,
@@ -484,13 +455,6 @@ class MPD
     build_songs_list(send_command(:search, type, what))
   end
 
-  # Sets the volume level. (Maps to MPD's +setvol+)
-  # @param [Integer] vol Volume level between 0 and 100.
-  # @macro returnraise
-  def volume=(vol)
-    send_command :setvol, vol
-  end
-
   # Gets the volume level.
   # @return [Integer]
   def volume
@@ -501,11 +465,6 @@ class MPD
   # @macro returnraise
   def shuffle
     send_command :shuffle
-  end
-
-  # @return [Boolean] Is MPD stopped?
-  def stopped?
-    return status[:state] == :stop
   end
 
   # Swaps the song at position `posA` with the song

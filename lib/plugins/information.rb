@@ -45,6 +45,7 @@ class MPD
         send_command(:idle, *masks)
       end
 
+      # MPD status: volume, time, modes...
       # * *volume*: 0-100
       # * *repeat*: true or false
       # * *random*: true or false
