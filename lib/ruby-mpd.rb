@@ -4,19 +4,25 @@ require 'thread'
 require_relative 'song'
 require_relative 'parser'
 
+require_relative 'playlist'
+
 require_relative 'plugins/information'
 require_relative 'plugins/playback_options'
 require_relative 'plugins/controls'
+require_relative 'plugins/playlists'
 require_relative 'plugins/stickers'
 require_relative 'plugins/outputs'
 require_relative 'plugins/reflection'
 require_relative 'plugins/channels'
 
+# TODO: object oriented: make playlist commands in a
+# playlist object and song commands and dir commands
+# in MPD::Song, MPD::Directory.
+
 # manual pages todo:
 # Querying MPD's status -> idle
 # Playback options -> mixrampdb, mixrampdelay
 # The current playlist
-# Stored playlists
 # The music database
 # Stickers -> improve implementation
 # Client to client -> improve implementation
@@ -55,6 +61,7 @@ class MPD
   include Plugins::Information
   include Plugins::PlaybackOptions
   include Plugins::Controls
+  include Plugins::Playlists
   include Plugins::Stickers
   include Plugins::Outputs
   include Plugins::Reflection
@@ -309,13 +316,6 @@ class MPD
     filter_response response, :file
   end
 
-  # List all of the playlists in the database
-  # 
-  # @return [Array<Hash>] Array of playlists
-  def playlists
-    send_command :listplaylists
-  end
-
   # List all of the songs in the database starting at path.
   # If path isn't specified, the root of the database is used
   #
@@ -329,18 +329,6 @@ class MPD
   # @return [Array<MPD::Song>]
   def songs_by_artist(artist)
     find :artist, artist
-  end
-
-  # Loads the playlist name.m3u (do not pass the m3u extension
-  # when calling) from the playlist directory. Use `playlists`
-  # to what playlists are available
-  #
-  # Since 0.17, a range can be passed to load, to load only a
-  # part of the playlist.
-  # 
-  # @macro returnraise
-  def load(name, range=nil)
-    send_command :load, name, range
   end
 
   # Move the song at `from` to `to` in the playlist.
@@ -429,22 +417,6 @@ class MPD
     return status[:repeat]
   end
 
-  # Removes (*PERMANENTLY!*) the playlist +playlist.m3u+ from
-  # the playlist directory
-  # @macro returnraise
-  def rm(playlist)
-    send_command :rm, playlist
-  end
-
-  alias :remove_playlist :rm
-
-  # Saves the current playlist to `playlist`.m3u in the
-  # playlist directory.
-  # @macro returnraise
-  def save(playlist)
-    send_command :save, playlist
-  end
-
   # Searches for any song that contains `what` in the `type` field
   # `type` can be 'title', 'artist', 'album' or 'filename'
   # `type`can also be 'any'
@@ -496,8 +468,6 @@ class MPD
     send_command :rescan, path
   end
 
-  private # Private Methods below
-
   # Used to send a command to the server. This synchronizes
   # on a mutex to be thread safe
   #
@@ -516,6 +486,8 @@ class MPD
       end
     end
   end
+
+  private # Private Methods below
 
   # Handles the server's response (called inside {#send_command}).
   # Repeatedly reads the server's response from the socket and
