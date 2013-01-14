@@ -23,7 +23,7 @@ class MPD
     end
 
     # Lists the songs in the playlist. Playlist plugins are supported.
-    # @return [Array<MPD::Song] songs in the playlist.
+    # @return [Array<MPD::Song>] songs in the playlist.
     def songs
       mpd.build_songs_list @mpd.send_command(:listplaylistinfo, @name)
     end
@@ -60,8 +60,9 @@ class MPD
       @mpd.send_command :playlistmove, @name
     end
 
-    def rename(new_name)
+    # Renames the playlist to +new_name+.
     # @macro returnraise
+    def rename(new_name)
       @mpd.send_command :rename, @name, new_name
       @name = new_name
     end
