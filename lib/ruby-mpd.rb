@@ -218,11 +218,6 @@ class MPD
 
   ###--- OTHER ---###
 
-  # @return [Integer] Crossfade in seconds.
-  def crossfade
-    return status[:xfade]
-  end
-
   # Counts the number of songs and their total playtime
   # in the db matching, matching the searched tag exactly.
   # @return [Hash] a hash with +songs+ and +playtime+ keys.
@@ -292,69 +287,21 @@ class MPD
     build_songs_list send_command(:listallinfo, path)
   end
 
-  # List all of the songs by an artist
+  # List all of the songs by an artist.
   #
   # @return [Array<MPD::Song>]
   def songs_by_artist(artist)
     find :artist, artist
   end
 
-  # Is MPD paused?
-  # @return [Boolean]
-  def paused?
-    return status[:state] == :pause
-  end
-
-  # Is MPD playing?
-  # @return [Boolean]
-  def playing?
-    return status[:state] == :play
-  end
-
-  # @return [Boolean] Is MPD stopped?
-  def stopped?
-    return status[:state] == :stop
-  end
-
-  # @return [Integer] Current playlist version number.
-  def playlist_version
-    status[:playlist]
-  end
-
-  # Returns true if consume is enabled.
-  def consume?
-    return status[:consume]
-  end
-
-  # Returns true if single is enabled.
-  def single?
-    return status[:single]
-  end
-
-  # Returns true if random playback is currently enabled,
-  def random?
-    return status[:random]
-  end
-
-  # Returns true if repeat is enabled,
-  def repeat?
-    return status[:repeat]
-  end
-
-  # Searches for any song that contains `what` in the `type` field
-  # `type` can be 'title', 'artist', 'album' or 'filename'
-  # `type`can also be 'any'
+  # Searches for any song that contains +what+ in the +type+ field
+  # +type+ can be 'title', 'artist', 'album' or 'filename'
+  # +type+can also be 'any'
   # Searches are *NOT* case sensitive.
   #
   # @return [Array<MPD::Song>] Songs that matched.
   def search(type, what)
     build_songs_list(send_command(:search, type, what))
-  end
-
-  # Gets the volume level.
-  # @return [Integer]
-  def volume
-    return status[:volume]
   end
 
   # Tell the server to update the database. Optionally,
@@ -432,7 +379,7 @@ class MPD
   # only those matching the regexp. The regexp is removed
   # from the line before it is added to an Array
   #
-  # This is used in the `directories` and `files` methods
+  # This is used in the +directories+ and +files+ methods
   # to return only the directory/file names
   # @note Broken.
   def filter_response(string, filter)

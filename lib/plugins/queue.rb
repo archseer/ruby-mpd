@@ -52,19 +52,19 @@ class MPD
         send_command :deleteid, songid
       end
 
-      # Move the song at `from` to `to` in the queue.
+      # Move the song at +from+ to +to+ in the queue.
       # * Since 0.14, +to+ can be a negative number, which is the offset
-      # of the song from the currently playing (or to-be-played) song. 
-      # So -1 would mean the song would be moved to be the next song in the queue.
-      # Moving a song to -queue.length will move it to the song _before_ the current
-      # song on the queue; so this will work for repeating playlists, too.
+      #   of the song from the currently playing (or to-be-played) song. 
+      #   So -1 would mean the song would be moved to be the next song in the queue.
+      #   Moving a song to -queue.length will move it to the song _before_ the current
+      #   song on the queue; so this will work for repeating playlists, too.
       # * Since 0.15, +from+ can be a range of songs to move.
       # @macro returnraise
       def move(from, to)
         send_command :move, from, to
       end
 
-      # Move the song with the `songid` to `to` in the queue.
+      # Move the song with the +songid+ to +to+ in the queue.
       # @macro returnraise
       def moveid(songid, to)
         send_command :moveid, songid, to
@@ -99,21 +99,21 @@ class MPD
         send_command :shuffle, range
       end
 
-      # Swaps the song at position `posA` with the song
-      # as position `posB` in the queue.
+      # Swaps the song at position +posA+ with the song
+      # as position +posB+ in the queue.
       # @macro returnraise
       def swap(posA, posB)
         send_command :swap, posA, posB
       end
 
-      # Swaps the positions of the song with the id `songidA`
-      # with the song with the id `songidB` in the queue.
+      # Swaps the positions of the song with the id +songidA+
+      # with the song with the id +songidB+ in the queue.
       # @macro returnraise
       def swapid(songidA, songidB)
         send_command :swapid, songidA, songidB
       end
 
-      # Saves the current playlist/queue to `playlist`.m3u in the
+      # Saves the current playlist/queue to +playlist+.m3u in the
       # playlist directory.
       # @macro returnraise
       def save(playlist)
