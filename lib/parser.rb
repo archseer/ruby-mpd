@@ -32,7 +32,7 @@ class MPD
       :musicbrainz_trackid, :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartistid
     ]
 
-    SYM_KEYS = [:command, :state, :changed, :replay_gain_mode]
+    SYM_KEYS = [:command, :state, :changed, :replay_gain_mode, :tagtype]
     FLOAT_KEYS = [:mixrampdb, :elapsed]
     BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
@@ -85,7 +85,14 @@ class MPD
         key, value = line.split(': ', 2)
         key = key.downcase.to_sym
         value ||= '' # no nil values please ("album: ")
-        hash[key] = parse_key(key, value.chomp)
+        
+        # if val appears more than once, make an array of vals.
+        if hash.include? key
+          hash[key] = [hash[key]] if !hash[key].is_a?(Array) # if necessary
+          hash[key] << parse_key(key, value.chomp) # add new val to array
+        else # val hasn't appeared yet, map it.
+          hash[key] = parse_key(key, value.chomp) # map val to key
+        end
       end
 
       return hash
