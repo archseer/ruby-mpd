@@ -17,7 +17,7 @@ class MPD
         build_songs_list send_command(:playlistinfo, limit)
       end
 
-      # Add the file _path_ to the queue. If path is a directory, 
+      # Add the file _path_ to the queue. If path is a directory,
       # it will be added *recursively*.
       # @macro returnraise
       def add(path)
@@ -54,7 +54,7 @@ class MPD
 
       # Move the song at +from+ to +to+ in the queue.
       # * Since 0.14, +to+ can be a negative number, which is the offset
-      #   of the song from the currently playing (or to-be-played) song. 
+      #   of the song from the currently playing (or to-be-played) song.
       #   So -1 would mean the song would be moved to be the next song in the queue.
       #   Moving a song to -queue.length will move it to the song _before_ the current
       #   song on the queue; so this will work for repeating playlists, too.
@@ -90,7 +90,7 @@ class MPD
 
       # prio
 
-      # prioid 
+      # prioid
 
       # Shuffles the queue.
       # Optionally, a Range can be used to shuffle a specific subset.

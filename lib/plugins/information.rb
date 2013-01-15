@@ -18,12 +18,12 @@ class MPD
         Song.new send_command :currentsong
       end
 
-      # Waits until there is a noteworthy change in one or more of MPD's subsystems. 
-      # As soon as there is one, it lists all changed systems in a line in the format 
+      # Waits until there is a noteworthy change in one or more of MPD's subsystems.
+      # As soon as there is one, it lists all changed systems in a line in the format
       # 'changed: SUBSYSTEM', where SUBSYSTEM is one of the following:
       #
       # * *database*: the song database has been modified after update.
-      # * *update*: a database update has started or finished. If the database was modified 
+      # * *update*: a database update has started or finished. If the database was modified
       #   during the update, the database event is also emitted.
       # * *stored_playlist*: a stored playlist has been modified, renamed, created or deleted
       # * *playlist*: the current playlist has been modified
@@ -33,10 +33,10 @@ class MPD
       # * *options*: options like repeat, random, crossfade, replay gain
       # * *sticker*: the sticker database has been modified.
       # * *subscription*: a client has subscribed or unsubscribed to a channel
-      # * *message*: a message was received on a channel this client is subscribed to; this 
+      # * *message*: a message was received on a channel this client is subscribed to; this
       #   event is only emitted when the queue is empty
       #
-      # If the optional +masks+ argument is used, MPD will only send notifications 
+      # If the optional +masks+ argument is used, MPD will only send notifications
       # when something changed in one of the specified subsytems.
       #
       # @since MPD 0.14

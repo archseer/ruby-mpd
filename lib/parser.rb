@@ -1,13 +1,13 @@
 require 'time' # required for Time.iso8601
 
 class MPD
-  # Parser module, being able to parse messages to and from the MPD daemon format. 
+  # Parser module, being able to parse messages to and from the MPD daemon format.
   module Parser
     private
 
     # Parses the command into MPD format.
     def convert_command(command, *args)
-      args.map! do |word| 
+      args.map! do |word|
         if word.is_a?(TrueClass) || word.is_a?(FalseClass)
           word ? '1' : '0' # convert bool to 1 or 0
         elsif word.is_a?(Range)
@@ -49,7 +49,7 @@ class MPD
       elsif SYM_KEYS.include? key
         value.to_sym
       elsif key == :playlist && !value.to_i.zero?
-        # doc states it's an unsigned int, meaning if we get 0, 
+        # doc states it's an unsigned int, meaning if we get 0,
         # then it's a name string. HAXX! what if playlist name is '123'?
         # @todo HAXX
         value.to_i
@@ -84,7 +84,7 @@ class MPD
         key, value = line.split(': ', 2)
         key = key.downcase.to_sym
         value ||= '' # no nil values please ("album: ")
-        
+
         # if val appears more than once, make an array of vals.
         if hash.include? key
           hash[key] = [hash[key]] if !hash[key].is_a?(Array) # if necessary
@@ -113,7 +113,7 @@ class MPD
       end
     end
 
-    # Parses the response into appropriate objects (either a single object, 
+    # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
@@ -136,7 +136,7 @@ class MPD
 
     # Parse the response into groups that have the same key (used for file lists,
     # groups together files, directories and playlists).
-    # @return [Hash<Array>] A hash of key groups. 
+    # @return [Hash<Array>] A hash of key groups.
     def build_groups(string)
       return [] if string.nil? || !string.is_a?(String)
 

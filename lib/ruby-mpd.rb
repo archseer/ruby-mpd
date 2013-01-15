@@ -61,12 +61,12 @@ class MPD
   include Plugins::Outputs
   include Plugins::Reflection
   include Plugins::Channels
-  
+
   # The version of the MPD protocol the server is using.
   attr_reader :version
   # A list of tags MPD accepts.
   attr_reader :tags
- 
+
   # Initialize an MPD object with the specified hostname and port.
   # When called without arguments, 'localhost' and 6600 are used.
   def initialize(hostname = 'localhost', port = 6600)
@@ -115,7 +115,7 @@ class MPD
   # and wait for your commands.
   #
   # When called with true as an argument, this will enable callbacks by starting
-  # a seperate polling thread, which will also automatically reconnect if disconnected 
+  # a seperate polling thread, which will also automatically reconnect if disconnected
   # for whatever reason.
   #
   # @return [true] Successfully connected.
@@ -150,10 +150,10 @@ class MPD
             if key == :song
               emit(:song, mpd.current_song)
             else # convert arrays to splat arguments
-              val.is_a?(Array) ? emit(key, *val) : emit(key, val) 
+              val.is_a?(Array) ? emit(key, *val) : emit(key, val)
             end
           end
-          
+
           old_status = status
           sleep 0.1
 
@@ -214,7 +214,7 @@ class MPD
   ###--- OTHER ---###
 
   # Lists all of the albums in the database.
-  # The optional argument is for specifying an artist to list 
+  # The optional argument is for specifying an artist to list
   # the albums for
   #
   # @return [Array<String>] An array of album names.

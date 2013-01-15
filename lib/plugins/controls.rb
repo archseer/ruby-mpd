@@ -2,7 +2,7 @@ class MPD
   module Plugins
     # Commands for controlling playback. Changes have been made to {#seek},
     # command maps to +seekcur+ from MPD and the original seek command is
-    # {#seekpos} here. 
+    # {#seekpos} here.
     module Controls
       # Plays the next song in the playlist.
       # @macro returnraise
@@ -17,7 +17,7 @@ class MPD
         send_command :pause, toggle
       end
 
-      # Begin playing the playist.   
+      # Begin playing the playist.
       # @param [Integer] pos Position in the playlist to start playing.
       # @macro returnraise
       def play(pos = nil)

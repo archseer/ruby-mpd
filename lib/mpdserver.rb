@@ -162,7 +162,7 @@ class MPDTestServer < GServer
       end
     end
   end
-  
+
   def serve( sock )
     command_list = []
     in_cmd_list = false
@@ -193,11 +193,11 @@ class MPDTestServer < GServer
             if audit
               log "MPD Command List: CMD ##{i}: \"#{set[0]}(#{set[1].join(', ')})\": " + (the_ret ? 'successful' : 'failed')
             end
-            
+
             break unless the_ret
 
             sock.puts 'list_OK' if in_ok_list
-            
+
           end
 
           sock.puts 'OK' if the_ret
@@ -598,7 +598,7 @@ class MPDTestServer < GServer
         if args.length > 0 and not is_bool args[0]
           return(cmd_fail(sock,"ACK [2@0] {pause} \"#{args[0]}\" is not 0 or 1"))
         end
-        
+
         if @status[:state] != 'stop'
           if args.length == 1
             @status[:state] = ( args[0] == '1' ? 'pause' : 'play' )

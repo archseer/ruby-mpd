@@ -23,13 +23,13 @@ class MPD
         send_command :sticker, :get, type, uri, name
       end
 
-      # Adds a sticker value to the specified object. If a sticker 
+      # Adds a sticker value to the specified object. If a sticker
       # item with that name already exists, it is replaced.
       def set_sticker(type, uri, name, value)
         send_command :sticker, :set, type, uri, name
       end
 
-      # Deletes a sticker value from the specified object. If you do 
+      # Deletes a sticker value from the specified object. If you do
       # not specify a sticker name, all sticker values are deleted.
       def delete_sticker(type, uri, name = nil)
         send_command :sticker, :delete, type, uri, name

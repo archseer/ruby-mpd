@@ -7,7 +7,7 @@ class MPD
 
       # Enable/disable consume mode.
       # @since MPD 0.16
-      # When consume is activated, each song played is removed from playlist 
+      # When consume is activated, each song played is removed from playlist
       # after playing.
       # @macro returnraise
       def consume=(toggle)
@@ -30,7 +30,7 @@ class MPD
         send_command :mixrampdb, decibels
       end
 
-      # Additional time subtracted from the overlap calculated by mixrampdb. 
+      # Additional time subtracted from the overlap calculated by mixrampdb.
       # A value of "nan" or Float::NAN disables MixRamp overlapping and falls
       # back to crossfading.
       def mixrampdelay=(seconds)
@@ -75,8 +75,8 @@ class MPD
       def replay_gain_mode=(mode)
         send_command :replay_gain_mode, mode
       end
-      
-      # Prints replay gain options. Currently, only the variable 
+
+      # Prints replay gain options. Currently, only the variable
       # +:replay_gain_mode+ is returned.
       # @since MPD 0.16
       def replay_gain_status
