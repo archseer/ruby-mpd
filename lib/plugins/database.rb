@@ -13,11 +13,11 @@ class MPD
       end
 
       # Finds songs in the database that are *EXACTLY* matched by the what
-      # argument. 
+      # argument.
       #
       # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
       #   parameters: +:file+ to search by full path (relative to database root),
-      #   and +:any+ to match against all available tags. 
+      #   and +:any+ to match against all available tags.
       # @return [Array<MPD::Song>] Songs that matched.
       def find(type, what)
         build_songs_list send_command(:find, type, what)

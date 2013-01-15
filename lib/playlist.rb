@@ -2,7 +2,7 @@ class MPD
   # An object representing an .m3u playlist stored by MPD.
   #
   # Playlists are stored inside the configured playlist directory. They are
-  # addressed with their file name (without the directory and without the 
+  # addressed with their file name (without the directory and without the
   # .m3u suffix).
   #
   # Some of the commands described in this section can be used to run playlist
