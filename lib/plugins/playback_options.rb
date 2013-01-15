@@ -20,9 +20,22 @@ class MPD
         send_command :crossfade, seconds
       end
 
-      # mixrampdb
+      # Sets the threshold at which songs will be overlapped. Like crossfading
+      # but doesn't fade the track volume, just overlaps. The songs need to have
+      # MixRamp tags added by an external tool. 0dB is the normalized maximum
+      # volume so use negative values, I prefer -17dB. In the absence of mixramp
+      # tags crossfading will be used. See http://sourceforge.net/projects/mixramp
+      # @param [Float] decibels Maximum volume level in decibels.
+      def mixrampdb=(decibels)
+        send_command :mixrampdb, decibels
+      end
 
-      # mixrampdelay
+      # Additional time subtracted from the overlap calculated by mixrampdb. 
+      # A value of "nan" or Float::NAN disables MixRamp overlapping and falls
+      # back to crossfading.
+      def mixrampdelay=(seconds)
+        send_command :mixrampdelay, seconds
+      end
 
       # Enable/disable random playback.
       # @macro returnraise
