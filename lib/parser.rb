@@ -8,7 +8,7 @@ class MPD
     # Parses the command into MPD format.
     def convert_command(command, *args)
       args.map! do |word| 
-        if word.is_a?(TrueClass) || word.is_a?(FalseClass) 
+        if word.is_a?(TrueClass) || word.is_a?(FalseClass)
           word ? '1' : '0' # convert bool to 1 or 0
         elsif word.is_a?(Range)
           if word.end == -1 #negative means to end of range
@@ -80,8 +80,7 @@ class MPD
     def build_hash(string)
       return {} if string.nil?
 
-      hash = {}
-      string.split("\n").each do |line|
+      string.split("\n").each_with_object({}) do |line, hash|
         key, value = line.split(': ', 2)
         key = key.downcase.to_sym
         value ||= '' # no nil values please ("album: ")
@@ -94,8 +93,6 @@ class MPD
           hash[key] = parse_key(key, value.chomp) # map val to key
         end
       end
-
-      return hash
     end
 
     # Converts the response to MPD::Song objects.
@@ -111,7 +108,7 @@ class MPD
       first_key = string.match(/\A(.+?): /)[1]
 
       chunks = string.split(/\n(?=#{first_key})/)
-      list = chunks.inject([]) do |result, chunk|
+      chunks.inject([]) do |result, chunk|
         result << chunk.strip
       end
     end
@@ -134,8 +131,21 @@ class MPD
 
       # if list has only one element, return it, else return array
       result = list.length == 1 ? list.first : list
-
       return result
+    end
+
+    # Parse the response into groups that have the same key (used for file lists,
+    # groups together files, directories and playlists).
+    # @return [Hash<Array>] A hash of key groups. 
+    def build_groups(string)
+      return [] if string.nil? || !string.is_a?(String)
+
+      string.split("\n").each_with_object({}) do |line, hash|
+        key, value = line.split(': ', 2)
+        key = key.downcase.to_sym
+        hash[key] ||= []
+        hash[key] << parse_key(key, value.chomp) # map val to key
+      end
     end
 
   end
