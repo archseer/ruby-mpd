@@ -1,6 +1,8 @@
 class MPD
   module Plugins
     # Commands related to setting various aspects and modes of playback.
+    #
+    # Changes: setvol -> volume.
     module PlaybackOptions
 
       # Enable/disable consume mode.

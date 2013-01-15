@@ -17,7 +17,6 @@ class MPD
 
       # seems that type is always :song, supposedly directory and
       # playlist too "(e.g. song files, directories, albums)"
-      # Maybe move these into MPD::Song?
 
       # Reads a sticker value for the specified object.
       def get_sticker(type, uri, name)

@@ -11,26 +11,18 @@ require_relative 'plugins/playback_options'
 require_relative 'plugins/controls'
 require_relative 'plugins/queue'
 require_relative 'plugins/playlists'
+require_relative 'plugins/database'
 require_relative 'plugins/stickers'
 require_relative 'plugins/outputs'
 require_relative 'plugins/reflection'
 require_relative 'plugins/channels'
 
-# TODO: object oriented: make playlist commands in a
-# playlist object and song commands and dir commands
+# TODO: object oriented: song commands and dir commands
 # in MPD::Song, MPD::Directory.
-
+# Make stickers a mixin for Playlist, Song, Directory...
 # TODO: Namespace queue?
 
-# manual pages todo:
-# Querying MPD's status -> idle
-# Playback options -> mixrampdb, mixrampdelay
-# The current playlist
-# The music database
-# Stickers -> improve implementation
-# Client to client -> improve implementation
-
-# todo: command list as a do block
+# command list as a do block
 # mpd.command_list do
 #   volume 10
 #   play xyz
@@ -42,7 +34,7 @@ require_relative 'plugins/channels'
 # 0.15
 #  - added the "findadd" command
 #  - allow changing replay gain mode on-the-fly
-# ver 0.17 (2012/06/27)
+# 0.17 (2012/06/27)
 #  - new commands "searchadd", "searchaddpl"
 
 # @!macro [new] error_raise
@@ -51,6 +43,7 @@ require_relative 'plugins/channels'
 #   @return [Boolean] returns true if successful.
 #   @macro error_raise
 
+# The main class/namespace of the MPD client.
 class MPD
 
   # Standard MPD error.
@@ -63,6 +56,7 @@ class MPD
   include Plugins::Controls
   include Plugins::Queue
   include Plugins::Playlists
+  include Plugins::Database
   include Plugins::Stickers
   include Plugins::Outputs
   include Plugins::Reflection
@@ -80,6 +74,7 @@ class MPD
     @port = port
     @socket = nil
     @version = nil
+
     @stop_cb_thread = false
     @mutex = Mutex.new
     @cb_thread = nil
@@ -175,7 +170,7 @@ class MPD
     return true
   end
 
-  # Check if the client is connected
+  # Check if the client is connected.
   #
   # @return [Boolean] True only if the server responds otherwise false.
   def connected?

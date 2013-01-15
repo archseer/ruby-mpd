@@ -67,7 +67,7 @@ class MPD
       @name = new_name
     end
 
-    # Deletes the playlist *PERMANENTLY* from the disk.
+    # Deletes the playlist from the disk.
     # @macro returnraise
     def destroy
       @mpd.send_command :rm, @name
