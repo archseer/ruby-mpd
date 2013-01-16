@@ -250,7 +250,7 @@ class MPD
   #
   # @return [Array<MPD::Song>]
   def songs_by_artist(artist)
-    find :artist, artist
+    search :artist, artist
   end
 
   # Used to send a command to the server. This synchronizes

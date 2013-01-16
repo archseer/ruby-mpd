@@ -63,7 +63,7 @@ accepts an ID key instead of the position:
 
   mpd.move(:id => 1, 10) # => move the song with the ID of 1 to position 10.
 
-Commands that accept ID's: +#move+, +#delete+, +#play+, +#song_priority+. #seek
+Commands that accept ID's: +#move+, +#delete+, +#play+, +#song_priority+. +#seek+
 accepts both +:pos+ and +:id+. *Note*: #swap and #swapid are still separate!
 
 === Ranges
@@ -82,8 +82,8 @@ Move also allows this:
 
   mpd.move 1..3, 10 # => move songs 1, 2 and 3 to position 10 (and 11 and 12).
 
-Commands that support ranges: #delete, #move, #queue, #song_priority, #shuffle,
-MPD::Playlist#load.
+Commands that support ranges: +#delete+, +#move+, +#queue+, +#song_priority+, +#shuffle+,
++MPD::Playlist#load+.
 
 == Searching
 
