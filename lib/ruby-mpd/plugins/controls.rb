@@ -17,18 +17,20 @@ class MPD
         send_command :pause, toggle
       end
 
-      # Begin playing the playist.
+      # Begin/resume playing the queue.
       # @param [Integer] pos Position in the playlist to start playing.
+      # @param [Hash] pos :id of the song where to start playing.
       # @macro returnraise
       def play(pos = nil)
-        send_command :play, pos
-      end
-
-      # Begin playing the playlist.
-      # @param [Integer] songid ID of the song where to start playing.
-      # @macro returnraise
-      def playid(songid = nil)
-        send_command :playid, songid
+        if pos.is_a?(Hash) 
+          if pos[:id]
+            send_command :playid, priority, pos[:id]
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :play, pos
+        end
       end
 
       # Plays the previous song in the playlist.
@@ -43,23 +45,16 @@ class MPD
       #
       # @since MPD 0.17
       # @param [Integer, String] time Position within the current song.
+      # @param [Hash] options Either +:id+ or +:pos+ can be specified.
       # Returns true if successful,
-      def seek(time)
-        send_command :seekcur, time
-      end
-
-      # Seeks to the position +time+ (in seconds) of the
-      # song at +pos+ in the playlist.
-      # @macro returnraise
-      def seekpos(pos, time)
-        send_command :seek, pos, time
-      end
-
-      # Seeks to the position +time+ (in seconds) of the song with
-      # the id of +songid+.
-      # @macro returnraise
-      def seekid(songid, time)
-        send_command :seekid, songid, time
+      def seek(time, options = {})
+        if options[:id]
+          send_command :seekid, options[:id], time
+        elsif options[:pos]
+          send_command :seek, options[:pos], time
+        else
+          send_command :seekcur, time
+        end
       end
 
       # Stop playing.

@@ -54,8 +54,49 @@ Once connected, you can issue commands to talk to the server
 
 You can find documentation for each command at http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD
 
-Quick note: For searching, to enable case sensitivity, pass a third argument in
-as :case_sensitive => true. This does not work for Playlist#searchadd.
+== Commands
+
+Some commands accept "option hashes" besides their default values. For example, +#move+
+accepts an ID key instead of the position:
+
+  mpd.move(1, 10) # => move first song to position 10.
+
+  mpd.move(:id => 1, 10) # => move the song with the ID of 1 to position 10.
+
+Commands that accept ID's: +#move+, +#delete+, +#play+, +#song_priority+. #seek
+accepts both +:pos+ and +:id+. *Note*: #swap and #swapid are still separate!
+
+=== Ranges
+
+Some commands also allow ranges instead of numbers, specifying a range of songs.
+ruby-mpd correctly handles inclusive and exclusive ranges (1..10 vs 1...10).
+For example, #queue allows us to return only a subset of the queue:
+
+  mpd.queue.count # => 20
+
+  mpd.queue(1..10).count # => 10
+
+Move also allows this:
+
+  mpd.move 1, 10 # => move song 1 to position 10.
+
+  mpd.move 1..3, 10 # => move songs 1, 2 and 3 to position 10 (and 11 and 12).
+
+Commands that support ranges: #delete, #move, #queue, #song_priority, #shuffle,
+MPD::Playlist#load.
+
+== Searching
+
+Searching is case insensitive by default. To enable case sensitivity, pass a third
+argument in as +:case_sensitive => true+. This does not work for Playlist#searchadd.
+
+  mpd.search(:artist, 'MyArtiSt', :case_sensitive => true)
+
+While searching, one can also enable the +add+ option, which will automatically add
+the songs the query returned to the queue. In that case, the response will only return
++true+, stating that the operation was successful (instead of returning an array).
+
+  mpd.search(:artist, 'MyArtiSt', {:case_sensitive => true, :add => true})
 
 == Playlists
 

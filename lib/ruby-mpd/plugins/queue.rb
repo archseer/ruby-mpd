@@ -5,7 +5,7 @@ class MPD
     # queue. 
     # Changes: playlistinfo -> queue, plchanges -> queue_changes,
     #  playlistid -> song_with_id, playlistfind -> queue_find,
-    #  playlistsearch -> queue_search.
+    #  playlistsearch -> queue_search, prio -> song_priority.
     module Queue
 
       # List the current playlist/queue.
@@ -42,15 +42,18 @@ class MPD
       # Since MPD 0.15 a range can also be passed. Songs with positions within range will be deleted.
       # @param [Integer, Range] pos Song with position in the queue will be deleted,
       # if range is passed, songs with positions within range will be deleted.
+      # @param [Hash] pos :id to specify the song ID to delete instead of position.
       # @macro returnraise
       def delete(pos)
-        send_command :delete, pos
-      end
-
-      # Delete the song with the +songid+ from the queue.
-      # @macro returnraise
-      def deleteid(songid)
-        send_command :deleteid, songid
+        if pos.is_a?(Hash) 
+          if pos[:id]
+            send_command :deleteid, pos[:id]
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :delete, pos
+        end
       end
 
       # Move the song at +from+ to +to+ in the queue.
@@ -60,15 +63,18 @@ class MPD
       #   Moving a song to -queue.length will move it to the song _before_ the current
       #   song on the queue; so this will work for repeating playlists, too.
       # * Since 0.15, +from+ can be a range of songs to move.
+      # @param [Hash] from :id to specify the song ID to move instead of position.
       # @macro returnraise
       def move(from, to)
-        send_command :move, from, to
-      end
-
-      # Move the song with the +songid+ to +to+ in the queue.
-      # @macro returnraise
-      def moveid(songid, to)
-        send_command :moveid, songid, to
+        if pos.is_a?(Hash) 
+          if pos[:id]
+            send_command :moveid, pos[:id], to
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :move, from, to
+        end
       end
 
       # Returns the song with the +songid+ in the playlist,
@@ -84,7 +90,7 @@ class MPD
       #   parameters: +:file+ to search by full path (relative to database root),
       #   and +:any+ to match against all available tags.
       #
-      # @param [Hash] Use +:case_sensitive+ to make the query case sensitive.
+      # @param [Hash] options Use +:case_sensitive+ to make the query case sensitive.
       # @return [Array<MPD::Song>] Songs that matched.
       def queue_search(type, what, options = {})
         command = options[:case_sensitive] ? :playlistfind : :playlistsearch
@@ -99,14 +105,28 @@ class MPD
 
       # plchangesposid
 
-      # prio
-
-      # prioid
+      # Set the priority of the specified songs. A higher priority means that it will be played
+      # first when "random" mode is enabled.
+      # @param [Integer] priority An integer between 0 and 255. The default priority of new songs is 0.
+      # @param [Integer] pos A specific position.
+      # @param [Range] pos A range of positions.
+      # @param [Hash] pos :id to specify the song ID to move instead of position.
+      def song_priority(priority, pos)
+        if pos.is_a?(Hash) 
+          if pos[:id]
+            send_command :prioid, priority, pos[:id]
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :prio, priority, pos
+        end
+      end
 
       # Shuffles the queue.
       # Optionally, a Range can be used to shuffle a specific subset.
       # @macro returnraise
-      def shuffle(range)
+      def shuffle(range=nil)
         send_command :shuffle, range
       end
 

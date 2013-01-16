@@ -2,7 +2,7 @@ class MPD
   module Plugins
     # Commands for interacting with the music database.
     #
-    # Changes: listallinfo -> songs, searchaddpl in MPD::Playlist#searchadd
+    # Changes: listallinfo -> songs, searchaddpl in MPD::Playlist#searchadd.
     # search merges search, find, searchadd and findadd
     module Database
 
@@ -45,7 +45,7 @@ class MPD
       # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
       #   parameters: +:file+ to search by full path (relative to database root),
       #   and +:any+ to match against all available tags.
-      # @param [Hash] A hash of options.
+      # @param [Hash] options A hash of options.
       # @return [Array<MPD::Song>] Songs that matched.
       # @return [true] if +:add+ is enabled.
       def search(type, what, options = {})
