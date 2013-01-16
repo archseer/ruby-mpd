@@ -1,0 +1,174 @@
+= ruby-mpd
+
+ruby-mpd is a powerful object-oriented Music Player Daemon library, forked from librmpd.
+librmpd is as of writing outdated by 6(*!*) years. This library tries to act as a successor,
+originally using librmpd as a base, however almost all of the codebase was rewritten.
+ruby-mpd supports all "modern" MPD features.
+
+== MPD Protocol
+
+The Music Player Daemon protocol is implemented inside the library. The implementation
+brings the entire set of features to ruby, with support of the newest protocol commands.
+However some commands were remapped, some were converted to objects, as I felt they fit
+this way much more into ruby and are more intuitive.
+
+== Installation
+
+  gem install ruby-mpd
+
+== Usage
+
+Require the library.
+
+  require 'ruby-mpd'
+
+Then, make a new object:
+
+  mpd = MPD.new 'localhost', 6600
+
+You can also omit the host and/or port, and it will use the defaults.
+
+  mpd = MPD.new 'localhost'
+  mpd = MPD.new
+
+
+Once you have an instance of the MPD class, connect to the server:
+
+  mpd.connect
+
+When you are done, disconnect by calling disconnect.
+
+  mpd.disconnect
+
+*Note*: The server may disconnect you at any time due to inactivity. This can
+be fixed by enabling callbacks (see the Callbacks section) or by issuing a
+`ping` command at certain intervals
+
+Once connected, you can issue commands to talk to the server
+
+    mpd.connect
+    if mpd.stopped?
+      mpd.play
+    end
+    song = mpd.current_song
+    puts "Current Song: #{song.artist} - #{song.title}"
+
+You can find documentation for each command [here](TODO)
+
+== Playlists
+
+Playlists are one of the objects that map the MPD commands onto a simple to use
+object. Instead of going trough all those function calls, passing data along to
+get your results, you simply use the object in an object-oriented way:
+
+  mpd.playlists # 0> [MPD::Playlist, MPD::Playlist...]
+
+  playlist = mpd.playlists.first
+
+  p playlist.name # => "My playlist"
+
+  playlist.songs # => [MPD::Song, MPD::Song...]
+
+  playlist.rename('Awesomelist')
+  p playlist.name # => "Awesomelist"
+
+  playlist.add('awesome_track.mp3')
+
+To create a new playlist, simply create a new object. The playlist will be created
+in the daemon's library automatically as soon as you use +#add+ or +#findadd+. There
+is also no save method, as playlists get 'saved' by the daemon any time you do an
+action on them (add, delete, rename).
+
+  MPD::Playlist.new(mpd, 'name')
+
+Currently, one also has to pass in the MPD connection, as playlists are tied to
+a certain connection.
+
+== Callbacks
+
+Callbacks are a simple way to make your client respond to events, rather that
+have to continuously ask the server for updates. This allows you to focus on
+displaying the data, rather that working overly hard to get it. This is done
+by having a background thread continuously check the server for changes. Because
+of this thead, enabling callbacks also means your client will stay connected to
+the server without having to worry about timeouts.
+
+To make use of callbacks, we need to:
+
+(1) Setup a callback to be called when something happens.
+(2) Connect to the server with callbacks set as enabled.
+
+
+Firstly, we need to create a callback block and subscribe it, so that will get
+triggered whenever a specific event happens. When the callback is triggered,
+it will also recieve the new values of the event that happened.
+
+So how do we do this? We use the MPD#on method, which sets it all up for us. The
+argument takes a symbol with the name of the event. The function also requires a block,
+which is our actual callback that will get called.
+
+  mpd.on :volume do |volume|
+    puts "Volume was set to #{volume}"!
+  end
+
+One can also use separate methods or Procs and whatnot, just pass them in as a parameter.
+  
+  # Proc
+  proc = Proc.new {|volume| puts "Volume was set to #{volume}"! }
+  mpd.on :volume, &proc
+
+  # Method
+  def volume_change(value)
+    puts "Volume changed to #{value}!"
+  end
+
+  method = self.method(:volume_change)
+  mpd.on :volume, &method
+
+ruby-mpd supports callbacks for any of the keys returned by MPD#status, as well as +:connection+.
+which will notify us when we connect or disconnect to the daemon. Here's the full list of events,
+along with the variables it will return:
+
+  * *volume*: The volume level as an Integer between 0-100.
+  * *repeat*: true or false
+  * *random*: true or false
+  * *single*: true or false
+  * *consume*: true or false
+  * *playlist*: 31-bit unsigned Integer, the playlist version number.
+  * *playlistlength*: Integer, the length of the playlist
+  * *state*: :play, :stop, or :pause, state of the playback.
+  * *song*: An MPD::Song object, representing the current song.
+  * *songid*: playlist songid of the current song stopped on or playing.
+  * *nextsong*: playlist song number of the next song to be played.
+  * *nextsongid*: playlist songid of the next song to be played.
+  * *time*: Returns two variables, *+total+* and *+elapsed+*, Integers representing seconds.
+  * *elapsed*: Float, representing total time elapsed within the current song, but with higher accuracy.
+  * *bitrate*: instantaneous bitrate in kbps.
+  * *xfade*: crossfade in seconds
+  * *mixrampdb*: mixramp threshold in dB (Float)
+  * *mixrampdelay*: mixrampdelay in seconds
+  * *audio*: Returns three variables: sampleRate, bits and channels.
+  * *updating_db*: job id
+  * *error*: if there is an error, returns message here
+
+Note that if the callback returns more than one value, the callback needs more arguments
+in order to recieve those values:
+
+  mpd.on :audio do |sampleRate, bits, channels|
+    puts bits
+  end
+
+  mpd.on :audio do |*args|
+    puts args.join(',')
+  end
+
+Finally, the easiest step. In order for callbacks to work, connect to the server
+with callbacks enabled:
+
+    mpd.connect true
+
+Easy as pie. The above will connect to the server like normal, but this time it will
+create a new thread that loops until you issue a `disconnect`. This loop checks the
+server, then sleeps for two tenths of a second, then loops. Because it's continuously
+polling the server, there's the added benefit of your client not being disconnected
+due to inactivity.

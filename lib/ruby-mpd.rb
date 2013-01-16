@@ -1,26 +1,26 @@
 require 'socket'
 require 'thread'
 
-require_relative 'song'
-require_relative 'parser'
+require 'ruby-mpd/song'
+require 'ruby-mpd/parser'
+require 'ruby-mpd/playlist'
 
-require_relative 'playlist'
-
-require_relative 'plugins/information'
-require_relative 'plugins/playback_options'
-require_relative 'plugins/controls'
-require_relative 'plugins/queue'
-require_relative 'plugins/playlists'
-require_relative 'plugins/database'
-require_relative 'plugins/stickers'
-require_relative 'plugins/outputs'
-require_relative 'plugins/reflection'
-require_relative 'plugins/channels'
+require 'ruby-mpd/plugins/information'
+require 'ruby-mpd/plugins/playback_options'
+require 'ruby-mpd/plugins/controls'
+require 'ruby-mpd/plugins/queue'
+require 'ruby-mpd/plugins/playlists'
+require 'ruby-mpd/plugins/database'
+require 'ruby-mpd/plugins/stickers'
+require 'ruby-mpd/plugins/outputs'
+require 'ruby-mpd/plugins/reflection'
+require 'ruby-mpd/plugins/channels'
 
 # TODO: object oriented: song commands and dir commands
 # in MPD::Song, MPD::Directory.
 # Make stickers a mixin for Playlist, Song, Directory...
 # TODO: Namespace queue?
+# TODO: fix parser to use build_group also
 
 # command list as a do block
 # mpd.command_list do
@@ -28,14 +28,12 @@ require_relative 'plugins/channels'
 #   play xyz
 # end
 
-# error codes stored in ack.h
+# Playlist#rename -> Playlist#name= ?
+#   MPD::Playlist.new(mpd, 'name')  no mpd?
 
-# TODO:
-# 0.15
-#  - added the "findadd" command
-#  - allow changing replay gain mode on-the-fly
-# 0.17 (2012/06/27)
-#  - new commands "searchadd", "searchaddpl"
+# make it possible to use MPD::Song objects instead of filepath strings
+
+# error codes stored in ack.h
 
 # @!macro [new] error_raise
 #   @raise (see #send_command)
@@ -102,10 +100,9 @@ class MPD
   # Triggers an event, running it's callbacks.
   # @param [Symbol] event The event that happened.
   def emit(event, *args)
-    p "#{event} was triggered!"
     @callbacks[event] ||= []
-    @callbacks[event].each do |cb|
-      cb.call *args
+    @callbacks[event].each do |handle|
+      handle.call *args
     end
   end
 
@@ -273,7 +270,7 @@ class MPD
     end
   end
 
-  private # Private Methods below
+  private
 
   # Handles the server's response (called inside {#send_command}).
   # Repeatedly reads the server's response from the socket and

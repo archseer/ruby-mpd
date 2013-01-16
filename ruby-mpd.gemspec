@@ -9,9 +9,6 @@ Gem::Specification.new do |s|
   s.summary          = "Ruby client library for MPD"
   s.description      = "A simple yet powerful library for the Music Player Daemon, written in Ruby."
 
-  s.has_rdoc         = true
-  s.extra_rdoc_files = ['README.md']
-
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }

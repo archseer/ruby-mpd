@@ -117,7 +117,6 @@ class MPD
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    # @todo fix parsing of :listall
     def build_response(string)
       return [] if string.nil? || !string.is_a?(String)
 
