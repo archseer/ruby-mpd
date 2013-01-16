@@ -33,6 +33,10 @@ require 'ruby-mpd/plugins/channels'
 
 # make it possible to use MPD::Song objects instead of filepath strings
 
+# merge find & search with a options hash (:insensitive => true)
+
+# merge id, pos with (:pos => 1 | :id => 1)
+
 # error codes stored in ack.h
 
 # @!macro [new] error_raise

@@ -2,7 +2,7 @@ class MPD
   module Plugins
     # Commands for interacting with the music database.
     #
-    # Changes: listallinfo -> songs
+    # Changes: listallinfo -> songs, searchaddpl in MPD::Playlist#searchadd
     module Database
 
       # Counts the number of songs and their total playtime
@@ -23,7 +23,14 @@ class MPD
         build_songs_list send_command(:find, type, what)
       end
 
-      # findadd
+      # Finds songs in the database that are *EXACTLY* matched by the what
+      # argument and immediately adds them to the queue.
+      #
+      # @param (see #find)
+      # @macro returnraise
+      def findadd(type, what)
+        send_command :findadd, type, what
+      end
 
       # List all tags of the specified type.
       # Type can be any tag supported by MPD or +:file+.
@@ -55,9 +62,15 @@ class MPD
         build_songs_list(send_command(:search, type, what))
       end
 
-      # searchadd
-
-      # searchaddpl
+      # Searches for any song that contains +what+ in the +type+ field
+      # and immediately adds them to the queue.
+      # Searches are *NOT* case sensitive.
+      #
+      # @param (see #find)
+      # @macro returnraise
+      def searchadd(type, what)
+        send_command :searchadd, type, what
+      end
 
       # Tell the server to update the database. Optionally,
       # specify the path to update.

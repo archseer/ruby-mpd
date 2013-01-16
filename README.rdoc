@@ -54,6 +54,10 @@ Once connected, you can issue commands to talk to the server
 
 You can find documentation for each command at http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD
 
+Quick note: For searching, there are usually two methods, a search variant
+and a find variant. The find variant is case sensitive, whilst the search
+one is not, and they both accept the same arguments.
+
 == Playlists
 
 Playlists are one of the objects that map the MPD commands onto a simple to use

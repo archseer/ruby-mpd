@@ -4,7 +4,8 @@ class MPD
     # For a distinction between this and other playlists, this is called
     # queue. 
     # Changes: playlistinfo -> queue, plchanges -> queue_changes,
-    #  playlistid -> song_with_id.
+    #  playlistid -> song_with_id, playlistfind -> queue_find,
+    #  playlistsearch -> queue_search.
     module Queue
 
       # List the current playlist/queue.
@@ -70,7 +71,16 @@ class MPD
         send_command :moveid, songid, to
       end
 
-      # playlistfind
+      # Finds songs in the queue that are *EXACTLY* matched by the what
+      # argument.
+      #
+      # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
+      #   parameters: +:file+ to search by full path (relative to database root),
+      #   and +:any+ to match against all available tags.
+      # @return [Array<MPD::Song>] Songs that matched.
+      def queue_find(type, what)
+        build_songs_list send_command(:playlistfind, type, what)
+      end
 
       # Returns the song with the +songid+ in the playlist,
       # @return [MPD::Song]
@@ -78,7 +88,14 @@ class MPD
         Song.new send_command(:playlistid, songid)
       end
 
-      # playlistsearch
+      # Searches for songs in the queue matched by the what
+      # argument. Case insensitive.
+      #
+      # @param (see #find)
+      # @return (see #find)
+      def queue_search(type, what)
+        build_songs_list send_command(:playlistsearch, type, what)
+      end
 
       # List the changes since the specified version in the queue.
       # @return [Array<MPD::Song>]

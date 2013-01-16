@@ -42,6 +42,16 @@ class MPD
       @mpd.send_command :playlistadd, @name, uri
     end
 
+    # Searches for any song that contains +what+ in the +type+ field
+    # and immediately adds them to the playlist.
+    # Searches are *NOT* case sensitive.
+    #
+    # @param (see MPD::Plugins::Database#find)
+    # @macro returnraise
+    def searchadd(type, what)
+      send_command :searchaddpl, @name, type, what
+    end
+
     # Clears the playlist.
     # @macro returnraise
     def clear
