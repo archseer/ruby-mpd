@@ -16,27 +16,6 @@ require 'ruby-mpd/plugins/outputs'
 require 'ruby-mpd/plugins/reflection'
 require 'ruby-mpd/plugins/channels'
 
-# TODO: object oriented: song commands and dir commands
-# in MPD::Song, MPD::Directory.
-# Make stickers a mixin for Playlist, Song, Directory...
-# TODO: Namespace queue?
-# TODO: fix parser to use build_group also
-
-# command list as a do block
-# mpd.command_list do
-#   volume 10
-#   play xyz
-# end
-
-# Playlist#rename -> Playlist#name= ?
-#   MPD::Playlist.new(mpd, 'name')  no mpd?
-
-# make it possible to use MPD::Song objects instead of filepath strings
-
-# commands missing: #plchangeposid, #lsinfo, #listall.
-
-# error codes stored in ack.h
-
 # @!macro [new] error_raise
 #   @raise (see #send_command)
 # @!macro [new] returnraise

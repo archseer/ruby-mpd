@@ -16,6 +16,8 @@ class MPD
           else
             "#{word.begin}:#{word.end + (word.exclude_end? ? 0 : 1)}"
           end
+        elsif word.is_a?(MPD::Song)
+          word.file
         else
           # escape any strings with space (wrap in double quotes)
           word = word.to_s
@@ -37,8 +39,6 @@ class MPD
     BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
     # Parses key-value pairs into correct class
-    # @todo special parsing of playlist, it's a int in :status and a string in :listplaylists
-
     def parse_key key, value
       if INT_KEYS.include? key
         value.to_i
