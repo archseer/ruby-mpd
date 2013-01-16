@@ -70,13 +70,13 @@ accepts both +:pos+ and +:id+. *Note*: #swap and #swapid are still separate!
 
 Some commands also allow ranges instead of numbers, specifying a range of songs.
 ruby-mpd correctly handles inclusive and exclusive ranges (1..10 vs 1...10).
-For example, #queue allows us to return only a subset of the queue:
+For example, +#queue+ allows us to return only a subset of the queue:
 
   mpd.queue.count # => 20
 
   mpd.queue(1..10).count # => 10
 
-Move also allows this:
+Move also allows specifying ranges to move a range of songs instead of just one.
 
   mpd.move 1, 10 # => move song 1 to position 10.
 
@@ -145,7 +145,7 @@ Firstly, we need to create a callback block and subscribe it, so that will get
 triggered whenever a specific event happens. When the callback is triggered,
 it will also recieve the new values of the event that happened.
 
-So how do we do this? We use the MPD#on method, which sets it all up for us. The
+So how do we do this? We use the +MPD#on+ method, which sets it all up for us. The
 argument takes a symbol with the name of the event. The function also requires a block,
 which is our actual callback that will get called.
 
@@ -167,31 +167,31 @@ One can also use separate methods or Procs and whatnot, just pass them in as a p
   method = self.method(:volume_change)
   mpd.on :volume, &method
 
-ruby-mpd supports callbacks for any of the keys returned by MPD#status, as well as +:connection+.
+ruby-mpd supports callbacks for any of the keys returned by +MPD#status+, as well as +:connection+.
 which will notify us when we connect or disconnect to the daemon. Here's the full list of events,
 along with the variables it will return:
 
-  * *volume*: The volume level as an Integer between 0-100.
-  * *repeat*: true or false
-  * *random*: true or false
-  * *single*: true or false
-  * *consume*: true or false
-  * *playlist*: 31-bit unsigned Integer, the playlist version number.
-  * *playlistlength*: Integer, the length of the playlist
-  * *state*: :play, :stop, or :pause, state of the playback.
-  * *song*: An MPD::Song object, representing the current song.
-  * *songid*: playlist songid of the current song stopped on or playing.
-  * *nextsong*: playlist song number of the next song to be played.
-  * *nextsongid*: playlist songid of the next song to be played.
-  * *time*: Returns two variables, *+total+* and *+elapsed+*, Integers representing seconds.
-  * *elapsed*: Float, representing total time elapsed within the current song, but with higher accuracy.
-  * *bitrate*: instantaneous bitrate in kbps.
-  * *xfade*: crossfade in seconds
-  * *mixrampdb*: mixramp threshold in dB (Float)
-  * *mixrampdelay*: mixrampdelay in seconds
-  * *audio*: Returns three variables: sampleRate, bits and channels.
-  * *updating_db*: job id
-  * *error*: if there is an error, returns message here
+* *volume*: The volume level as an Integer between 0-100.
+* *repeat*: true or false
+* *random*: true or false
+* *single*: true or false
+* *consume*: true or false
+* *playlist*: 31-bit unsigned Integer, the playlist version number.
+* *playlistlength*: Integer, the length of the playlist
+* *state*: :play, :stop, or :pause, state of the playback.
+* *song*: An MPD::Song object, representing the current song.
+* *songid*: playlist songid of the current song stopped on or playing.
+* *nextsong*: playlist song number of the next song to be played.
+* *nextsongid*: playlist songid of the next song to be played.
+* *time*: Returns two variables, *+total+* and *+elapsed+*, Integers representing seconds.
+* *elapsed*: Float, representing total time elapsed within the current song, but with higher accuracy.
+* *bitrate*: instantaneous bitrate in kbps.
+* *xfade*: crossfade in seconds
+* *mixrampdb*: mixramp threshold in dB (Float)
+* *mixrampdelay*: mixrampdelay in seconds
+* *audio*: Returns three variables: sampleRate, bits and channels.
+* *updating_db*: job id
+* *error*: if there is an error, returns message here
 
 Note that if the callback returns more than one value, the callback needs more arguments
 in order to recieve those values:
@@ -208,7 +208,7 @@ in order to recieve those values:
 Finally, the easiest step. In order for callbacks to work, connect to the server
 with callbacks enabled:
 
-    mpd.connect true
+  mpd.connect true
 
 Easy as pie. The above will connect to the server like normal, but this time it will
 create a new thread that loops until you issue a `disconnect`. This loop checks the

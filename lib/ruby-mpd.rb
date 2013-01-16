@@ -233,7 +233,7 @@ class MPD
   #
   # @return [Array<String>] Array of directory names
   def directories(path = nil)
-    response = send_command :listall, path
+    response = send_command(:listall, path)
     return response[:directory]
   end
 

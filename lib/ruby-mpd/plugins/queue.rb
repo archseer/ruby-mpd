@@ -2,10 +2,7 @@ class MPD
   module Plugins
     # These commands manipulate the current playlist, what's playing now.
     # For a distinction between this and other playlists, this is called
-    # queue. 
-    # Changes: playlistinfo -> queue, plchanges -> queue_changes,
-    #  playlistid -> song_with_id, playlistfind -> queue_find,
-    #  playlistsearch -> queue_search, prio -> song_priority.
+    # queue.
     module Queue
 
       # List the current playlist/queue.

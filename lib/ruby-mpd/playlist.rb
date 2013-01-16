@@ -9,9 +9,6 @@ class MPD
   # plugins instead of the hard-coded simple m3u parser. They can access
   # playlists in the music directory (relative path including the suffix) or
   # remote playlists (absolute URI with a supported scheme).
-  #
-  # Changes: rm -> destroy. listplaylistinfo -> songs. Playlist prefixes
-  # dropped also of course. Listplaylist not used, kinda inferior to listplaylistinfo
   class Playlist
 
     attr_accessor :name

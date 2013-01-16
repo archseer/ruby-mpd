@@ -1,9 +1,6 @@
 class MPD
   module Plugins
     # Commands for interacting with the music database.
-    #
-    # Changes: listallinfo -> songs, searchaddpl in MPD::Playlist#searchadd.
-    # search merges search, find, searchadd and findadd
     module Database
 
       # Counts the number of songs and their total playtime

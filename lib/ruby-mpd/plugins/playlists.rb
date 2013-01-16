@@ -1,8 +1,6 @@
 class MPD
   module Plugins
     # These commands manipulate stored playlists.
-    #
-    # Changes: listplaylists -> playlists.
     module Playlists
 
       # List all of the playlists in the database

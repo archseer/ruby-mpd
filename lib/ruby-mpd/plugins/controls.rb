@@ -1,8 +1,6 @@
 class MPD
   module Plugins
-    # Commands for controlling playback. Changes have been made to {#seek},
-    # command maps to +seekcur+ from MPD and the original seek command is
-    # {#seekpos} here.
+    # Commands for controlling playback.
     module Controls
       # Plays the next song in the playlist.
       # @macro returnraise
