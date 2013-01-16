@@ -94,6 +94,9 @@ class MPD
   #  method = Proc.new {|volume| puts "Volume was set to #{volume}"! }
   #  mpd.on :volume, &method
   #
+  # @param [Symbol] event The event we wish to listen for.
+  # @param [Proc, Method] block The actual callback.
+  # @return [void]
   def on(event, &block)
     @callbacks[event] ||= []
     @callbacks[event].push block
@@ -101,6 +104,7 @@ class MPD
 
   # Triggers an event, running it's callbacks.
   # @param [Symbol] event The event that happened.
+  # @return [void]
   def emit(event, *args)
     @callbacks[event] ||= []
     @callbacks[event].each do |handle|
@@ -182,6 +186,7 @@ class MPD
   # Disconnect from the MPD daemon. This has no effect if the client is not
   # connected. Reconnect using the {#connect} method. This will also stop
   # the callback thread, thus disabling callbacks.
+  # @return [void]
   def disconnect
     @stop_cb_thread = true
 
@@ -198,8 +203,9 @@ class MPD
     send_command :kill
   end
 
-  # Used for authentication with the server
+  # Used for authentication with the server.
   # @param [String] pass Plaintext password
+  # @macro returnraise
   def password(pass)
     send_command :password, pass
   end
@@ -212,21 +218,6 @@ class MPD
 
   ###--- OTHER ---###
 
-  # Lists all of the albums in the database.
-  # The optional argument is for specifying an artist to list
-  # the albums for
-  #
-  # @return [Array<String>] An array of album names.
-  def albums(artist = nil)
-    list :album, artist
-  end
-
-  # Lists all of the artists in the database.
-  #
-  # @return [Array<String>] An array of artist names.
-  def artists
-    list :artist
-  end
 
   # List all of the directories in the database, starting at path.
   # If path isn't specified, the root of the database is used
@@ -244,13 +235,6 @@ class MPD
   def files(path = nil)
     response = send_command(:listall, path)
     return response[:file]
-  end
-
-  # List all of the songs by an artist.
-  #
-  # @return [Array<MPD::Song>]
-  def songs_by_artist(artist)
-    search :artist, artist
   end
 
   # Used to send a command to the server. This synchronizes

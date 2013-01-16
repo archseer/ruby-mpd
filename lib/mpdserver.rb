@@ -20,7 +20,6 @@
 #
 # Example:
 #
-#  require 'rubygems'
 #  require 'librmpd'
 #  require 'mpdserver'
 #
@@ -71,7 +70,7 @@ class MPDTestServer < GServer
     }
     @elapsed_time = 0
     @current_song = nil
-    @database = YAML::load( File.open( db_file ) )
+    @database = YAML::load(File.open(db_file))
     @songs = @database[0]
     @playlists = @database[1]
     @artists = []

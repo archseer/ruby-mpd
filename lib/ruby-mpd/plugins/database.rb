@@ -29,7 +29,8 @@ class MPD
         build_songs_list send_command(:listallinfo, path)
       end
 
-      # lsinfo
+      # lsinfo - Clients that are connected via UNIX domain socket may use this
+      # command to read the tags of an arbitrary local file (URI beginning with "file:///").
 
       # Searches for any song that contains +what+ in the +type+ field.
       # Searches are case insensitive by default, however you can enable
@@ -70,6 +71,31 @@ class MPD
         send_command :rescan, path
       end
 
+      # unofficial
+
+      # Lists all of the albums in the database.
+      # The optional argument is for specifying an artist to list
+      # the albums for
+      #
+      # @return [Array<String>] An array of album names.
+      def albums(artist = nil)
+        list :album, artist
+      end
+
+      # Lists all of the artists in the database.
+      #
+      # @return [Array<String>] An array of artist names.
+      def artists
+        list :artist
+      end
+
+      # List all of the songs by an artist.
+      #
+      # @return [Array<MPD::Song>]
+      def songs_by_artist(artist)
+        search :artist, artist
+      end
+      
     end
   end
 end

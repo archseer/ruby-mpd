@@ -24,6 +24,7 @@ class MPD
       # volume so use negative values, I prefer -17dB. In the absence of mixramp
       # tags crossfading will be used. See http://sourceforge.net/projects/mixramp
       # @param [Float] decibels Maximum volume level in decibels.
+      # @macro returnraise
       def mixrampdb=(decibels)
         send_command :mixrampdb, decibels
       end
@@ -31,6 +32,7 @@ class MPD
       # Additional time subtracted from the overlap calculated by mixrampdb.
       # A value of "nan" or Float::NAN disables MixRamp overlapping and falls
       # back to crossfading.
+      # @macro returnraise
       def mixrampdelay=(seconds)
         send_command :mixrampdelay, seconds
       end

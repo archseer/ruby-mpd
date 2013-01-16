@@ -44,7 +44,7 @@ class MPD
       # @since MPD 0.17
       # @param [Integer, String] time Position within the current song.
       # @param [Hash] options Either +:id+ or +:pos+ can be specified.
-      # Returns true if successful,
+      # @macro returnraise
       def seek(time, options = {})
         if options[:id]
           send_command :seekid, options[:id], time
