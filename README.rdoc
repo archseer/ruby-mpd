@@ -1,7 +1,7 @@
 = ruby-mpd
 
 ruby-mpd is a powerful object-oriented Music Player Daemon library, forked from librmpd.
-librmpd is as of writing outdated by 6(*!*) years. This library tries to act as a successor,
+librmpd is as of writing outdated by 6 years! This library tries to act as a successor,
 originally using librmpd as a base, however almost all of the codebase was rewritten.
 ruby-mpd supports all "modern" MPD features.
 
@@ -22,7 +22,7 @@ Require the library.
 
   require 'ruby-mpd'
 
-Then, make a new object:
+Then, make a new MPD instance:
 
   mpd = MPD.new 'localhost', 6600
 
@@ -31,8 +31,7 @@ You can also omit the host and/or port, and it will use the defaults.
   mpd = MPD.new 'localhost'
   mpd = MPD.new
 
-
-Once you have an instance of the MPD class, connect to the server:
+Once you have an instance of the MPD class, connect to the server.
 
   mpd.connect
 
@@ -47,13 +46,13 @@ be fixed by enabling callbacks (see the Callbacks section) or by issuing a
 Once connected, you can issue commands to talk to the server
 
     mpd.connect
-    if mpd.stopped?
-      mpd.play
-    end
+    
+    mpd.play if mpd.stopped?
+
     song = mpd.current_song
     puts "Current Song: #{song.artist} - #{song.title}"
 
-You can find documentation for each command [here](TODO)
+You can find documentation for each command at http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD
 
 == Playlists
 
@@ -95,9 +94,8 @@ the server without having to worry about timeouts.
 
 To make use of callbacks, we need to:
 
-(1) Setup a callback to be called when something happens.
-(2) Connect to the server with callbacks set as enabled.
-
+1. Setup a callback to be called when something happens.
+2. Connect to the server with callbacks set as enabled.
 
 Firstly, we need to create a callback block and subscribe it, so that will get
 triggered whenever a specific event happens. When the callback is triggered,
@@ -158,6 +156,7 @@ in order to recieve those values:
     puts bits
   end
 
+  # or
   mpd.on :audio do |*args|
     puts args.join(',')
   end
