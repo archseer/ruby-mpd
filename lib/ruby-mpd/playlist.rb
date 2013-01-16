@@ -46,7 +46,9 @@ class MPD
     # and immediately adds them to the playlist.
     # Searches are *NOT* case sensitive.
     #
-    # @param (see MPD::Plugins::Database#find)
+    # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
+    #   parameters: +:file+ to search by full path (relative to database root),
+    #   and +:any+ to match against all available tags.
     # @macro returnraise
     def searchadd(type, what)
       send_command :searchaddpl, @name, type, what

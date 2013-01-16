@@ -3,6 +3,7 @@ class MPD
     # Commands for interacting with the music database.
     #
     # Changes: listallinfo -> songs, searchaddpl in MPD::Playlist#searchadd
+    # search merges search, find, searchadd and findadd
     module Database
 
       # Counts the number of songs and their total playtime
@@ -10,26 +11,6 @@ class MPD
       # @return [Hash] a hash with +songs+ and +playtime+ keys.
       def count(type, what)
         send_command :count, type, what
-      end
-
-      # Finds songs in the database that are *EXACTLY* matched by the what
-      # argument.
-      #
-      # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
-      #   parameters: +:file+ to search by full path (relative to database root),
-      #   and +:any+ to match against all available tags.
-      # @return [Array<MPD::Song>] Songs that matched.
-      def find(type, what)
-        build_songs_list send_command(:find, type, what)
-      end
-
-      # Finds songs in the database that are *EXACTLY* matched by the what
-      # argument and immediately adds them to the queue.
-      #
-      # @param (see #find)
-      # @macro returnraise
-      def findadd(type, what)
-        send_command :findadd, type, what
       end
 
       # List all tags of the specified type.
@@ -54,22 +35,27 @@ class MPD
       # lsinfo
 
       # Searches for any song that contains +what+ in the +type+ field.
-      # Searches are *NOT* case sensitive.
+      # Searches are case insensitive by default, however you can enable
+      # it using the third argument.
       #
-      # @param (see #find)
+      # Options:
+      # * *add*: Add the search results to the queue.
+      # * *case_sensitive*: Make the query case sensitive.
+      #
+      # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
+      #   parameters: +:file+ to search by full path (relative to database root),
+      #   and +:any+ to match against all available tags.
+      # @param [Hash] A hash of options.
       # @return [Array<MPD::Song>] Songs that matched.
-      def search(type, what)
-        build_songs_list(send_command(:search, type, what))
-      end
+      # @return [true] if +:add+ is enabled.
+      def search(type, what, options = {})
+        if options[:add]
+          command = options[:case_sensitive] ? :findadd : :searchadd
+        else
+          command = options[:case_sensitive] ? :find : :search
+        end
 
-      # Searches for any song that contains +what+ in the +type+ field
-      # and immediately adds them to the queue.
-      # Searches are *NOT* case sensitive.
-      #
-      # @param (see #find)
-      # @macro returnraise
-      def searchadd(type, what)
-        send_command :searchadd, type, what
+        build_songs_list send_command(command, type, what)
       end
 
       # Tell the server to update the database. Optionally,

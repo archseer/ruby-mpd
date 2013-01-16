@@ -71,17 +71,6 @@ class MPD
         send_command :moveid, songid, to
       end
 
-      # Finds songs in the queue that are *EXACTLY* matched by the what
-      # argument.
-      #
-      # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
-      #   parameters: +:file+ to search by full path (relative to database root),
-      #   and +:any+ to match against all available tags.
-      # @return [Array<MPD::Song>] Songs that matched.
-      def queue_find(type, what)
-        build_songs_list send_command(:playlistfind, type, what)
-      end
-
       # Returns the song with the +songid+ in the playlist,
       # @return [MPD::Song]
       def song_with_id(songid)
@@ -89,12 +78,17 @@ class MPD
       end
 
       # Searches for songs in the queue matched by the what
-      # argument. Case insensitive.
+      # argument. Case insensitive by default.
       #
-      # @param (see #find)
-      # @return (see #find)
-      def queue_search(type, what)
-        build_songs_list send_command(:playlistsearch, type, what)
+      # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
+      #   parameters: +:file+ to search by full path (relative to database root),
+      #   and +:any+ to match against all available tags.
+      #
+      # @param [Hash] Use +:case_sensitive+ to make the query case sensitive.
+      # @return [Array<MPD::Song>] Songs that matched.
+      def queue_search(type, what, options = {})
+        command = options[:case_sensitive] ? :playlistfind : :playlistsearch
+        build_songs_list send_command(command, type, what)
       end
 
       # List the changes since the specified version in the queue.
