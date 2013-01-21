@@ -1,9 +1,8 @@
 #
-# Unit tests for librmpd
+# Unit tests for ruby-mpd
 #
-# This uses the included mpdserver.rb test server
 
-require '../lib/librmpd'
+require '../lib/ruby-mpd'
 require 'test/unit'
 
 class MPDTester < Test::Unit::TestCase
@@ -19,7 +18,7 @@ class MPDTester < Test::Unit::TestCase
 
   def test_connect
     ret = @mpd.connect
-    assert_match /OK MPD [0-9.]*\n/, ret
+    assert ret
   end
 
   def test_connected?
@@ -63,10 +62,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Are You Shpongled?', pls[0].album
     assert_equal 'Shpongle Falls', pls[0].title
 
-    assert_raise(MPD::MPDError) {@mpd.add('Does/Not/Exist')}
+    assert_raise(MPD::ServerError) {@mpd.add('Does/Not/Exist')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.add('Shpongle')}
+    assert_raise(MPD::ServerError) {@mpd.add('Shpongle')}
   end
 
   def test_clear
@@ -84,7 +83,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 0, pls.size
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.clear}
+    assert_raise(MPD::ServerError) {@mpd.clear}
   end
 
   def test_clearerror
@@ -94,7 +93,7 @@ class MPDTester < Test::Unit::TestCase
     assert @mpd.clearerror
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.clearerror}
+    assert_raise(MPD::ServerError) {@mpd.clearerror}
   end
 
   def test_crossfade
@@ -106,8 +105,8 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '40', @mpd.status['xfade']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.crossfade = 20}
-    assert_raise(MPD::MPDError) {@mpd.crossfade}
+    assert_raise(MPD::ServerError) {@mpd.crossfade = 20}
+    assert_raise(MPD::ServerError) {@mpd.crossfade}
   end
 
   def test_current_song
@@ -145,7 +144,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '1', s.track
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.current_song}
+    assert_raise(MPD::ServerError) {@mpd.current_song}
   end
 
   def test_delete
@@ -161,10 +160,10 @@ class MPDTester < Test::Unit::TestCase
       assert_not_equal 'No On Ever Dreams', song.title
     end
 
-    assert_raise(MPD::MPDError) {@mpd.delete(999)}
+    assert_raise(MPD::ServerError) {@mpd.delete(999)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.delete(3)}
+    assert_raise(MPD::ServerError) {@mpd.delete(3)}
   end
 
   def test_deleteid
@@ -180,10 +179,10 @@ class MPDTester < Test::Unit::TestCase
       assert_not_equal 'No One Ever Dreams', song.title
     end
 
-    assert_raise(MPD::MPDError) {@mpd.deleteid(999)}
+    assert_raise(MPD::ServerError) {@mpd.deleteid(999)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.deleteid(11)}
+    assert_raise(MPD::ServerError) {@mpd.deleteid(11)}
   end
 
   def test_find
@@ -220,10 +219,10 @@ class MPDTester < Test::Unit::TestCase
     d = @mpd.find 'artist', 'no artist'
     assert_equal 0, d.size
 
-    assert_raise(MPD::MPDError) {@mpd.find('error', 'no-such')}
+    assert_raise(MPD::ServerError) {@mpd.find('error', 'no-such')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.find('album', 'Are You Shpongled')}
+    assert_raise(MPD::ServerError) {@mpd.find('album', 'Are You Shpongled')}
   end
 
   def test_kill
@@ -233,7 +232,7 @@ class MPDTester < Test::Unit::TestCase
 
     assert !@mpd.connected?
 
-    assert_raise(MPD::MPDError) {@mpd.kill}
+    assert_raise(MPD::ServerError) {@mpd.kill}
   end
 
   def test_albums
@@ -254,7 +253,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Nothing Lasts... But Nothing Is Lost', sh[1]
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.albums}
+    assert_raise(MPD::ServerError) {@mpd.albums}
   end
 
   def test_artists
@@ -268,7 +267,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Shpongle', artists[2]
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.artists}
+    assert_raise(MPD::ServerError) {@mpd.artists}
   end
 
   def test_list
@@ -295,11 +294,11 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Are You Shpongled?', arg[0]
     assert_equal 'Nothing Lasts... But Nothing Is Lost', arg[1]
 
-    assert_raise(MPD::MPDError) {@mpd.list('fail')}
-    assert_raise(MPD::MPDError) {@mpd.list('fail', 'Shpongle')}
+    assert_raise(MPD::ServerError) {@mpd.list('fail')}
+    assert_raise(MPD::ServerError) {@mpd.list('fail', 'Shpongle')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.artists}
+    assert_raise(MPD::ServerError) {@mpd.artists}
   end
 
   def test_directories
@@ -323,10 +322,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Shpongle/Are_You_Shpongled', shpongle[1]
     assert_equal 'Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost', shpongle[2]
 
-    assert_raise(MPD::MPDError) {@mpd.directories('no-dirs')}
+    assert_raise(MPD::ServerError) {@mpd.directories('no-dirs')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.directories}
+    assert_raise(MPD::ServerError) {@mpd.directories}
   end
 
   def test_files
@@ -354,10 +353,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/01.Botanical_Dimensions.ogg', sh[7]
     assert_equal 'Shpongle/Nothing_Lasts..._But_Nothing_Is_Lost/20.Falling_Awake.ogg', sh[26]
 
-    assert_raise(MPD::MPDError) {@mpd.files('no-files')}
+    assert_raise(MPD::ServerError) {@mpd.files('no-files')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.files}
+    assert_raise(MPD::ServerError) {@mpd.files}
   end
 
   def test_playlists
@@ -371,7 +370,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Astral_Projection_-_Dancing_Galaxy', pls[1]
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.playlists}
+    assert_raise(MPD::ServerError) {@mpd.playlists}
   end
 
   def test_songs
@@ -403,10 +402,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Botanical Dimensions', sh[7].title
     assert_equal 'Falling Awake', sh[26].title
 
-    assert_raise(MPD::MPDError) {@mpd.songs('no-songs')}
+    assert_raise(MPD::ServerError) {@mpd.songs('no-songs')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.songs}
+    assert_raise(MPD::ServerError) {@mpd.songs}
   end
 
   def test_songs_by_artist
@@ -429,7 +428,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 0, songs.size
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.songs_by_artist('Shpongle')}
+    assert_raise(MPD::ServerError) {@mpd.songs_by_artist('Shpongle')}
   end
 
   def test_load
@@ -455,10 +454,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Liquid Sun', pls[6].title
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[7].title
 
-    assert_raise(MPD::MPDError) {@mpd.load('No-PLS')}
+    assert_raise(MPD::ServerError) {@mpd.load('No-PLS')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.load('Astral_Projection_-_Dancing_Galaxy')}
+    assert_raise(MPD::ServerError) {@mpd.load('Astral_Projection_-_Dancing_Galaxy')}
   end
 
   def test_move
@@ -485,10 +484,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[6].title
     assert_equal 'Soundform', pls[7].title
 
-    assert_raise(MPD::MPDError) {@mpd.move(999,1)}
+    assert_raise(MPD::ServerError) {@mpd.move(999,1)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.move(3,1)}
+    assert_raise(MPD::ServerError) {@mpd.move(3,1)}
   end
 
   def test_moveid
@@ -515,10 +514,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[6].title
     assert_equal 'Soundform', pls[7].title
 
-    assert_raise(MPD::MPDError) {@mpd.moveid(999,1)}
+    assert_raise(MPD::ServerError) {@mpd.moveid(999,1)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.moveid(10,1)}
+    assert_raise(MPD::ServerError) {@mpd.moveid(10,1)}
 
   end
 
@@ -536,7 +535,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal pos + 1, @mpd.status['song'].to_i
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.next}
+    assert_raise(MPD::ServerError) {@mpd.next}
   end
 
   def test_pause
@@ -563,19 +562,19 @@ class MPDTester < Test::Unit::TestCase
     assert !@mpd.paused?
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.pause = true}
-    assert_raise(MPD::MPDError) {@mpd.paused?}
+    assert_raise(MPD::ServerError) {@mpd.pause = true}
+    assert_raise(MPD::ServerError) {@mpd.paused?}
   end
 
   def test_password
     @mpd.connect
 
-    assert_raise(MPD::MPDError) {@mpd.password('wrong')}
+    assert_raise(MPD::ServerError) {@mpd.password('wrong')}
 
     assert @mpd.password('test')
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.password('test')}
+    assert_raise(MPD::ServerError) {@mpd.password('test')}
   end
 
   def test_ping
@@ -584,7 +583,7 @@ class MPDTester < Test::Unit::TestCase
     assert @mpd.ping
     
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.ping}
+    assert_raise(MPD::ServerError) {@mpd.ping}
   end
 
   def test_play
@@ -614,8 +613,8 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Flying Into A Star', song.title
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.play}
-    assert_raise(MPD::MPDError) {@mpd.playing?}
+    assert_raise(MPD::ServerError) {@mpd.play}
+    assert_raise(MPD::ServerError) {@mpd.playing?}
   end
 
   def test_playid
@@ -645,8 +644,8 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Flying Into A Star', song.title
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.playid}
-    assert_raise(MPD::MPDError) {@mpd.playing?}
+    assert_raise(MPD::ServerError) {@mpd.playid}
+    assert_raise(MPD::ServerError) {@mpd.playing?}
 
   end
 
@@ -664,7 +663,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 9, ver
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.playlist_version}
+    assert_raise(MPD::ServerError) {@mpd.playlist_version}
   end
 
   def test_playlist
@@ -690,7 +689,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[7].title
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.playlist}
+    assert_raise(MPD::ServerError) {@mpd.playlist}
   end
 
   def test_song_at_pos
@@ -707,10 +706,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Liquid Sun', @mpd.song_at_pos(6).title
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', @mpd.song_at_pos(7).title
 
-    assert_raise(MPD::MPDError) {@mpd.song_at_pos(999)}
+    assert_raise(MPD::ServerError) {@mpd.song_at_pos(999)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.song_at_pos(0)}
+    assert_raise(MPD::ServerError) {@mpd.song_at_pos(0)}
   end
 
   def test_song_with_id
@@ -727,10 +726,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Liquid Sun', @mpd.song_with_id(13).title
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', @mpd.song_with_id(14).title
 
-    assert_raise(MPD::MPDError) {@mpd.song_with_id(999)}
+    assert_raise(MPD::ServerError) {@mpd.song_with_id(999)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.song_with_id(10)}
+    assert_raise(MPD::ServerError) {@mpd.song_with_id(10)}
   end
 
   def test_playlist_changes
@@ -760,7 +759,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 8, changes.size
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.playlist_changes(9)}
+    assert_raise(MPD::ServerError) {@mpd.playlist_changes(9)}
   end
 
   def test_previous
@@ -781,7 +780,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal pos - 1, @mpd.status['song'].to_i
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.previous}
+    assert_raise(MPD::ServerError) {@mpd.previous}
   end
 
   def test_random
@@ -794,8 +793,8 @@ class MPDTester < Test::Unit::TestCase
     assert !@mpd.random?
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.random = false}
-    assert_raise(MPD::MPDError) {@mpd.random?}
+    assert_raise(MPD::ServerError) {@mpd.random = false}
+    assert_raise(MPD::ServerError) {@mpd.random?}
   end
 
   def test_repeat
@@ -808,8 +807,8 @@ class MPDTester < Test::Unit::TestCase
     assert !@mpd.repeat?
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.repeat = false}
-    assert_raise(MPD::MPDError) {@mpd.repeat?}
+    assert_raise(MPD::ServerError) {@mpd.repeat = false}
+    assert_raise(MPD::ServerError) {@mpd.repeat?}
   end
 
   def test_rm
@@ -823,10 +822,10 @@ class MPDTester < Test::Unit::TestCase
 
     assert_equal 'Shpongle_-_Are_You_Shpongled', pls[0]
 
-    assert_raise(MPD::MPDError) {@mpd.rm('Not-Exist')}
+    assert_raise(MPD::ServerError) {@mpd.rm('Not-Exist')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.rm('Astral_Projection_-_Dancing_Galaxy')}
+    assert_raise(MPD::ServerError) {@mpd.rm('Astral_Projection_-_Dancing_Galaxy')}
   end
 
   def test_save
@@ -862,7 +861,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '... and the Day Turned to Night', pls[14].title
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.save('test')}
+    assert_raise(MPD::ServerError) {@mpd.save('test')}
   end
 
   def test_search
@@ -898,10 +897,10 @@ class MPDTester < Test::Unit::TestCase
     z = @mpd.search 'title', 'no-title'
     assert_equal 0, z.size
 
-    assert_raise(MPD::MPDError) {@mpd.search('error', 'nosuch')}
+    assert_raise(MPD::ServerError) {@mpd.search('error', 'nosuch')}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.search('artist','searching')}
+    assert_raise(MPD::ServerError) {@mpd.search('artist','searching')}
   end
 
   def test_seek
@@ -930,7 +929,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '200:585', status['time']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.seek(1, 100)}
+    assert_raise(MPD::ServerError) {@mpd.seek(1, 100)}
   end
 
   def test_seekid
@@ -959,7 +958,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '200:585', status['time']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.seekid(1, 100)}
+    assert_raise(MPD::ServerError) {@mpd.seekid(1, 100)}
   end
 
   def test_volume
@@ -974,8 +973,8 @@ class MPDTester < Test::Unit::TestCase
     assert_equal vol, @mpd.volume
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.volume = 10}
-    assert_raise(MPD::MPDError) {@mpd.volume}
+    assert_raise(MPD::ServerError) {@mpd.volume = 10}
+    assert_raise(MPD::ServerError) {@mpd.volume}
   end
 
   def test_shuffle
@@ -991,7 +990,7 @@ class MPDTester < Test::Unit::TestCase
     assert_not_equal 'Dancing Galaxy', pls[0].title
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.shuffle}
+    assert_raise(MPD::ServerError) {@mpd.shuffle}
   end
 
   def test_stats
@@ -1005,7 +1004,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '500', stats['uptime']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.stats}
+    assert_raise(MPD::ServerError) {@mpd.stats}
   end
 
   def test_status
@@ -1018,7 +1017,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal '0', status['random']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.status}
+    assert_raise(MPD::ServerError) {@mpd.status}
   end
 
   def test_stop
@@ -1036,8 +1035,8 @@ class MPDTester < Test::Unit::TestCase
     assert !@mpd.playing?
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.stop}
-    assert_raise(MPD::MPDError) {@mpd.stopped?}
+    assert_raise(MPD::ServerError) {@mpd.stop}
+    assert_raise(MPD::ServerError) {@mpd.stopped?}
   end
 
   def test_swap
@@ -1071,10 +1070,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Liquid Sun', pls[6].title
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[1].title
 
-    assert_raise(MPD::MPDError) {@mpd.swap(999,1)}
+    assert_raise(MPD::ServerError) {@mpd.swap(999,1)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.swap(2, 5)}
+    assert_raise(MPD::ServerError) {@mpd.swap(2, 5)}
   end
 
   def test_swapid
@@ -1108,10 +1107,10 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 'Liquid Sun', pls[6].title
     assert_equal 'Ambient Galaxy (Disco Valley Mix)', pls[1].title
 
-    assert_raise(MPD::MPDError) {@mpd.swapid(999,8)}
+    assert_raise(MPD::ServerError) {@mpd.swapid(999,8)}
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.swapid(9, 12)}
+    assert_raise(MPD::ServerError) {@mpd.swapid(9, 12)}
   end
 
   def test_update
@@ -1130,6 +1129,6 @@ class MPDTester < Test::Unit::TestCase
     assert_nil status['updating_db']
 
     @mpd.disconnect
-    assert_raise(MPD::MPDError) {@mpd.update}
+    assert_raise(MPD::ServerError) {@mpd.update}
   end
 end
