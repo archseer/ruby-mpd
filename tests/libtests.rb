@@ -4,27 +4,17 @@
 # This uses the included mpdserver.rb test server
 
 require '../lib/librmpd'
-require '../lib/mpdserver'
 require 'test/unit'
 
 class MPDTester < Test::Unit::TestCase
 
   def setup
     begin
-      @port = 93932
-      @server = MPDTestServer.new @port
-      @server.start
-    rescue Errno::EADDRINUSE
-      @port = 94942
-      @server = MPDTestServer.new @port
-      @server.start
-    end
-    @mpd = MPD.new 'localhost', @port
+    @mpd = MPD.new 'localhost', 94942
   end
 
   def teardown
     @mpd.disconnect
-    @server.stop
   end
 
   def test_connect
