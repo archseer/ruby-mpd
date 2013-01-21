@@ -76,12 +76,17 @@ accepts both +:pos+ and +:id+. *Note*: +#swap+ and +#swapid+ are still separate!
 === Ranges
 
 Some commands also allow ranges instead of numbers, specifying a range of songs.
-ruby-mpd correctly handles inclusive and exclusive ranges (1..10 vs 1...10).
+ruby-mpd correctly handles inclusive and exclusive ranges (1..10 vs 1...10). Negative
+range end means that we want the range to span until the end of the list.
+
 For example, +#queue+ allows us to return only a subset of the queue:
 
   mpd.queue.count # => 20
 
   mpd.queue(1..10).count # => 10
+
+  mpd.queue(5..-1).count # => 15 (from 5 to the end of the range)
+  mpd.queue(5...-1).count # => 15 (does the same)
 
 Move also allows specifying ranges to move a range of songs instead of just one.
 

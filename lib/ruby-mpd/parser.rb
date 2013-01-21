@@ -11,7 +11,7 @@ class MPD
         if word.is_a?(TrueClass) || word.is_a?(FalseClass)
           word ? '1' : '0' # convert bool to 1 or 0
         elsif word.is_a?(Range)
-          if word.end == -1 #negative means to end of range
+          if word.end == -1 # negative means to end of range
             "#{word.begin}:"
           else
             "#{word.begin}:#{word.end + (word.exclude_end? ? 0 : 1)}"
