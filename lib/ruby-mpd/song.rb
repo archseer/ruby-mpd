@@ -8,7 +8,7 @@ class MPD::Song
   attr_accessor :time
 
   def initialize(options)
-    @data = {}
+    @data = {} #allowed fields are @types + :file
     @time = options.delete(:time).first #HAXX for array return
     @data.merge! options
   end

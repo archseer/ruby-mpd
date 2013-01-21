@@ -1,8 +1,6 @@
 class MPD
   module Plugins
     # Informational commands regarding MPD's internals and config.
-    #
-    # Changes: tagtypes was mapped to tags and gets fetched only once.
     module Reflection
       # Returns the config of MPD (currently only music_directory).
       # Only works if connected trough an UNIX domain socket.
@@ -36,7 +34,9 @@ class MPD
         send_command :decoders
       end
 
-      # Get a list of available song metadata.
+      # Get a list of available song metadata fields. This gets only
+      # mapped once per-connect (it gets remapped if you connect and
+      # disconnect).
       # @return [Array] An array of tags.
       def tags
         @tags ||= send_command(:tagtypes).map {|tag| tag.downcase }

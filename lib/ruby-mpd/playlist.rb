@@ -22,7 +22,7 @@ class MPD
     # Lists the songs in the playlist. Playlist plugins are supported.
     # @return [Array<MPD::Song>] songs in the playlist.
     def songs
-      mpd.build_songs_list @mpd.send_command(:listplaylistinfo, @name)
+      @mpd.send_command(:listplaylistinfo, @name).map {|hash| Song.new(hash) }
     end
 
     # Loads the playlist into the current queue. Playlist plugins are supported.

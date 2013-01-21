@@ -43,8 +43,6 @@ class MPD
 
   # The version of the MPD protocol the server is using.
   attr_reader :version
-  # A list of tags MPD accepts.
-  attr_reader :tags
 
   # Initialize an MPD object with the specified hostname and port.
   # When called without arguments, 'localhost' and 6600 are used.
@@ -53,6 +51,7 @@ class MPD
     @port = port
     @socket = nil
     @version = nil
+    @tags = nil
 
     @stop_cb_thread = false
     @mutex = Mutex.new
