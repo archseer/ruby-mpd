@@ -48,7 +48,7 @@ class MPD
     #   and +:any+ to match against all available tags.
     # @macro returnraise
     def searchadd(type, what)
-      send_command :searchaddpl, @name, type, what
+      @mpd.send_command :searchaddpl, @name, type, what
     end
 
     # Clears the playlist.
