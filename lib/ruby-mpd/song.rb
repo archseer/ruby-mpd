@@ -4,8 +4,12 @@ class MPD; end
 #
 # If the field doesn't exist or isn't set, nil will be returned
 class MPD::Song
+  # length in seconds
+  attr_accessor :time
+
   def initialize(options)
     @data = {}
+    @time = options.delete(:time).first #HAXX for array return
     @data.merge! options
   end
 
@@ -15,7 +19,7 @@ class MPD::Song
   end
 
   def length
-    return "#{(@data.time / 60)}:#{"%02d" % (@data.time % 60)}"
+    return "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
   end
 
   def method_missing(m, *a)
