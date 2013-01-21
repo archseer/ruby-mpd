@@ -165,15 +165,16 @@ class MPD
   # Disconnect from the MPD daemon. This has no effect if the client is not
   # connected. Reconnect using the {#connect} method. This will also stop
   # the callback thread, thus disabling callbacks.
-  # @return [void]
+  # @return [Boolean] True if successfully disconnected, false otherwise.
   def disconnect
     @stop_cb_thread = true
 
-    return if @socket.nil?
+    return false if !@socket
 
     @socket.puts 'close'
     @socket.close
     @socket = nil
+    return true
   end
 
   # Kills the MPD process.
