@@ -26,7 +26,7 @@ Then, make a new MPD instance:
 
   mpd = MPD.new 'localhost', 6600
 
-You can also omit the host and/or port, and it will use the defaults.
+You can also omit the host and port, and it will use the defaults.
 
   mpd = MPD.new 'localhost'
   mpd = MPD.new
@@ -255,6 +255,12 @@ and just use idle and when it returns, simply use idle again and again.
 
 +#directories+ and +#files+ is broken at the moment as we need to make the parser use
 +Parser#build_group+ for only those two commands.
+
+=== Tests
+
+Tests fail at the moment, as they are 6 years old. The entire MPD server mock class
+either needs to be rewritten, or a mpd.conf along with a sample database and instructions
+for a controlled environment needs to be written.
 
 == TODO list
 

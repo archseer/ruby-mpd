@@ -64,13 +64,13 @@ class MPD
   # that specific event happens.
   #
   #   mpd.on :volume do |volume|
-  #     puts "Volume was set to #{volume}"!
+  #     puts "Volume was set to #{volume}!"
   #   end
   #
   # One can also define separate methods or Procs and whatnot,
   # just pass them in as a parameter.
   #
-  #  method = Proc.new {|volume| puts "Volume was set to #{volume}"! }
+  #  method = Proc.new {|volume| puts "Volume was set to #{volume}!" }
   #  mpd.on :volume, &method
   #
   # @param [Symbol] event The event we wish to listen for.
@@ -197,9 +197,8 @@ class MPD
 
   ###--- OTHER ---###
 
-
   # List all of the directories in the database, starting at path.
-  # If path isn't specified, the root of the database is used
+  # If path isn't specified, the root of the database is used.
   #
   # @return [Array<String>] Array of directory names
   def directories(path = nil)
@@ -208,7 +207,7 @@ class MPD
   end
 
   # List all of the files in the database, starting at path.
-  # If path isn't specified, the root of the database is used
+  # If path isn't specified, the root of the database is used.
   #
   # @return [Array<String>] Array of file names
   def files(path = nil)
@@ -216,8 +215,8 @@ class MPD
     return response[:file]
   end
 
-  # Used to send a command to the server. This synchronizes
-  # on a mutex to be thread safe
+  # Used to send a command to the server. Synchronized on a mutex
+  # to be thread safe.
   #
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.

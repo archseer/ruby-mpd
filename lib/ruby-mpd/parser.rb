@@ -38,7 +38,7 @@ class MPD
     FLOAT_KEYS = [:mixrampdb, :elapsed]
     BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
-    # Parses key-value pairs into correct class
+    # Parses key-value pairs into correct class.
     def parse_key key, value
       if INT_KEYS.include? key
         value.to_i
