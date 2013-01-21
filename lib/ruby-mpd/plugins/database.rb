@@ -19,7 +19,13 @@ class MPD
         send_command :list, type, arg
       end
 
-      # listall
+      # List all of the files in the database, starting at path.
+      # If path isn't specified, the root of the database is used.
+      #
+      # @return [Hash<String>] hash with array keys :file, :directory and :playlist.
+      def files(path = nil)
+        send_command(:listall, path)
+      end
 
       # List all of the songs in the database starting at path.
       # If path isn't specified, the root of the database is used
@@ -72,6 +78,15 @@ class MPD
       end
 
       # unofficial
+
+      # List all of the directories in the database, starting at path.
+      # If path isn't specified, the root of the database is used.
+      #
+      # @return [Array<String>] Array of directory names
+      def directories(path = nil)
+        response = send_command(:listall, path)
+        return response[:directory]
+      end
 
       # Lists all of the albums in the database.
       # The optional argument is for specifying an artist to list

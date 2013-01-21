@@ -113,6 +113,14 @@ class MPD
       end
     end
 
+    # Parses the response, determining per-command on what parsing logic
+    # to use (build_response vs build_grouped_response). 
+    #
+    # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
+    def parse_response(command, string)
+      command == :listall ? build_grouped_response(string) : build_response(string)
+    end
+
     # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
@@ -136,7 +144,7 @@ class MPD
     # Parse the response into groups that have the same key (used for file lists,
     # groups together files, directories and playlists).
     # @return [Hash<Array>] A hash of key groups.
-    def build_groups(string)
+    def build_grouped_response(string)
       return [] if string.nil? || !string.is_a?(String)
 
       string.split("\n").each_with_object({}) do |line, hash|

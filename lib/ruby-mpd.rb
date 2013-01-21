@@ -196,27 +196,12 @@ class MPD
     send_command :ping
   end
 
-  ###--- OTHER ---###
-
-  # List all of the directories in the database, starting at path.
-  # If path isn't specified, the root of the database is used.
+  # Used to send a command to the server, and to recieve the reply.
+  # Reply gets parsed. Synchronized on a mutex to be thread safe.
   #
-  # @return [Array<String>] Array of directory names
-  def directories(path = nil)
-    response = send_command(:listall, path)
-    return response[:directory]
-  end
-
-  # List all of the files in the database, starting at path.
-  # If path isn't specified, the root of the database is used.
-  #
-  # @return [Array<String>] Array of file names
-  def files(path = nil)
-    send_command(:listall, path)
-  end
-
-  # Used to send a command to the server. Synchronized on a mutex
-  # to be thread safe.
+  # Can be used to get low level direct access to MPD daemon. Not
+  # recommended, should be just left for internal use by other
+  # methods.
   #
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.
@@ -226,7 +211,9 @@ class MPD
     @mutex.synchronize do
       begin
         @socket.puts convert_command(command, *args)
-        return handle_server_response
+        response = handle_server_response
+        return true if response.is_a?(TrueClass)
+        return parse_response(command, response)
       rescue Errno::EPIPE
         @socket = nil
         raise MPDError, 'Broken Pipe (Disconnected)'
@@ -237,8 +224,7 @@ class MPD
   private
 
   # Handles the server's response (called inside {#send_command}).
-  # Repeatedly reads the server's response from the socket and
-  # processes the output.
+  # Repeatedly reads the server's response from the socket.
   #
   # @return (see Parser#build_response)
   # @return [true] If "OK" is returned.
@@ -264,7 +250,7 @@ class MPD
 
     if !error
       return true if msg.empty?
-      return build_response(msg)
+      return msg
     else
       err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
       raise MPDError, "#{err[:code]}: #{err[:command]}: #{err[:message]}"

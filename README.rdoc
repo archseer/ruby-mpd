@@ -251,11 +251,6 @@ queue the commands to send them later, when idle has returned the response.
 Idle seems like a possible way to reimplement callbacks; make a separate connection
 and just use idle and when it returns, simply use idle again and again.
 
-=== File commands
-
-+#directories+ and +#files+ is broken at the moment as we need to make the parser use
-+Parser#build_group+ for only those two commands.
-
 === Tests
 
 Tests fail at the moment, as they are 6 years old. The entire MPD server mock class
@@ -270,4 +265,5 @@ for a controlled environment needs to be written.
 * Playlist#rename -> Playlist#name=
 * Figure out a way to make passing the mpd instance to MPD::Playlist.new unnecessary.
 * Make parsing per-command (because playlist is an integer in the :status command and
-  a string in :listplaylists)
+  a string in :listplaylists, and :time is an array in status and integer in songs)
+* Per command parsing should also skip :directory and :playlist keys inside #songs command.

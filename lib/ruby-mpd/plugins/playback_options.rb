@@ -51,7 +51,7 @@ class MPD
 
       # Sets the volume level. (Maps to MPD's +setvol+)
       # @param [Integer] vol Volume level between 0 and 100.
-      # @macro returnraise
+      # @return [Integer] The new volume level.
       def volume=(vol)
         send_command :setvol, vol
       end
