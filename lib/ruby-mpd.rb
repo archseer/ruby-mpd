@@ -1,6 +1,7 @@
 require 'socket'
 require 'thread'
 
+require 'ruby-mpd/exceptions'
 require 'ruby-mpd/song'
 require 'ruby-mpd/parser'
 require 'ruby-mpd/playlist'
@@ -24,10 +25,6 @@ require 'ruby-mpd/plugins/channels'
 
 # The main class/namespace of the MPD client.
 class MPD
-
-  # Standard MPD error.
-  class MPDError < StandardError; end
-
   include Parser
 
   include Plugins::Information
@@ -102,7 +99,7 @@ class MPD
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
   def connect(callbacks = false)
-    raise MPDError, 'Already Connected!' if self.connected?
+    raise ConnectionError, 'Already connected!' if self.connected?
 
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
     @version = @socket.gets.chomp.gsub('OK MPD ', '') # Read the version
@@ -205,7 +202,7 @@ class MPD
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.
   def send_command(command, *args)
-    raise MPDError, "Not Connected to the Server" if @socket.nil?
+    raise ConnectionError, "Not connected to the server!" if @socket.nil?
 
     @mutex.synchronize do
       begin
@@ -215,7 +212,7 @@ class MPD
         return parse_response(command, response)
       rescue Errno::EPIPE
         @socket = nil
-        raise MPDError, 'Broken Pipe (Disconnected)'
+        raise ConnectionError, 'Broken pipe (got disconnected)'
       end
     end
   end
@@ -251,8 +248,7 @@ class MPD
       return true if msg.empty?
       return msg
     else
-      err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
-      raise MPDError, "#{err[:code]}: #{err[:command]}: #{err[:message]}"
+      raise ServerError, error
     end
   end
 
