@@ -212,8 +212,7 @@ class MPD
   #
   # @return [Array<String>] Array of file names
   def files(path = nil)
-    response = send_command(:listall, path)
-    return response[:file]
+    send_command(:listall, path)
   end
 
   # Used to send a command to the server. Synchronized on a mutex
