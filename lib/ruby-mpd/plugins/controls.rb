@@ -9,7 +9,6 @@ class MPD
       end
 
       # Resume/pause playback.
-      # @note The use of pause without an argument is deprecated in MPD.
       # @macro returnraise
       def pause=(toggle)
         send_command :pause, toggle
