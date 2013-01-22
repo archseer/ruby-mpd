@@ -127,14 +127,14 @@ class MPD
     def parse_response(command, string)
       # return explicit array if needed
       return RETURN_ARRAY.include?(command) ? [] : true if string.is_a?(TrueClass)
-      command == :listall ? build_grouped_response(string) : build_response(string)
+      command == :listall ? build_grouped_response(string) : build_response(command, string)
     end
 
     # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(string)
+    def build_response(command, string)
       return [] if string.nil? || !string.is_a?(String)
 
       chunks = make_chunks(string)
@@ -145,8 +145,8 @@ class MPD
         result << (is_hash ? build_hash(chunk) : parse_line(chunk))
       end
 
-      # if list has only one element, return it, else return array
-      result = list.length == 1 ? list.first : list
+      # if list has only one element and not set to explicit array, return it, else return array
+      result = (list.length == 1 && !RETURN_ARRAY.include?(command)) ? list.first : list
       return result
     end
 
