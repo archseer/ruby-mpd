@@ -264,7 +264,7 @@ for a controlled environment needs to be written.
 
 == TODO list
 
-* object oriented: song commands and dir commands in MPD::Song, MPD::Directory.
+* MPD::Song, MPD::Directory.
 * Make stickers a mixin for Playlist, Song, Directory...
 * Namespace queue
 * Playlist#rename -> Playlist#name=

@@ -38,6 +38,13 @@ class MPD
     FLOAT_KEYS = [:mixrampdb, :elapsed]
     BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
+
+    # Commands, where it makes sense to always explicitly return an array.
+    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list, :listall, 
+      :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
+      :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
+      :decoders, :listplaylistinfo]
+
     # Parses key-value pairs into correct class.
     def parse_key key, value
       if INT_KEYS.include? key
@@ -118,6 +125,8 @@ class MPD
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
+      # return explicit array if needed
+      return RETURN_ARRAY.include?(command) ? [] : true if string.is_a?(TrueClass)
       command == :listall ? build_grouped_response(string) : build_response(string)
     end
 

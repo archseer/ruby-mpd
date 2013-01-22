@@ -24,7 +24,7 @@ class MPD
       #
       # @return [Hash<String>] hash with array keys :file, :directory and :playlist.
       def files(path = nil)
-        send_command(:listall, path)
+        send_command :listall, path
       end
 
       # List all of the songs in the database starting at path.
@@ -72,7 +72,7 @@ class MPD
 
       # Same as {#update}, but also rescans unmodified files.
       #
-      # @return [Integer] Update job ID
+      # @return (see #update)
       def rescan(path = nil)
         send_command :rescan, path
       end

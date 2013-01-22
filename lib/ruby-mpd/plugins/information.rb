@@ -14,8 +14,11 @@ class MPD
       # Get the currently playing song
       #
       # @return [MPD::Song]
+      # @return [nil] if there is no song playing
       def current_song
-        Song.new send_command :currentsong
+        hash = send_command :currentsong
+        # if there is no current song (we get true, then return nil)
+        hash.is_a?(TrueClass) ? nil : Song.new(hash)
       end
 
       # Waits until there is a noteworthy change in one or more of MPD's subsystems.

@@ -208,7 +208,6 @@ class MPD
       begin
         @socket.puts convert_command(command, *args)
         response = handle_server_response
-        return true if response.is_a?(TrueClass)
         return parse_response(command, response)
       rescue Errno::EPIPE
         @socket = nil

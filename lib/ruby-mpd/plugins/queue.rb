@@ -9,7 +9,7 @@ class MPD
       # An Integer or Range can be used to limit the information returned
       # to a specific subset.
       #
-      # @return [MPD::Song, Array<MPD::Song>] Array of songs in the queue
+      # @return [Array<MPD::Song>] Array of songs in the queue
       # or a single song.
       def queue(limit=nil)
         build_songs_list send_command(:playlistinfo, limit)

@@ -1,4 +1,5 @@
 class MPD
+  # This namespace contains "plugins", which get included into the main class.
   module Plugins
     # = Client to client commands
     #
@@ -30,9 +31,7 @@ class MPD
       end
 
       # Obtain a list of all channels.
-      # @return [Array<String>]
-      # @return [String] if only one channel exists.
-      # @return [true] if no channels exist.
+      # @return [Array<String>] a list of channels
       def channels
         send_command :channels
       end
@@ -40,8 +39,6 @@ class MPD
       # Reads messages for this client. The response is an array of
       # hashes with +:channel+ and +:message+ keys or true if no messages.
       # @return [Array<Hash>] Messages recieved.
-      # @return [Hash] if only one message recieved
-      # @return [true] if no messages.
       def readmessages
         send_command :readmessages
       end

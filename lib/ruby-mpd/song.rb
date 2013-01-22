@@ -1,6 +1,6 @@
 class MPD; end
 
-# This class is a glorified Hash used to represent a song.
+# Object representation of a song.
 #
 # If the field doesn't exist or isn't set, nil will be returned
 class MPD::Song
@@ -18,10 +18,12 @@ class MPD::Song
     self.file == another.file
   end
 
+  # @return [String] A formatted representation of the song length ("1:02")
   def length
     return "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
   end
 
+  # Pass any unknown calls over to the data hash.
   def method_missing(m, *a)
     key = m #.to_s
     if key =~ /=$/
