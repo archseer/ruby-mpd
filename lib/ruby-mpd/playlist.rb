@@ -23,6 +23,8 @@ class MPD
     # @return [Array<MPD::Song>] songs in the playlist.
     def songs
       @mpd.send_command(:listplaylistinfo, @name).map {|hash| Song.new(hash) }
+    rescue NotFound
+      return [] # we rescue in the case the playlist doesn't exist.
     end
 
     # Loads the playlist into the current queue. Playlist plugins are supported.

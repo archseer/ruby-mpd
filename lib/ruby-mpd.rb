@@ -247,8 +247,25 @@ class MPD
       return true if msg.empty?
       return msg
     else
-      raise ServerError, error
+      err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
+      raise SERVER_ERRORS[err[:code].to_i], "[#{err[:command]}] #{err[:message]}"
     end
   end
+
+  SERVER_ERRORS = {
+    1 => NotListError,
+    2 => ServerArgumentError,
+    3 => IncorrectPassword,
+    4 => PermissionError,
+    5 => ServerError,
+
+    50 => NotFound,
+    51 => PlaylistMaxError,
+    52 => SystemError,
+    53 => PlaylistLoadError,
+    54 => AlreadyUpdating,
+    55 => NotPlaying,
+    56 => AlreadyExists
+  }
 
 end
