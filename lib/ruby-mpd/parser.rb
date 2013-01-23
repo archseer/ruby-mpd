@@ -124,7 +124,7 @@ class MPD
     def parse_response(command, string)
       # return explicit array if needed
       return RETURN_ARRAY.include?(command) ? [] : true if string.is_a?(TrueClass)
-      command == :listall ? build_grouped_response(string) : build_response(command, string)
+      command == :listall ? build_hash(string) : build_response(command, string)
     end
 
     # Parses the response into appropriate objects (either a single object,
@@ -145,19 +145,6 @@ class MPD
       # if list has only one element and not set to explicit array, return it, else return array
       result = (list.length == 1 && !RETURN_ARRAY.include?(command)) ? list.first : list
       return result
-    end
-
-    # Parse the response into groups that have the same key (used for file lists,
-    # groups together files, directories and playlists).
-    # @return [Hash<Array>] A hash of key groups.
-    def build_grouped_response(string)
-      return [] if string.nil? || !string.is_a?(String)
-
-      string.split("\n").each_with_object({}) do |line, hash|
-        key, object = parse_line(line)
-        hash[key] ||= []
-        hash[key] << object
-      end
     end
 
   end
