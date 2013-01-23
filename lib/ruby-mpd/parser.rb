@@ -76,9 +76,7 @@ class MPD
       return nil if line.nil?
       key, value = line.split(': ', 2)
       key = key.downcase.to_sym
-      value ||= '' # no nil values please ("album: ")
-      value.chomp!
-      return key, parse_key(key, value)
+      return key, parse_key(key, value.chomp)
     end
 
     # This builds a hash out of lines returned from the server,
@@ -158,7 +156,7 @@ class MPD
       string.split("\n").each_with_object({}) do |line, hash|
         key, object = parse_line(line)
         hash[key] ||= []
-        hash[key] << object # map obj to key
+        hash[key] << object
       end
     end
 
