@@ -74,7 +74,7 @@ class MPD
     # Parses a single response line into a key-object (value) pair.
     def parse_line(line)
       return nil if line.nil?
-      key, value = line.split(': ', 2)
+      key, value = line.split(/:\s?/, 2)
       key = key.downcase.to_sym
       return key, parse_key(key, value.chomp)
     end
