@@ -71,13 +71,14 @@ class MPD
       end
     end
 
-    # Parses a single response line into an object.
-    def parse_line(string)
-      return nil if string.nil?
-      key, value = string.split(': ', 2)
+    # Parses a single response line into a key value pair.
+    def parse_line(line)
+      return nil if line.nil?
+      key, value = line.split(': ', 2)
       key = key.downcase.to_sym
       value ||= '' # no nil values please ("album: ")
-      return parse_key(key, value.chomp)
+      value.chomp!
+      return key, value
     end
 
     # This builds a hash out of lines returned from the server,
@@ -88,16 +89,14 @@ class MPD
       return {} if string.nil?
 
       string.split("\n").each_with_object({}) do |line, hash|
-        key, value = line.split(': ', 2)
-        key = key.downcase.to_sym
-        value ||= '' # no nil values please ("album: ")
+        key, value = parse_line(line)
 
         # if val appears more than once, make an array of vals.
         if hash.include? key
-          hash[key] = [hash[key]] if !hash[key].is_a?(Array) # if necessary
-          hash[key] << parse_key(key, value.chomp) # add new val to array
+          hash[key] = Array(hash[key]) if # convert to array (http://rubyquicktips.com/post/9618833891/convert-object-to-array)
+          hash[key] << parse_key(key, value) # add new val to array
         else # val hasn't appeared yet, map it.
-          hash[key] = parse_key(key, value.chomp) # map val to key
+          hash[key] = parse_key(key, value) # map val to key
         end
       end
     end
@@ -142,7 +141,7 @@ class MPD
       is_hash = chunks.any? {|chunk| chunk.include? "\n"}
 
       list = chunks.inject([]) do |result, chunk|
-        result << (is_hash ? build_hash(chunk) : parse_line(chunk))
+        result << (is_hash ? build_hash(chunk) : parse_key(*parse_line(chunk)))
       end
 
       # if list has only one element and not set to explicit array, return it, else return array
@@ -157,10 +156,9 @@ class MPD
       return [] if string.nil? || !string.is_a?(String)
 
       string.split("\n").each_with_object({}) do |line, hash|
-        key, value = line.split(': ', 2)
-        key = key.downcase.to_sym
+        key, value = parse_line(line)
         hash[key] ||= []
-        hash[key] << parse_key(key, value.chomp) # map val to key
+        hash[key] << parse_key(key, value) # map val to key
       end
     end
 
