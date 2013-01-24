@@ -210,7 +210,7 @@ class MPD
         response = handle_server_response
         return parse_response(command, response)
       rescue Errno::EPIPE
-        @socket = nil
+        reset_vars # kill the socket and reset
         raise ConnectionError, 'Broken pipe (got disconnected)'
       end
     end
