@@ -228,18 +228,15 @@ class MPD
     return if @socket.nil?
 
     msg = ''
-    reading = true
-    error = nil
-    while reading
-      line = @socket.gets
-      case line
+    while true
+      case line = @socket.gets
       when "OK\n", nil
-        reading = false
+        break
       when /^ACK/
         error = line
-        reading = false
+        break
       else
-        msg += line
+        msg << line
       end
     end
 

@@ -118,7 +118,7 @@ class MPD
     end
 
     # Parses the response, determining per-command on what parsing logic
-    # to use (build_response vs build_grouped_response). 
+    # to use (build_response vs build a single grouped hash). 
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
