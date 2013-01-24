@@ -116,13 +116,8 @@ class MPD
         old_status = {}
         while !@stop_cb_thread
           status = mpd.status rescue {}
-          c = mpd.connected?
 
-          # @todo Move into status[:connection]?
-          if connected != c
-            connected = c
-            emit(:connection, connected)
-          end
+          status[:connection] = mpd.connected?
 
           status[:time] = [nil, nil] if !status[:time] # elapsed, total
           status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
