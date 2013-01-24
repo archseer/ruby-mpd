@@ -108,7 +108,6 @@ class MPD
       @stop_cb_thread = false
       @cb_thread = Thread.new(self) { |mpd|
         old_status = {}
-        connected = ''
         while !@stop_cb_thread
           status = mpd.status rescue {}
           c = mpd.connected?
