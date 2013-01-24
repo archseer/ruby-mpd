@@ -46,15 +46,21 @@ class MPD
   def initialize(hostname = 'localhost', port = 6600)
     @hostname = hostname
     @port = port
-    @socket = nil
-    @version = nil
-    @tags = nil
+    reset_vars
 
     @stop_cb_thread = false
     @mutex = Mutex.new
     @cb_thread = nil
     @callbacks = {}
   end
+
+  # Initialize instance variables on new object, or on disconnect.
+  def reset_vars
+    @socket = nil
+    @version = nil
+    @tags = nil
+  end
+  private :reset_vars
 
   # This will register a block callback that will trigger whenever
   # that specific event happens.
@@ -168,7 +174,7 @@ class MPD
 
     @socket.puts 'close'
     @socket.close
-    @socket = nil
+    reset_vars
     return true
   end
 
