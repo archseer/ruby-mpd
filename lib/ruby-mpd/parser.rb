@@ -123,7 +123,7 @@ class MPD
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
       # return explicit array if needed
-      return RETURN_ARRAY.include?(command) ? [] : true if string.is_a?(TrueClass)
+      return RETURN_ARRAY.include?(command) ? [] : true if string == true
       command == :listall ? build_hash(string) : build_response(command, string)
     end
 

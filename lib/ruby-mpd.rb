@@ -48,9 +48,7 @@ class MPD
     @port = port
     reset_vars
 
-    @stop_cb_thread = false
     @mutex = Mutex.new
-    @cb_thread = nil
     @callbacks = {}
   end
 
@@ -93,6 +91,44 @@ class MPD
     end
   end
 
+  # Constructs a callback loop thread.
+  # @return [Thread]
+  def callback_thread
+    @stop_cb_thread = false
+    @cb_thread ||= Thread.new(self) do |mpd|
+      old_status = {}
+      while !@stop_cb_thread
+        status = mpd.status rescue {}
+
+        status[:connection] = mpd.connected?
+
+        status[:time] = [nil, nil] if !status[:time] # elapsed, total
+        status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
+
+        status.each do |key, val|
+          next if val == old_status[key] # skip unchanged keys
+
+          if key == :song
+            emit(:song, mpd.current_song)
+          else # convert arrays to splat arguments
+            val.is_a?(Array) ? emit(key, *val) : emit(key, val)
+          end
+        end
+
+        old_status = status
+        sleep 0.1
+
+        if !status[:connection]
+          sleep 2
+          unless @stop_cb_thread
+            mpd.connect rescue nil
+          end
+        end
+      end
+    end
+  end
+  private :callback_thread
+
   # Connect to the daemon.
   #
   # When called without any arguments, this will just connect to the server
@@ -110,41 +146,7 @@ class MPD
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
     @version = @socket.gets.chomp.gsub('OK MPD ', '') # Read the version
 
-    if callbacks and (@cb_thread.nil? or !@cb_thread.alive?)
-      @stop_cb_thread = false
-      @cb_thread = Thread.new(self) { |mpd|
-        old_status = {}
-        while !@stop_cb_thread
-          status = mpd.status rescue {}
-
-          status[:connection] = mpd.connected?
-
-          status[:time] = [nil, nil] if !status[:time] # elapsed, total
-          status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
-
-          status.each do |key, val|
-            next if val == old_status[key] # skip unchanged keys
-
-            if key == :song
-              emit(:song, mpd.current_song)
-            else # convert arrays to splat arguments
-              val.is_a?(Array) ? emit(key, *val) : emit(key, val)
-            end
-          end
-
-          old_status = status
-          sleep 0.1
-
-          if !connected
-            sleep 2
-            unless @stop_cb_thread
-              mpd.connect rescue nil
-            end
-          end
-        end
-      }
-    end
-
+    callback_thread if callbacks and (!@cb_thread || !@cb_thread.alive?)
     return true
   end
 
