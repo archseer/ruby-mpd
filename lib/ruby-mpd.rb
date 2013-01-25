@@ -118,11 +118,9 @@ class MPD
         old_status = status
         sleep 0.1
 
-        if !status[:connection]
+        if !status[:connection] && !Thread.current[:stop]
           sleep 2
-          unless Thread.current[:stop]
-            mpd.connect rescue nil
-          end
+          mpd.connect rescue nil
         end
 
         Thread.stop if Thread.current[:stop]
