@@ -85,19 +85,19 @@ class MPD
   # @param [Symbol] event The event that happened.
   # @return [void]
   def emit(event, *args)
+    puts "#{event} hi"
     @callbacks[event] ||= []
     @callbacks[event].each do |handle|
       handle.call *args
     end
   end
 
-  # Constructs a callback loop thread.
+  # Constructs a callback loop thread and/or resumes it.
   # @return [Thread]
   def callback_thread
-    @stop_cb_thread = false
     @cb_thread ||= Thread.new(self) do |mpd|
       old_status = {}
-      while !@stop_cb_thread
+      while true
         status = mpd.status rescue {}
 
         status[:connection] = mpd.connected?
@@ -120,12 +120,16 @@ class MPD
 
         if !status[:connection]
           sleep 2
-          unless @stop_cb_thread
+          unless Thread.current[:stop]
             mpd.connect rescue nil
           end
         end
+
+        Thread.stop if Thread.current[:stop]
       end
     end
+    @cb_thread[:stop] = false
+    @cb_thread.run if @cb_thread.stop?
   end
   private :callback_thread
 
@@ -146,7 +150,7 @@ class MPD
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
     @version = @socket.gets.chomp.gsub('OK MPD ', '') # Read the version
 
-    callback_thread if callbacks and (!@cb_thread || !@cb_thread.alive?)
+    callback_thread if callbacks
     return true
   end
 
@@ -165,7 +169,7 @@ class MPD
   # the callback thread, thus disabling callbacks.
   # @return [Boolean] True if successfully disconnected, false otherwise.
   def disconnect
-    @stop_cb_thread = true
+    @cb_thread[:stop] = true if @cb_thread
 
     return false if !@socket
 
