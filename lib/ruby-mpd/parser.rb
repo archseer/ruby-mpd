@@ -57,8 +57,8 @@ class MPD
         value.to_sym
       elsif key == :playlist && !value.to_i.zero?
         # doc states it's an unsigned int, meaning if we get 0,
-        # then it's a name string. HAXX! what if playlist name is '123'?
-        # @todo HAXX
+        # then it's a name string.
+        # @todo HAXX! what if playlist name is '123'?
         value.to_i
       elsif key == :db_update
         Time.at(value.to_i)
@@ -109,7 +109,7 @@ class MPD
     # Make chunks from string.
     # @return [Array<String>]
     def make_chunks(string)
-      first_key = string.match(/\A(.+?): /)[1]
+      first_key = string.match(/\A(.+?):\s?/)[1]
 
       chunks = string.split(/\n(?=#{first_key})/)
       chunks.inject([]) do |result, chunk|

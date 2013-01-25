@@ -3,7 +3,7 @@
 ruby-mpd is a powerful object-oriented Music Player Daemon library, forked from librmpd.
 librmpd is as of writing outdated by 6 years! This library tries to act as a successor,
 originally using librmpd as a base, however almost all of the codebase was rewritten.
-ruby-mpd supports all "modern" MPD features.
+ruby-mpd supports all "modern" MPD features as well as callbacks.
 
 == MPD Protocol
 
@@ -41,7 +41,7 @@ When you are done, disconnect by calling disconnect.
 
 *Note*: The server may disconnect you at any time due to inactivity. This can
 be fixed by enabling callbacks (see the Callbacks section) or by issuing a
-`ping` command at certain intervals
+`ping` command at certain intervals.
 
 Once connected, you can issue commands to talk to the server.
 
