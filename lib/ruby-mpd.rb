@@ -85,8 +85,7 @@ class MPD
   # @param [Symbol] event The event that happened.
   # @return [void]
   def emit(event, *args)
-    puts "#{event} hi"
-    @callbacks[event] ||= []
+    return unless @callbacks[event]
     @callbacks[event].each do |handle|
       handle.call *args
     end
