@@ -106,6 +106,11 @@ class MPD
       return array.map {|hash| Song.new(hash) }
     end
 
+    # Remove lines which we don't want.
+    def filter_lines(string, filter)
+      string.split("\n").reject {|line| line =~ /(#{filter.join('|')}):/}.join("\n")
+    end
+
     # Make chunks from string.
     # @return [Array<String>]
     def make_chunks(string)
@@ -124,15 +129,24 @@ class MPD
     def parse_response(command, string)
       # return explicit array if needed
       return RETURN_ARRAY.include?(command) ? [] : true if string == true
-      command == :listall ? build_hash(string) : build_response(command, string)
+      if command == :listall 
+        build_hash(string)
+      elsif command == :listallinfo
+        build_response(command, string, [:directory, :playlist])
+      else
+        build_response(command, string)
+      end
     end
 
     # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(command, string)
+    def build_response(command, string, filter=nil)
       return [] if string.nil? || !string.is_a?(String)
+
+      # filter lines if filter specified
+      string = filter_lines(string,filter) if filter
 
       chunks = make_chunks(string)
       # if there are any new lines (more than one data piece), it's a hash, else an object.

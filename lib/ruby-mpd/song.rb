@@ -10,6 +10,7 @@ class MPD::Song
   def initialize(options)
     @data = {} #allowed fields are @types + :file
     @time = options.delete(:time).first #HAXX for array return
+    @file = options.delete(:file)
     @data.merge! options
   end
 
