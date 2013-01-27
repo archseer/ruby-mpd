@@ -305,7 +305,7 @@ class MPDTester < Test::Unit::TestCase
     @mpd.connect
 
     dirs = @mpd.directories
-    
+
     assert_equal 7, dirs.size
     assert_equal 'Astral_Projection', dirs[0]
     assert_equal 'Astral_Projection/Dancing_Galaxy', dirs[1]
@@ -439,7 +439,7 @@ class MPDTester < Test::Unit::TestCase
     pls = @mpd.playlist
 
     assert_equal 8, pls.size
-    
+
     pls.each do |song|
       assert_equal 'Astral Projection', song.artist
       assert_equal 'Dancing Galaxy', song.album
@@ -581,7 +581,7 @@ class MPDTester < Test::Unit::TestCase
     @mpd.connect
 
     assert @mpd.ping
-    
+
     @mpd.disconnect
     assert_raise(MPD::ServerError) {@mpd.ping}
   end
@@ -911,7 +911,7 @@ class MPDTester < Test::Unit::TestCase
     assert @mpd.play
 
     sleep 2
-    
+
     assert @mpd.pause = true
 
     sleep 2
@@ -923,7 +923,7 @@ class MPDTester < Test::Unit::TestCase
     song = @mpd.current_song
 
     assert_equal 'Flying Into A Star', song.title
-    
+
     status = @mpd.status
 
     assert_equal '200:585', status['time']
@@ -940,7 +940,7 @@ class MPDTester < Test::Unit::TestCase
     assert @mpd.play
 
     sleep 2
-    
+
     assert @mpd.pause = true
 
     sleep 2
@@ -952,7 +952,7 @@ class MPDTester < Test::Unit::TestCase
     song = @mpd.current_song
 
     assert_equal 'Flying Into A Star', song.title
-    
+
     status = @mpd.status
 
     assert_equal '200:585', status['time']
@@ -963,7 +963,7 @@ class MPDTester < Test::Unit::TestCase
 
   def test_volume
     @mpd.connect
-    
+
     vol = @mpd.volume
 
     @mpd.volume = 30
@@ -1121,7 +1121,7 @@ class MPDTester < Test::Unit::TestCase
     assert_equal 1, ret
 
     status = @mpd.status
-    
+
     assert_equal '1', status['updating_db']
 
     status = @mpd.status

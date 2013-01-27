@@ -40,7 +40,7 @@ class MPD
 
 
     # Commands, where it makes sense to always explicitly return an array.
-    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list, :listall, 
+    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list, :listall,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
       :decoders, :listplaylistinfo]
@@ -118,7 +118,7 @@ class MPD
     end
 
     # Parses the response, determining per-command on what parsing logic
-    # to use (build_response vs build a single grouped hash). 
+    # to use (build_response vs build a single grouped hash).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)

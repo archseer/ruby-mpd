@@ -19,7 +19,7 @@ class MPD
       # @param [Hash] pos :id of the song where to start playing.
       # @macro returnraise
       def play(pos = nil)
-        if pos.is_a?(Hash) 
+        if pos.is_a?(Hash)
           if pos[:id]
             send_command :playid, priority, pos[:id]
           else

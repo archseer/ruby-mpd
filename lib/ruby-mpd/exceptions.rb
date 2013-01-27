@@ -12,7 +12,7 @@ class MPD
   class ServerArgumentError < ServerError; end
   # MPD server password incorrect - ACK_ERROR_PASSWORD
   class IncorrectPassword < ServerError; end
-  # ACK_ERROR_PERMISSION - not permitted to use the command. 
+  # ACK_ERROR_PERMISSION - not permitted to use the command.
   # (Mostly, the solution is to connect via UNIX domain socket)
   class PermissionError < ServerError; end
 

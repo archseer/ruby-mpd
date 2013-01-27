@@ -43,7 +43,7 @@ class MPD
       # @param [Hash] pos :id to specify the song ID to delete instead of position.
       # @macro returnraise
       def delete(pos)
-        if pos.is_a?(Hash) 
+        if pos.is_a?(Hash)
           if pos[:id]
             send_command :deleteid, pos[:id]
           else
@@ -64,7 +64,7 @@ class MPD
       # @param [Hash] from :id to specify the song ID to move instead of position.
       # @macro returnraise
       def move(from, to)
-        if pos.is_a?(Hash) 
+        if pos.is_a?(Hash)
           if pos[:id]
             send_command :moveid, pos[:id], to
           else
@@ -110,7 +110,7 @@ class MPD
       # @param [Range] pos A range of positions.
       # @param [Hash] pos :id to specify the song ID to move instead of position.
       def song_priority(priority, pos)
-        if pos.is_a?(Hash) 
+        if pos.is_a?(Hash)
           if pos[:id]
             send_command :prioid, priority, pos[:id]
           else

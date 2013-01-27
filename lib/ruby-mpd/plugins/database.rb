@@ -110,7 +110,7 @@ class MPD
       def songs_by_artist(artist)
         search :artist, artist
       end
-      
+
     end
   end
 end
