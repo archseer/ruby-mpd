@@ -5,12 +5,16 @@ class MPD; end
 # If the field doesn't exist or isn't set, nil will be returned
 class MPD::Song
   # length in seconds
-  attr_accessor :time
+  attr_reader :file, :title, :time, :artist, :album, :albumartist
 
   def initialize(options)
-    @data = {} #allowed fields are @types + :file
+    @data = {} # allowed fields are @types + :file
     @time = options.delete(:time).first #HAXX for array return
     @file = options.delete(:file)
+    @title = options.delete(:title)
+    @artist = options.delete(:artist)
+    @album = options.delete(:album)
+    @albumartist = options.delete(:albumartist)
     @data.merge! options
   end
 
