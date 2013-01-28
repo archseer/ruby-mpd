@@ -9,7 +9,7 @@ class MPD::Song
 
   def initialize(options)
     @data = {} # allowed fields are @types + :file
-    @time = options.delete(:time).first #HAXX for array return
+    @time = options.delete(:time) { [nil] }.first #HAXX for array return
     @file = options.delete(:file)
     @title = options.delete(:title)
     @artist = options.delete(:artist)
@@ -25,7 +25,11 @@ class MPD::Song
 
   # @return [String] A formatted representation of the song length ("1:02")
   def length
-    return "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
+    if @time.nil?
+      '--:--'
+    else
+      "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
+    end
   end
 
   # Pass any unknown calls over to the data hash.
