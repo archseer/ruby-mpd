@@ -25,7 +25,11 @@ class MPD::Song
 
   # @return [String] A formatted representation of the song length ("1:02")
   def length
-    return "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
+    if @time.nil?
+      '--:--'
+    else
+      "#{(@time / 60)}:#{"%02d" % (@time % 60)}"
+    end
   end
 
   # Pass any unknown calls over to the data hash.
