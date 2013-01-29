@@ -14,7 +14,7 @@ class MPD
     attr_accessor :name
 
     def initialize(mpd, options)
-      @name = options.is_a?(Hash) ? options[:playlist] : options.to_s
+      @name = options.is_a?(Hash) ? options[:playlist].to_s : options.to_s # convert to_s in case the parser converted to int
       @mpd = mpd
       #@last_modified = options[:'last-modified']
     end

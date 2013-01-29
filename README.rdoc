@@ -267,6 +267,3 @@ for a controlled environment needs to be written.
 * MPD::Song, MPD::Directory.
 * Make stickers a mixin for Playlist, Song, Directory...
 * Namespace queue
-* Make parsing per-command (because playlist is an integer in the :status command and
-  a string in :listplaylists, and :time is an array in status and integer in songs)
-* Per command parsing should also skip :directory and :playlist keys inside #songs command.
