@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   s.platform      = Gem::Platform::RUBY
   s.name          = 'ruby-mpd'
-  s.version       = '0.1.8'
+  s.version       = '0.2.0'
   s.homepage      = 'https://github.com/archSeer/ruby-mpd'
   s.authors       = ["Blaž Hrastnik"]
   s.email         = ['speed.the.bboy@gmail.com']
