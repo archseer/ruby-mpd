@@ -5,6 +5,9 @@ class MPD
 
       # Counts the number of songs and their total playtime
       # in the db matching, matching the searched tag exactly.
+      #
+      # If you need a count on the entire database, look at
+      # {#stats #stats}.
       # @return [Hash] a hash with +songs+ and +playtime+ keys.
       def count(type, what)
         send_command :count, type, what
