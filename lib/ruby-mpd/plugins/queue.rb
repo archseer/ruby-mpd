@@ -26,7 +26,7 @@ class MPD
       # Optionally, one can specify the position on which to add the song (since MPD 0.14).
       # @return [Integer] id of the song that was added.
       def addid(path, pos=nil)
-        send_command :addid, pos
+        send_command :addid, path, pos
       end
 
       # Clears the current queue.
