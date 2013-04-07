@@ -1,6 +1,7 @@
 require 'socket'
 require 'thread'
 
+require 'ruby-mpd/version'
 require 'ruby-mpd/exceptions'
 require 'ruby-mpd/song'
 require 'ruby-mpd/parser'
