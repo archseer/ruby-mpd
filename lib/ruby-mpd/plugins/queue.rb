@@ -64,9 +64,9 @@ class MPD
       # @param [Hash] from :id to specify the song ID to move instead of position.
       # @macro returnraise
       def move(from, to)
-        if pos.is_a?(Hash)
-          if pos[:id]
-            send_command :moveid, pos[:id], to
+        if from.is_a?(Hash)
+          if from[:id]
+            send_command :moveid, from[:id], to
           else
             raise ArgumentError, 'Only :id key is allowed!'
           end
