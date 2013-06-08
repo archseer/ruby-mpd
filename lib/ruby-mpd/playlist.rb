@@ -1,3 +1,5 @@
+require "uri"
+
 class MPD
   # An object representing an .m3u playlist stored by MPD.
   #
@@ -22,7 +24,14 @@ class MPD
     # Lists the songs in the playlist. Playlist plugins are supported.
     # @return [Array<MPD::Song>] songs in the playlist.
     def songs
-      @mpd.send_command(:listplaylistinfo, @name).map {|hash| Song.new(hash) }
+      if @mpd.send_command(:listplaylistinfo, @name).to_s =~ URI::regexp
+        @mpd.send_command(:listplaylistinfo, @name).map {|hash| Song.new({:file=>hash, :time=>0}) }
+      else
+        @mpd.send_command(:listplaylistinfo, @name).map {|hash| Song.new(hash) }
+      end
+    rescue TypeError
+      p "Files in Playlist '#{@name}' do not exist"
+      return nil
     rescue NotFound
       return [] # we rescue in the case the playlist doesn't exist.
     end
