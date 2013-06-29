@@ -23,7 +23,7 @@ class MPD
             "#{word.begin}:#{word.end + (word.exclude_end? ? 0 : 1)}"
           end
         elsif word.is_a?(MPD::Song)
-          word.file
+          %Q["#{word.file}"] # escape filename
         else
           # escape any strings with space (wrap in double quotes)
           word = word.to_s
