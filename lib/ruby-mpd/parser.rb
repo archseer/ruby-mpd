@@ -49,7 +49,7 @@ class MPD
     RETURN_ARRAY = [:channels, :outputs, :readmessages, :list, :listall,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
-      :decoders, :listplaylistinfo]
+      :decoders, :listplaylistinfo, :playlistinfo]
 
     # Parses key-value pairs into correct class.
     def parse_key(key, value)
