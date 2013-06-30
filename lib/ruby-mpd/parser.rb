@@ -107,7 +107,6 @@ class MPD
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
     def build_songs_list(array)
-      return [] if !array.is_a?(Array)
       return array.map {|hash| Song.new(hash) }
     end
 
@@ -132,27 +131,22 @@ class MPD
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
-      # return explicit array if needed
-      return RETURN_ARRAY.include?(command) ? [] : true if string == true
+      # return explicit array or true if the message is empty
+      return RETURN_ARRAY.include?(command) ? [] : true if string.empty?
       if command == :listall 
-        build_hash(string)
+        return build_hash(string)
       elsif command == :listallinfo
-        build_response(command, string, [:directory, :playlist])
-      else
-        build_response(command, string)
+        string = filter_lines(string, [:directory, :playlist])
       end
+
+      build_response(command, string)
     end
 
     # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(command, string, filter=nil)
-      return [] if string.nil? || !string.is_a?(String)
-
-      # filter lines if filter specified
-      string = filter_lines(string,filter) if filter
-
+    def build_response(command, string)
       chunks = make_chunks(string)
       # if there are any new lines (more than one data piece), it's a hash, else an object.
       is_hash = chunks.any? {|chunk| chunk.include? "\n"}

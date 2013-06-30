@@ -243,7 +243,6 @@ class MPD
     end
 
     if !error
-      return true if msg.empty?
       return msg
     else
       err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
