@@ -220,7 +220,7 @@ in order to recieve those values:
 Finally, the easiest step. In order for callbacks to work, connect to the server
 with callbacks enabled:
 
-  mpd.connect true
+  mpd.connect(callbacks: true)
 
 Easy as pie. The above will connect to the server like normal, but this time it will
 create a new thread that loops until you issue a `disconnect`. This loop checks the

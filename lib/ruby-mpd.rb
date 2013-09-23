@@ -136,13 +136,13 @@ class MPD
   # When called without any arguments, this will just connect to the server
   # and wait for your commands.
   #
-  # When called with true as an argument, this will enable callbacks by starting
+  # When called with +callbacks: true+ as an argument, this will enable callbacks by starting
   # a seperate polling thread, which will also automatically reconnect if disconnected
   # for whatever reason.
   #
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
-  def connect(callbacks = false)
+  def connect(opts = {callbacks: false})
     raise ConnectionError, 'Already connected!' if self.connected?
 
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
@@ -156,7 +156,12 @@ class MPD
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
 
-    callback_thread if callbacks
+    if opts == true || opts == false
+      warn "Using 'true' or 'false' as an argument to #connect has been deprecated, and will be removed in the future!"
+      opts = {callbacks: opts}
+    end
+
+    callback_thread if opts[:callbacks]
     return true
   end
 
