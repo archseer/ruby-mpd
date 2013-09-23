@@ -46,7 +46,7 @@ class MPD
 
 
     # Commands, where it makes sense to always explicitly return an array.
-    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list, :listall,
+    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
       :decoders, :listplaylistinfo, :playlistinfo]
@@ -131,13 +131,14 @@ class MPD
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
-      # return explicit array or true if the message is empty
-      return RETURN_ARRAY.include?(command) ? [] : true if string.empty?
-      if command == :listall 
+      if command == :listall # Explicitly handle :listall (#files) -> always return a Hash
         return build_hash(string)
       elsif command == :listallinfo
         string = filter_lines(string, [:directory, :playlist])
       end
+
+      # return explicit array or true if the message is empty
+      return RETURN_ARRAY.include?(command) ? [] : true if string.empty?
 
       build_response(command, string)
     end
