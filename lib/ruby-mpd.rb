@@ -146,7 +146,15 @@ class MPD
     raise ConnectionError, 'Already connected!' if self.connected?
 
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
-    @version = @socket.gets.chomp.gsub('OK MPD ', '') # Read the version
+
+    # by protocol, we need to get a 'OK MPD <version>' reply
+    # should we fail to do so, the connection was unsuccessful
+    if response = @socket.gets
+      @version = response.chomp.gsub('OK MPD ', '') # Read the version
+    else
+      reset_vars
+      raise ConnectionError, 'Unable to connect (possibly too many connections open)'
+    end
 
     callback_thread if callbacks
     return true
