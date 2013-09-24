@@ -182,10 +182,22 @@ class MPD
 
     return false if !@socket
 
-    @socket.puts 'close'
-    @socket.close
+    begin
+      @socket.puts 'close'
+      @socket.close
+    rescue Errno::EPIPE
+      # socket was forcefully closed
+    end
+
     reset_vars
     return true
+  end
+
+  # Attempts to reconnect to the MPD daemon.
+  # @return [Boolean] True if successfully reconnected, false otherwise.
+  def reconnect(opts = {callbacks: false})
+    disconnect
+    connect(opts)
   end
 
   # Kills the MPD process.
@@ -225,8 +237,8 @@ class MPD
         response = handle_server_response
         return parse_response(command, response)
       rescue Errno::EPIPE
-        reset_vars # kill the socket and reset
-        raise ConnectionError, 'Broken pipe (got disconnected)'
+        reconnect
+        retry
       end
     end
   end

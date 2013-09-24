@@ -39,9 +39,9 @@ When you are done, disconnect by calling disconnect.
 
   mpd.disconnect
 
-*Note*: The server may disconnect you at any time due to inactivity. This can
-be fixed by enabling callbacks (see the Callbacks section) or by issuing a
-`ping` command at certain intervals.
+*Note*: In the past, one had to tackle the issue of the server possibly disconnecting
+the client at any time due to inactivity. Since 0.3.0, this is handled automatically
+via a reconnect mechanism.
 
 Once connected, you can issue commands to talk to the server.
 
@@ -143,9 +143,7 @@ certain connection.
 Callbacks are a simple way to make your client respond to events, rather that
 have to continuously ask the server for updates. This allows you to focus on
 displaying the data, rather that working overly hard to get it. This is done
-by having a background thread continuously check the server for changes. Because
-of this thead, enabling callbacks also means your client will stay connected to
-the server without having to worry about timeouts.
+by having a background thread continuously check the server for changes.
 
 To make use of callbacks, we need to:
 
@@ -224,9 +222,7 @@ with callbacks enabled:
 
 Easy as pie. The above will connect to the server like normal, but this time it will
 create a new thread that loops until you issue a `disconnect`. This loop checks the
-server, then sleeps for two tenths of a second, then loops. Because it's continuously
-polling the server, there's the added benefit of your client not being disconnected
-due to inactivity.
+server, then sleeps for two tenths of a second, then loops.
 
 == Not yet implemented
 
