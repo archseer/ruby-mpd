@@ -44,7 +44,6 @@ class MPD
     FLOAT_KEYS = [:mixrampdb, :elapsed]
     BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
 
-
     # Commands, where it makes sense to always explicitly return an array.
     RETURN_ARRAY = [:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
