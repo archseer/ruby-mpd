@@ -105,14 +105,12 @@ class MPD
         status[:time] = [nil, nil] if !status[:time] # elapsed, total
         status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
 
+        status[:song] = mpd.current_song
+
         status.each do |key, val|
           next if val == old_status[key] # skip unchanged keys
-
-          if key == :song
-            emit(:song, mpd.current_song)
-          else # convert arrays to splat arguments
-            val.is_a?(Array) ? emit(key, *val) : emit(key, val)
-          end
+          # convert arrays to splat arguments
+          val.is_a?(Array) ? emit(key, *val) : emit(key, val)
         end
 
         old_status = status

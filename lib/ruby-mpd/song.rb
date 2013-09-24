@@ -20,7 +20,7 @@ class MPD::Song
 
   # Two songs are the same when they are the same file.
   def ==(another)
-    self.file == another.file
+    self.class == another.class && self.file == another.file
   end
 
   # @return [String] A formatted representation of the song length ("1:02")
