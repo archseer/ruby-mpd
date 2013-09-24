@@ -44,9 +44,17 @@ class MPD
 
   # Initialize an MPD object with the specified hostname and port.
   # When called without arguments, 'localhost' and 6600 are used.
-  def initialize(hostname = 'localhost', port = 6600)
+  #
+  # When called with +callbacks: true+ as an optional argument,
+  # callbacks will be enabled by starting a separate polling thread.
+  #
+  # @param [String] hostname Hostname of the daemon
+  # @param [Integer] port Port of the daemon
+  # @param [Hash] opts Optional parameters. Currently accepts +callbacks+
+  def initialize(hostname = 'localhost', port = 6600, opts = {})
     @hostname = hostname
     @port = port
+    @options = {callbacks: false}.merge(opts)
     reset_vars
 
     @mutex = Mutex.new
@@ -134,13 +142,9 @@ class MPD
   # When called without any arguments, this will just connect to the server
   # and wait for your commands.
   #
-  # When called with +callbacks: true+ as an argument, this will enable callbacks by starting
-  # a seperate polling thread, which will also automatically reconnect if disconnected
-  # for whatever reason.
-  #
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
-  def connect(opts = {callbacks: false})
+  def connect(callbacks = nil)
     raise ConnectionError, 'Already connected!' if self.connected?
 
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
@@ -154,12 +158,12 @@ class MPD
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
 
-    if opts == true || opts == false
-      warn "Using 'true' or 'false' as an argument to #connect has been deprecated, and will be removed in the future!"
-      opts = {callbacks: opts}
+    if callbacks
+      warn "Using 'true' or 'false' as an argument to MPD#connect has been deprecated, and will be removed in the future!"
+      @options.merge!(callbacks: callbacks)
     end
 
-    callback_thread if opts[:callbacks]
+    callback_thread if @options[:callbacks]
     return true
   end
 
@@ -195,9 +199,9 @@ class MPD
 
   # Attempts to reconnect to the MPD daemon.
   # @return [Boolean] True if successfully reconnected, false otherwise.
-  def reconnect(opts = {callbacks: false})
+  def reconnect
     disconnect
-    connect(opts)
+    connect
   end
 
   # Kills the MPD process.

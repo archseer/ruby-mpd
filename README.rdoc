@@ -148,7 +148,7 @@ by having a background thread continuously check the server for changes.
 To make use of callbacks, we need to:
 
 1. Setup a callback to be called when something happens.
-2. Connect to the server with callbacks enabled.
+2. Create a MPD client instance with callbacks enabled.
 
 Firstly, we need to create a callback block and subscribe it, so that will get
 triggered whenever a specific event happens. When the callback is triggered,
@@ -215,10 +215,10 @@ in order to recieve those values:
     puts args.join(',')
   end
 
-Finally, the easiest step. In order for callbacks to work, connect to the server
+Finally, the easiest step. In order for callbacks to work, create a MPD instance
 with callbacks enabled:
 
-  mpd.connect(callbacks: true)
+  MPD.new('localhost', 6600, {callbacks: true})
 
 Easy as pie. The above will connect to the server like normal, but this time it will
 create a new thread that loops until you issue a `disconnect`. This loop checks the
