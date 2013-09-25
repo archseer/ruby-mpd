@@ -140,7 +140,7 @@ class MPD
       #
       # @return [Array<MPD::Song>]
       def songs_by_artist(artist)
-        search :artist, artist
+        where(artist: artist)
       end
 
     end
