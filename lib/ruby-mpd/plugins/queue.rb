@@ -105,6 +105,13 @@ class MPD
 
       # Set the priority of the specified songs. A higher priority means that it will be played
       # first when "random" mode is enabled.
+      #
+      # Several ranges or ID's can be specified at once:
+      #
+      #  mpd.song_priority(10, [5..7, 9..10]) # songs 5 to 10, excluding 8
+      #
+      #  mpd.song_priority(10, {id: [5, 8, 12]}) # songs with ID's 5, 8 and 12
+      #
       # @param [Integer] priority An integer between 0 and 255. The default priority of new songs is 0.
       # @param [Integer] pos A specific position.
       # @param [Range] pos A range of positions.
@@ -112,12 +119,12 @@ class MPD
       def song_priority(priority, pos)
         if pos.is_a?(Hash)
           if pos[:id]
-            send_command :prioid, priority, pos[:id]
+            send_command :prioid, priority, *pos[:id]
           else
             raise ArgumentError, 'Only :id key is allowed!'
           end
         else
-          send_command :prio, priority, pos
+          send_command :prio, priority, *pos
         end
       end
 
