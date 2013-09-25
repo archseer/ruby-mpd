@@ -45,12 +45,12 @@ via a reconnect mechanism.
 
 Once connected, you can issue commands to talk to the server.
 
-    mpd.connect
+  mpd.connect
     
-    mpd.play if mpd.stopped?
+  mpd.play if mpd.stopped?
 
-    song = mpd.current_song
-    puts "Current Song: #{song.artist} - #{song.title}"
+  song = mpd.current_song
+  puts "Current Song: #{song.artist} - #{song.title}"
 
 You can find command documentation can be found {here}[http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD].
 
@@ -98,16 +98,33 @@ Commands that support ranges: +#delete+, +#move+, +#queue+, +#song_priority+, +#
 
 == Searching
 
-Searching is case insensitive by default. To enable case sensitivity, pass a third
-argument with the key +:case_sensitive+. This does not work for Playlist#searchadd.
+The MPD protocol supports two commands +find+ and +search+, where +find+ is strict
+and will be case sensitive, as well as return only full matches, while +search+ is
+"loose" -- case insensitive and allow partial matches.
 
-  mpd.search(:artist, 'MyArtiSt', :case_sensitive => true)
+For ease of use, ruby-mpd encapsulates both +find+ and +search+ in one method,
++MPD#where+.
+
+Searching is case *loose* by default, meaning it is case insensitive, and will do
+partial matching. To enable *strict* matching, enable the +strict+ option.
+
+This does not work for Playlist#searchadd.
+
+  mpd.where({artist: 'MyArtiSt'}, {strict: true})
+
+Multiple query parameters can also be used:
+
+  mpd.where(artist: 'Bonobo', album: 'Black Sands')
+
+Query keys can be any of of the tags supported by MPD (a list can be fetched via
+MPD#tags), or one of the two special parameters: +:file+ to search by full path
+(relative to database root), and +:any+ to match against all available tags.
 
 While searching, one can also enable the +add+ option, which will automatically add
 the songs the query returned to the queue. In that case, the response will only return
 +true+, stating that the operation was successful (instead of returning an array).
 
-  mpd.search(:artist, 'MyArtiSt', {:case_sensitive => true, :add => true})
+  mpd.where({artist: 'MyArtiSt'}, {strict: true, add: true})
 
 == Playlists
 

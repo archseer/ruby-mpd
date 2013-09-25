@@ -59,11 +59,13 @@ class MPD
       # @return [true] if +:add+ is enabled.
       def search(type, what, options = {})
         warn "MPD#search is deprecated! Use MPD#where instead."
+        options[:strict] = options[:case_sensitive] # transparently upgrade renamed option
         where({type => what}, options)
       end
 
       # Searches the database for any songs that match the specified parameters.
-      # Searching is *loose* (case insensitive and partial matching) by default.
+      # Searching is *loose* (case insensitive and allow partial matching) by
+      # default.
       #
       # The search keys can be any of the tags supported by MPD, or one of the
       # two special parameters: +:file+ to search by full path (relative to
@@ -76,8 +78,8 @@ class MPD
       #    mpd.where({artist: "Nujabes", album: "Modal Soul"}, {add: true})
       #
       # Options:
-      # * *add*: Add the search results to the queue.
-      # * *case_sensitive*: Make the query case sensitive.
+      # * *add*: Add search results to the queue.
+      # * *strict*: Search will be *case sensitive* and allow only *full matches*.
       #
       # @param [Hash] params A hash of search parameters.
       # @param [Hash] options A hash of options.
@@ -85,9 +87,9 @@ class MPD
       # @return [true] if +:add+ is enabled.
       def where(params, options = {})
         if options[:add]
-          command = options[:case_sensitive] ? :findadd : :searchadd
+          command = options[:strict] ? :findadd : :searchadd
         else
-          command = options[:case_sensitive] ? :find : :search
+          command = options[:strict] ? :find : :search
         end
 
         build_songs_list send_command(command, params)
