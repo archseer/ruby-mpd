@@ -52,7 +52,7 @@ Once connected, you can issue commands to talk to the server.
   song = mpd.current_song
   puts "Current Song: #{song.artist} - #{song.title}"
 
-You can find command documentation can be found {here}[http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD].
+Command documentation can be found {here}[http://www.rubydoc.info/github/archSeer/ruby-mpd/master/MPD].
 
 == Commands
 
@@ -158,7 +158,7 @@ get your results, you simply use the object in an object-oriented way:
   playlist.add('awesome_track.mp3')
 
 To create a new playlist, simply create a new object. The playlist will be created
-in the daemon's library automatically as soon as you use +#add+ or +#findadd+. There
+in the daemon's library automatically as soon as you use +#add+ or +#searchadd+. There
 is also no save method, as playlists get 'saved' by the daemon any time you do an
 action on them (add, delete, rename).
 
@@ -293,4 +293,4 @@ for a controlled environment needs to be written.
 * Make stickers a mixin for Playlist, Song, Directory...
 * Namespace queue
 
-* Merge +where+ and +queue_where+, by doing where(..., {in_queue: true})?
+* Merge +where+ and +queue_where+, by doing +where(..., {in_queue: true})+?
