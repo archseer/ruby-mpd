@@ -24,6 +24,10 @@ class MPD
           end
         elsif word.is_a?(MPD::Song)
           %Q["#{word.file}"] # escape filename
+        elsif word.is_a?(Hash) # normally a search query
+          word.each_with_object("") do |(type, what), query|
+            query << %Q[#{type} "#{what}" ]
+          end.strip
         else
           # escape any strings with space (wrap in double quotes)
           word = word.to_s
