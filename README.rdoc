@@ -126,6 +126,18 @@ the songs the query returned to the queue. In that case, the response will only 
 
   mpd.where({artist: 'MyArtiSt'}, {strict: true, add: true})
 
+=== Queue searching
+
+Queue searching works the same way (except by using +MPD#queue_where+), and it also
+accepts multiple search parameters (which seems to be undocumented in the MPD protocol
+specification).
+
+Same as +#where+, it is "loose" by default, and it supports a +:strict+ option.
+
+  mpd.queue_where(artist: 'James Brown', genre: 'Funk')
+
+  mpd.queue_where({artist: 'James Brown', genre: 'Funk'}, {strict: true})
+
 == Playlists
 
 Playlists are one of the objects that map the MPD commands onto a simple to use
@@ -280,3 +292,5 @@ for a controlled environment needs to be written.
 * MPD::Song, MPD::Directory.
 * Make stickers a mixin for Playlist, Song, Directory...
 * Namespace queue
+
+* Merge +where+ and +queue_where+, by doing where(..., {in_queue: true})?

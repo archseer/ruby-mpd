@@ -84,6 +84,8 @@ class MPD
       # Searches for songs in the queue matched by the what
       # argument. Case insensitive by default.
       #
+      # @deprecated Use {#queue_where} instead.
+      #
       # @param [Symbol] type Can be any tag supported by MPD, or one of the two special
       #   parameters: +:file+ to search by full path (relative to database root),
       #   and +:any+ to match against all available tags.
@@ -91,8 +93,35 @@ class MPD
       # @param [Hash] options Use +:case_sensitive+ to make the query case sensitive.
       # @return [Array<MPD::Song>] Songs that matched.
       def queue_search(type, what, options = {})
-        command = options[:case_sensitive] ? :playlistfind : :playlistsearch
-        build_songs_list send_command(command, type, what)
+        warn "MPD#queue_search is deprecated! Use MPD#where instead."
+        options[:strict] = options[:case_sensitive] # transparently upgrade renamed option
+        queue_where({type => what}, options)
+      end
+
+      # Searches the queue for any songs that match the specified parameters.
+      # Searching is *loose* (case insensitive and allow partial matching) by
+      # default.
+      #
+      # The search keys can be any of the tags supported by MPD, or one of the
+      # two special parameters: +:file+ to search by full path (relative to
+      # database root), and +:any+ to match against all available tags.
+      #
+      #    mpd.queue_where(artist: "DJ Shadow", album: "Endtroducing.....")
+      #
+      # A hash of options can be passed as a last parameter:
+      #
+      #    mpd.queue_where({artist: "Nujabes", album: "Modal Soul"}, {add: true})
+      #
+      # Options:
+      # * *strict*: Search will be *case sensitive* and allow only *full matches*.
+      #
+      # @param [Hash] params A hash of search parameters.
+      # @param [Hash] options A hash of options.
+      # @return [Array<MPD::Song>] Songs that matched.
+      def queue_where(params, options = {})
+        command = options[:strict] ? :playlistfind : :playlistsearch
+
+        build_songs_list send_command(command, params)
       end
 
       # List the changes since the specified version in the queue.
