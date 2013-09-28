@@ -12,29 +12,29 @@ class MPD
     private
 
     # Parses the command into MPD format.
-    def convert_command(command, *args)
-      args.map! do |word|
-        if word.is_a?(TrueClass) || word.is_a?(FalseClass)
-          word ? '1' : '0' # convert bool to 1 or 0
-        elsif word.is_a?(Range)
-          if word.end == -1 # negative means to end of range
-            "#{word.begin}:"
+    def convert_command(command, *params)
+      params.map! do |param|
+        if param.is_a?(TrueClass) || param.is_a?(FalseClass)
+          param ? '1' : '0' # convert bool to 1 or 0
+        elsif param.is_a?(Range)
+          if param.end == -1 # negative means to end of range
+            "#{param.begin}:"
           else
-            "#{word.begin}:#{word.end + (word.exclude_end? ? 0 : 1)}"
+            "#{param.begin}:#{param.end + (param.exclude_end? ? 0 : 1)}"
           end
-        elsif word.is_a?(MPD::Song)
-          %Q["#{word.file}"] # escape filename
-        elsif word.is_a?(Hash) # normally a search query
-          word.each_with_object("") do |(type, what), query|
+        elsif param.is_a?(MPD::Song)
+          %Q["#{param.file}"] # escape filename
+        elsif param.is_a?(Hash) # normally a search query
+          param.each_with_object("") do |(type, what), query|
             query << %Q[#{type} "#{what}" ]
           end.strip
         else
           # escape any strings with space (wrap in double quotes)
-          word = word.to_s
-          word.match(/\s|'/) ? %Q["#{word}"] : word
+          param = param.to_s
+          param.match(/\s|'/) ? %Q["#{param}"] : param
         end
       end
-      return [command, args].join(' ').strip
+      return [command, params].join(' ').strip
     end
 
     INT_KEYS = [
