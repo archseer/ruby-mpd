@@ -14,17 +14,18 @@ class MPD
     # Parses the command into MPD format.
     def convert_command(command, *params)
       params.map! do |param|
-        if param.is_a?(TrueClass) || param.is_a?(FalseClass)
+        case param
+        when true, false
           param ? '1' : '0' # convert bool to 1 or 0
-        elsif param.is_a?(Range)
+        when Range
           if param.end == -1 # negative means to end of range
             "#{param.begin}:"
           else
             "#{param.begin}:#{param.end + (param.exclude_end? ? 0 : 1)}"
           end
-        elsif param.is_a?(MPD::Song)
+        when MPD::Song
           %Q["#{param.file}"] # escape filename
-        elsif param.is_a?(Hash) # normally a search query
+        when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
             query << %Q[#{type} "#{what}" ]
           end.strip
