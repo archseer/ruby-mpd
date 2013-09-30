@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.name          = 'ruby-mpd'
   s.version       = MPD::VERSION
   s.homepage      = 'https://github.com/archSeer/ruby-mpd'
+  s.license       = 'GPL-2'
   s.authors       = ["Blaž Hrastnik"]
   s.email         = ['speed.the.bboy@gmail.com']
   s.summary       = "Modern client library for MPD"
