@@ -39,8 +39,7 @@ class MPD
   include Plugins::Reflection
   include Plugins::Channels
 
-  # The version of the MPD protocol the server is using.
-  attr_reader :version
+  attr_reader :version, :hostname, :port
 
   # Initialize an MPD object with the specified hostname and port.
   # When called without arguments, 'localhost' and 6600 are used.
