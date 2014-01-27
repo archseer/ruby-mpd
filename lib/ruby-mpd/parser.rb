@@ -100,8 +100,7 @@ class MPD
 
         # if val appears more than once, make an array of vals.
         if hash.include? key
-          hash[key] = Array(hash[key]) # convert to array (http://rubyquicktips.com/post/9618833891/convert-object-to-array)
-          hash[key] << object # add new obj to array
+          hash[key] = Array(hash[key]) << object
         else # val hasn't appeared yet, map it.
           hash[key] = object # map obj to key
         end
@@ -111,11 +110,12 @@ class MPD
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
     def build_songs_list(array)
-      return array.map {|hash| Song.new(hash) }
+      return array.map { |hash| Song.new(hash) }
     end
 
     # Remove lines which we don't want.
     def filter_lines(string, filter)
+      # WTF?! TODO: Fix it.
       string.split("\n").reject {|line| line =~ /(#{filter.join('|')}):/}.join("\n")
     end
 
@@ -123,11 +123,8 @@ class MPD
     # @return [Array<String>]
     def make_chunks(string)
       first_key = string.match(/\A(.+?):\s?/)[1]
-
-      chunks = string.split(/\n(?=#{first_key})/)
-      chunks.inject([]) do |result, chunk|
-        result << chunk.strip
-      end
+      chunks = string.split(/\n(?=#{first_key})/).
+        inject([]) { |result, chunk| result << chunk.strip }
     end
 
     # Parses the response, determining per-command on what parsing logic
@@ -154,16 +151,14 @@ class MPD
     def build_response(command, string)
       chunks = make_chunks(string)
       # if there are any new lines (more than one data piece), it's a hash, else an object.
-      is_hash = chunks.any? {|chunk| chunk.include? "\n"}
+      is_hash = chunks.any? { |chunk| chunk.include? "\n" }
 
       list = chunks.inject([]) do |result, chunk|
         result << (is_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object
       end
 
       # if list has only one element and not set to explicit array, return it, else return array
-      result = (list.length == 1 && !RETURN_ARRAY.include?(command)) ? list.first : list
-      return result
+      (list.length == 1 && !RETURN_ARRAY.include?(command)) ? list.first : list
     end
-
   end
 end

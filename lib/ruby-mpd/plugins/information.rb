@@ -95,54 +95,54 @@ class MPD
       # Is MPD paused?
       # @return [Boolean]
       def paused?
-        return status[:state] == :pause
+        status[:state] == :pause
       end
 
       # Is MPD playing?
       # @return [Boolean]
       def playing?
-        return status[:state] == :play
+        status[:state] == :play
       end
 
       # @return [Boolean] Is MPD stopped?
       def stopped?
-        return status[:state] == :stop
+        status[:state] == :stop
       end
 
       # Gets the volume level.
       # @return [Integer]
       def volume
-        return status[:volume]
+        status[:volume]
       end
 
       # @return [Integer] Crossfade in seconds.
       def crossfade
-        return status[:xfade]
+        status[:xfade]
       end
 
       # @return [Integer] Current playlist version number.
       def playlist_version
-        return status[:playlist]
+        status[:playlist]
       end
 
       # Returns true if consume is enabled.
       def consume?
-        return status[:consume]
+        status[:consume]
       end
 
       # Returns true if single is enabled.
       def single?
-        return status[:single]
+        status[:single]
       end
 
       # Returns true if random playback is currently enabled,
       def random?
-        return status[:random]
+        status[:random]
       end
 
       # Returns true if repeat is enabled,
       def repeat?
-        return status[:repeat]
+        status[:repeat]
       end
     end
   end

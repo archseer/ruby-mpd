@@ -62,9 +62,7 @@ class MPD
 
   # Initialize instance variables on new object, or on disconnect.
   def reset_vars
-    @socket = nil
-    @version = nil
-    @tags = nil
+    @socket, @version, @tags = nil, nil, nil
   end
   private :reset_vars
 
@@ -85,8 +83,7 @@ class MPD
   # @param [Proc, Method] block The actual callback.
   # @return [void]
   def on(event, &block)
-    @callbacks[event] ||= []
-    @callbacks[event].push block
+    (@callbacks[event] ||= []).push block
   end
 
   # Triggers an event, running it's callbacks.
@@ -94,9 +91,7 @@ class MPD
   # @return [void]
   def emit(event, *args)
     return unless @callbacks[event]
-    @callbacks[event].each do |handle|
-      handle.call *args
-    end
+    @callbacks[event].each { |handle| handle.call *args }
   end
 
   # Constructs a callback loop thread and/or resumes it.
@@ -109,21 +104,20 @@ class MPD
 
         status[:connection] = mpd.connected?
 
-        status[:time] = [nil, nil] if !status[:time] # elapsed, total
-        status[:audio] = [nil, nil, nil] if !status[:audio] # samp, bits, chans
-
+        status[:time] ||= [nil, nil] # elapsed, total
+        status[:audio] ||= [nil, nil, nil] # samp, bits, chans
         status[:song] = mpd.current_song
 
         status.each do |key, val|
           next if val == old_status[key] # skip unchanged keys
           # convert arrays to splat arguments
-          val.is_a?(Array) ? emit(key, *val) : emit(key, val)
+          emit(key, *val)
         end
 
         old_status = status
         sleep 0.1
 
-        if !status[:connection] && !Thread.current[:stop]
+        unless status[:connection] || Thread.current[:stop]
           sleep 2
           mpd.connect rescue nil
         end
@@ -150,12 +144,11 @@ class MPD
 
     # by protocol, we need to get a 'OK MPD <version>' reply
     # should we fail to do so, the connection was unsuccessful
-    if response = @socket.gets
-      @version = response.chomp.gsub('OK MPD ', '') # Read the version
-    else
+    unless response = @socket.gets
       reset_vars
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
+    @version = response.chomp.gsub('OK MPD ', '') # Read the version
 
     if callbacks
       warn "Using 'true' or 'false' as an argument to MPD#connect has been deprecated, and will be removed in the future!"
@@ -163,17 +156,15 @@ class MPD
     end
 
     callback_thread if @options[:callbacks]
-    return true
+    true
   end
 
   # Check if the client is connected.
   #
   # @return [Boolean] True only if the server responds otherwise false.
   def connected?
-    return false if !@socket
-
-    ret = send_command(:ping) rescue false
-    return ret
+    return false unless @socket
+    send_command(:ping) rescue false
   end
 
   # Disconnect from the MPD daemon. This has no effect if the client is not
@@ -183,7 +174,7 @@ class MPD
   def disconnect
     @cb_thread[:stop] = true if @cb_thread
 
-    return false if !@socket
+    return false unless @socket
 
     begin
       @socket.puts 'close'
@@ -268,12 +259,9 @@ class MPD
       end
     end
 
-    if !error
-      return msg
-    else
-      err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
-      raise SERVER_ERRORS[err[:code].to_i], "[#{err[:command]}] #{err[:message]}"
-    end
+    return msg unless error
+    err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
+    raise SERVER_ERRORS[err[:code].to_i], "[#{err[:command]}] #{err[:message]}"
   end
 
   SERVER_ERRORS = {
