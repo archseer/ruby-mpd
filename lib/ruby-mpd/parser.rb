@@ -82,7 +82,6 @@ class MPD
 
     # Parses a single response line into a key-object (value) pair.
     def parse_line(line)
-      return nil if line.nil?
       key, value = line.split(/:\s?/, 2)
       key = key.downcase.to_sym
       return key, parse_key(key, value.chomp)
@@ -115,7 +114,6 @@ class MPD
 
     # Remove lines which we don't want.
     def filter_lines(string, filter)
-      # WTF?! TODO: Fix it.
       string.split("\n").reject {|line| line =~ /(#{filter.join('|')}):/}.join("\n")
     end
 
@@ -123,8 +121,7 @@ class MPD
     # @return [Array<String>]
     def make_chunks(string)
       first_key = string.match(/\A(.+?):\s?/)[1]
-      chunks = string.split(/\n(?=#{first_key})/).
-        inject([]) { |result, chunk| result << chunk.strip }
+      chunks = string.split(/\n(?=#{first_key})/).map(&:strip)
     end
 
     # Parses the response, determining per-command on what parsing logic

@@ -43,8 +43,15 @@ class MPD
       # @param [Hash] pos :id to specify the song ID to delete instead of position.
       # @macro returnraise
       def delete(pos)
-        pos = hash_id_check pos
-        send_command :delete, pos
+        if pos.is_a?(Hash)
+          if pos[:id]
+            send_command :deleteid, pos[:id]
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :delete, pos
+        end
       end
 
       # Move the song at +from+ to +to+ in the queue.
@@ -57,8 +64,15 @@ class MPD
       # @param [Hash] from :id to specify the song ID to move instead of position.
       # @macro returnraise
       def move(from, to)
-        from = hash_id_check from
-        send_command :move, from, to
+        if from.is_a?(Hash)
+          if from[:id]
+            send_command :moveid, from[:id], to
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :move, from, to
+        end
       end
 
       # Returns the song with the +songid+ in the playlist,
@@ -131,16 +145,15 @@ class MPD
       # @param [Range] pos A range of positions.
       # @param [Hash] pos :id to specify the song ID to move instead of position.
       def song_priority(priority, pos)
-        pos = hash_id_check pos
-        send_command :prio, priority, *pos
-      end
-      
-      # TODO: think about more appropriate function name.
-      def hash_id_check(arg)
-        if arg.is_a?(Hash)
-          raise(ArgumentError, 'Only :id key is allowed!') unless arg = arg[:id]
+        if pos.is_a?(Hash)
+          if pos[:id]
+            send_command :prioid, priority, *pos[:id]
+          else
+            raise ArgumentError, 'Only :id key is allowed!'
+          end
+        else
+          send_command :prio, priority, *pos
         end
-        arg
       end
 
       # Shuffles the queue.

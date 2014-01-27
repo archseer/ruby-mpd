@@ -62,7 +62,9 @@ class MPD
 
   # Initialize instance variables on new object, or on disconnect.
   def reset_vars
-    @socket, @version, @tags = nil, nil, nil
+    @socket = nil
+    @version = nil
+    @tags = nil
   end
   private :reset_vars
 
@@ -110,8 +112,7 @@ class MPD
 
         status.each do |key, val|
           next if val == old_status[key] # skip unchanged keys
-          # convert arrays to splat arguments
-          emit(key, *val)
+          emit key, *val # splat arrays
         end
 
         old_status = status
@@ -156,7 +157,7 @@ class MPD
     end
 
     callback_thread if @options[:callbacks]
-    true
+    return true
   end
 
   # Check if the client is connected.
