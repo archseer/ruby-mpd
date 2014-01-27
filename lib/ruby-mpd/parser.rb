@@ -114,7 +114,7 @@ class MPD
 
     # Remove lines which we don't want.
     def filter_lines(string, filter)
-      string.split("\n").reject {|line| line =~ /(#{filter.join('|')}):/}.join("\n")
+      string.lines.reject {|line| line =~ /(#{filter.join('|')}):/}.join
     end
 
     # Make chunks from string.
