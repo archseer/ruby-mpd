@@ -94,7 +94,7 @@ class MPD
     def build_hash(string)
       return {} if string.nil?
 
-      string.split("\n").each_with_object({}) do |line, hash|
+      string.lines.each_with_object({}) do |line, hash|
         key, object = parse_line(line)
 
         # if val appears more than once, make an array of vals.
