@@ -91,8 +91,13 @@ class MPD
         else
           command = options[:strict] ? :find : :search
         end
-
-        build_songs_list send_command(command, params)
+      
+        response = send_command(command, params)
+        if response == true
+          return true
+        else
+          build_songs_list response
+        end
       end
 
       # Tell the server to update the database. Optionally,
