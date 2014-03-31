@@ -21,6 +21,13 @@ class MPD
       def disableoutput(num)
         send_command :disableoutput, num
       end
+
+      # Toggles specified output.
+      # @param [Integer] num Number of the output to enable.
+      # @macro returnraise
+      def toggleoutput(num)
+        send_command :toggleoutput, num
+      end
     end
   end
 end
