@@ -18,7 +18,7 @@ class MPD
       def current_song
         hash = send_command :currentsong
         # if there is no current song (we get true, then return nil)
-        hash.is_a?(TrueClass) ? nil : Song.new(self.class, hash)
+        hash.is_a?(TrueClass) ? nil : Song.new(self, hash)
       end
 
       # Waits until there is a noteworthy change in one or more of MPD's subsystems.
