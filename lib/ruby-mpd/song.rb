@@ -30,16 +30,12 @@ class MPD::Song
     "#{@time / 60}:#{"%02d" % (@time % 60)}"
   end
  
-  # Retreive "comments" metadata from a file and cache it in the object.
+  # Retrieve "comments" metadata from a file and cache it in the object.
   #
   # @return [Hash] Key value pairs from "comments" metadata on a file.
   # @return [Boolean] True if comments are empty
   def comments
-    if @comments.nil?
-      @comments = @mpd.send_command :readcomments, @file
-    else
-      @comments
-    end
+      @comments ||= @comments = @mpd.send_command :readcomments, @file
   end
 
   # Pass any unknown calls over to the data hash.
