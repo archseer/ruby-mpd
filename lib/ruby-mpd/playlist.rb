@@ -26,9 +26,9 @@ class MPD
     def songs
       result = @mpd.send_command(:listplaylistinfo, @name)
       if result.to_s =~ URI::regexp
-        Song.new({:file => result, :time => 0})
+        Song.new(@mpd, {:file => result, :time => 0})
       else
-        result.map {|hash| Song.new(hash) }
+        result.map {|hash| Song.new(@mpd, hash) }
       end
     rescue TypeError
       puts "Files inside Playlist '#{@name}' do not exist!"

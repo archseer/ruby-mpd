@@ -109,7 +109,7 @@ class MPD
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
     def build_songs_list(array)
-      return array.map { |hash| Song.new(hash) }
+      return array.map { |hash| Song.new(self, hash) }
     end
 
     # Remove lines which we don't want.
