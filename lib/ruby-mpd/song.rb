@@ -35,7 +35,7 @@ class MPD::Song
   # @return [Hash] Key value pairs from "comments" metadata on a file.
   # @return [Boolean] True if comments are empty
   def comments
-      @comments ||= @comments = @mpd.send_command :readcomments, @file
+      @comments ||= @mpd.send_command :readcomments, @file
   end
 
   # Pass any unknown calls over to the data hash.
