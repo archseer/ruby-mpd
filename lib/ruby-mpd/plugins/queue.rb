@@ -78,7 +78,7 @@ class MPD
       # Returns the song with the +songid+ in the playlist,
       # @return [MPD::Song]
       def song_with_id(songid)
-        Song.new send_command(:playlistid, songid)
+        Song.new(self, send_command(:playlistid, songid))
       end
 
       # Searches for songs in the queue matched by the what

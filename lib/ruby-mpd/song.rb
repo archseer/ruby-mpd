@@ -7,7 +7,8 @@ class MPD::Song
   # length in seconds
   attr_reader :file, :title, :time, :artist, :album, :albumartist
 
-  def initialize(options)
+  def initialize(mpd, options)
+    @mpd = mpd
     @data = {} # allowed fields are @types + :file
     @time = options.delete(:time) { [nil] }.first # HAXX for array return
     @file = options.delete(:file)
@@ -27,6 +28,14 @@ class MPD::Song
   def length
     return '--:--' if @time.nil?
     "#{@time / 60}:#{"%02d" % (@time % 60)}"
+  end
+ 
+  # Retrieve "comments" metadata from a file and cache it in the object.
+  #
+  # @return [Hash] Key value pairs from "comments" metadata on a file.
+  # @return [Boolean] True if comments are empty
+  def comments
+      @comments ||= @mpd.send_command :readcomments, @file
   end
 
   # Pass any unknown calls over to the data hash.
