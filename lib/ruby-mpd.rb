@@ -109,6 +109,7 @@ class MPD
         status[:time] ||= [nil, nil] # elapsed, total
         status[:audio] ||= [nil, nil, nil] # samp, bits, chans
         status[:song] = mpd.current_song
+        status[:updating_db] ||= nil
 
         status.each do |key, val|
           next if val == old_status[key] # skip unchanged keys
