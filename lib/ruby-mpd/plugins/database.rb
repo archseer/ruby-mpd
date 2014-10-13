@@ -122,7 +122,7 @@ class MPD
       #
       # @return [Array<String>] Array of directory names
       def directories(path = nil)
-        return files[:directory]
+        return files(path)[:directory]
       end
 
       # Lists all of the albums in the database.
