@@ -7,7 +7,7 @@ end
 desc "Open an irb session preloaded with this API"
 task :console do
   $:.unshift(File.expand_path('../lib', __FILE__))
-  require 'ruby-mpd'
+  require_relative './lib/ruby-mpd'
   require 'irb'
   ARGV.clear
   IRB.start
