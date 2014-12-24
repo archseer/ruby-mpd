@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-$:.unshift File.expand_path("../lib", __FILE__)
-require "ruby-mpd/version"
+require_relative "./lib/ruby-mpd/version"
 
 Gem::Specification.new do |s|
   s.platform      = Gem::Platform::RUBY
