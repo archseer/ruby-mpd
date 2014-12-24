@@ -121,7 +121,7 @@ class MPD
     # @return [Array<String>]
     def make_chunks(string)
       first_key = string.match(/\A(.+?):\s?/)[1]
-      chunks = string.split(/\n(?=#{first_key})/).map(&:strip)
+      string.split(/\n(?=#{first_key})/).map(&:strip)
     end
 
     # Parses the response, determining per-command on what parsing logic

@@ -93,7 +93,7 @@ class MPD
   # @return [void]
   def emit(event, *args)
     return unless @callbacks[event]
-    @callbacks[event].each { |handle| handle.call *args }
+    @callbacks[event].each { |handle| handle.call(*args) }
   end
 
   # Constructs a callback loop thread and/or resumes it.
