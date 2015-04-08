@@ -108,7 +108,7 @@ class MPD
 
         status[:time] ||= [nil, nil] # elapsed, total
         status[:audio] ||= [nil, nil, nil] # samp, bits, chans
-        status[:song] = mpd.current_song
+        status[:song] = mpd.current_song rescue nil
         status[:updating_db] ||= nil
 
         status.each do |key, val|
