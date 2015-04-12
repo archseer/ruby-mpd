@@ -96,7 +96,7 @@ class MPD
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
   def connect(callbacks = nil)
-    raise ConnectionError, 'Already connected!' if self.connected?
+    raise ConnectionError, 'Already connected!' if connected?
 
     @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
 
