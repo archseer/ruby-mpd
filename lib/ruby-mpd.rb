@@ -181,7 +181,7 @@ class MPD
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.
   def send_command(command, *args)
-    raise ConnectionError, "Not connected to the server!" if !@socket
+    raise ConnectionError, "Not connected to the server!" unless @socket
 
     @mutex.synchronize do
       begin
