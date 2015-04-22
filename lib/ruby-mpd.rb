@@ -54,6 +54,7 @@ class MPD
     @hostname = hostname
     @port = port
     @options = {callbacks: false}.merge(opts)
+    @password = opts.delete(:password) || nil
     reset_vars
 
     @mutex = Mutex.new
@@ -104,6 +105,8 @@ class MPD
       reset_vars
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
+
+    authenticate
     @version = response.chomp.gsub('OK MPD ', '') # Read the version
 
     if callbacks
@@ -161,6 +164,10 @@ class MPD
   # @macro returnraise
   def password(pass)
     send_command :password, pass
+  end
+
+  def authenticate
+    send_command(:password, @password) if @password
   end
 
   # Ping the server.

@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe MPD do
+  subject { MPD.new('localhost', 6600, password: password) }
+  let(:password) { nil }
+
   it 'has a version number' do
     expect(MPD::VERSION).not_to be nil
   end
@@ -9,6 +12,49 @@ describe MPD do
     it 'has sensible default settings' do
       expect(subject.hostname).to eql('localhost')
       expect(subject.port).to eql(6600)
+    end
+  end
+
+  describe '#authenticate' do
+    context "with a password" do
+      let(:password) { 'foo' }
+
+      it "calls #send_command with the password set in #initialize" do
+        expect(subject).to receive(:send_command).with(:password, password).and_return(true)
+        subject.authenticate
+      end
+    end
+
+    context "without a password" do
+      let(:password) { nil }
+
+      it "does NOT call send_command" do
+        expect(subject).to_not receive(:send_command)
+        subject.authenticate
+      end
+    end
+  end
+
+  describe '#connect' do
+    context "when already connected" do
+      before do
+        expect(subject).to receive(:connected?).and_return(true)
+      end
+
+      it 'raises an error' do
+        expect { subject.connect }.to raise_error(MPD::ConnectionError)
+      end
+    end
+
+    context "when not yet connected" do
+      before do
+        expect(subject).to receive(:connected?).and_return(false)
+      end
+
+      it 'calls #authenticate' do
+        expect(subject).to receive(:authenticate)
+        subject.connect
+      end      
     end
   end
 
