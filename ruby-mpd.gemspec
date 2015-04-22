@@ -1,20 +1,25 @@
-# -*- encoding: utf-8 -*-
-$:.unshift File.expand_path("../lib", __FILE__)
-require "ruby-mpd/version"
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'ruby-mpd/version'
 
-Gem::Specification.new do |s|
-  s.platform      = Gem::Platform::RUBY
-  s.name          = 'ruby-mpd'
-  s.version       = MPD::VERSION
-  s.homepage      = 'https://github.com/archSeer/ruby-mpd'
-  s.license       = 'GPL-2'
-  s.authors       = ["Blaž Hrastnik"]
-  s.email         = ['speed.the.bboy@gmail.com']
-  s.summary       = "Modern client library for MPD"
-  s.description   = "A powerful, modern and feature complete library for the Music Player Daemon."
+Gem::Specification.new do |spec|
+  spec.name          = "ruby-mpd"
+  spec.version       = MPD::VERSION
+  spec.authors       = ["Blaž Hrastnik"]
+  spec.email         = ["speed.the.bboy@gmail.com"]
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  spec.summary       = "Modern client library for MPD"
+  spec.description   = "A powerful, modern and feature complete library for the Music Player Daemon"
+  spec.homepage      = "https://github.com/archSeer/ruby-mpd"
+  spec.license       = "GPL-2"
+
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.require_paths = ["lib"]
+
+  spec.add_development_dependency "bundler", "~> 1.9"
+  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "rspec-core", "~> 3.1"
 end
