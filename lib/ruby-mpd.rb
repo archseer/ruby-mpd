@@ -98,11 +98,9 @@ class MPD
   def connect(callbacks = nil)
     raise ConnectionError, 'Already connected!' if connected?
 
-    @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
-
     # by protocol, we need to get a 'OK MPD <version>' reply
     # should we fail to do so, the connection was unsuccessful
-    unless response = @socket.gets
+    unless response = socket.gets
       reset_vars
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
@@ -262,6 +260,10 @@ private
     return msg unless error
     err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
     raise SERVER_ERRORS[err[:code].to_i], "[#{err[:command]}] #{err[:message]}"
+  end
+
+  def socket
+    @socket ||= File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
   end
 
   SERVER_ERRORS = {
