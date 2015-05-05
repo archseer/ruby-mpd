@@ -54,19 +54,12 @@ class MPD
     @hostname = hostname
     @port = port
     @options = {callbacks: false}.merge(opts)
+    @password = opts.delete(:password) || nil
     reset_vars
 
     @mutex = Mutex.new
     @callbacks = {}
   end
-
-  # Initialize instance variables on new object, or on disconnect.
-  def reset_vars
-    @socket = nil
-    @version = nil
-    @tags = nil
-  end
-  private :reset_vars
 
   # This will register a block callback that will trigger whenever
   # that specific event happens.
@@ -96,42 +89,6 @@ class MPD
     @callbacks[event].each { |handle| handle.call(*args) }
   end
 
-  # Constructs a callback loop thread and/or resumes it.
-  # @return [Thread]
-  def callback_thread
-    @cb_thread ||= Thread.new(self) do |mpd|
-      old_status = {}
-      while true
-        status = mpd.status rescue {}
-
-        status[:connection] = mpd.connected?
-
-        status[:time] ||= [nil, nil] # elapsed, total
-        status[:audio] ||= [nil, nil, nil] # samp, bits, chans
-        status[:song] = mpd.current_song rescue nil
-        status[:updating_db] ||= nil
-
-        status.each do |key, val|
-          next if val == old_status[key] # skip unchanged keys
-          emit key, *val # splat arrays
-        end
-
-        old_status = status
-        sleep 0.1
-
-        unless status[:connection] || Thread.current[:stop]
-          sleep 2
-          mpd.connect rescue nil
-        end
-
-        Thread.stop if Thread.current[:stop]
-      end
-    end
-    @cb_thread[:stop] = false
-    @cb_thread.run if @cb_thread.stop?
-  end
-  private :callback_thread
-
   # Connect to the daemon.
   #
   # When called without any arguments, this will just connect to the server
@@ -140,16 +97,16 @@ class MPD
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
   def connect(callbacks = nil)
-    raise ConnectionError, 'Already connected!' if self.connected?
-
-    @socket = File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
+    raise ConnectionError, 'Already connected!' if connected?
 
     # by protocol, we need to get a 'OK MPD <version>' reply
     # should we fail to do so, the connection was unsuccessful
-    unless response = @socket.gets
+    unless response = socket.gets
       reset_vars
       raise ConnectionError, 'Unable to connect (possibly too many connections open)'
     end
+
+    authenticate
     @version = response.chomp.gsub('OK MPD ', '') # Read the version
 
     if callbacks
@@ -209,6 +166,10 @@ class MPD
     send_command :password, pass
   end
 
+  def authenticate
+    send_command(:password, @password) if @password
+  end
+
   # Ping the server.
   # @macro returnraise
   def ping
@@ -225,7 +186,7 @@ class MPD
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.
   def send_command(command, *args)
-    raise ConnectionError, "Not connected to the server!" if !@socket
+    raise ConnectionError, "Not connected to the server!" unless @socket
 
     @mutex.synchronize do
       begin
@@ -239,7 +200,49 @@ class MPD
     end
   end
 
-  private
+private
+
+  # Initialize instance variables on new object, or on disconnect.
+  def reset_vars
+    @socket = nil
+    @version = nil
+    @tags = nil
+  end
+
+  # Constructs a callback loop thread and/or resumes it.
+  # @return [Thread]
+  def callback_thread
+    @cb_thread ||= Thread.new(self) do |mpd|
+      old_status = {}
+      while true
+        status = mpd.status rescue {}
+
+        status[:connection] = mpd.connected?
+
+        status[:time] ||= [nil, nil] # elapsed, total
+        status[:audio] ||= [nil, nil, nil] # samp, bits, chans
+        status[:song] = mpd.current_song rescue nil
+        status[:updating_db] ||= nil
+
+        status.each do |key, val|
+          next if val == old_status[key] # skip unchanged keys
+          emit key, *val # splat arrays
+        end
+
+        old_status = status
+        sleep 0.1
+
+        unless status[:connection] || Thread.current[:stop]
+          sleep 2
+          mpd.connect rescue nil
+        end
+
+        Thread.stop if Thread.current[:stop]
+      end
+    end
+    @cb_thread[:stop] = false
+    @cb_thread.run if @cb_thread.stop?
+  end
 
   # Handles the server's response (called inside {#send_command}).
   # Repeatedly reads the server's response from the socket.
@@ -264,6 +267,10 @@ class MPD
     return msg unless error
     err = error.match(/^ACK \[(?<code>\d+)\@(?<pos>\d+)\] \{(?<command>.*)\} (?<message>.+)$/)
     raise SERVER_ERRORS[err[:code].to_i], "[#{err[:command]}] #{err[:message]}"
+  end
+
+  def socket
+    @socket ||= File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
   end
 
   SERVER_ERRORS = {
