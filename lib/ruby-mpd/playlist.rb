@@ -78,7 +78,7 @@ class MPD
     # Moves song with SONGID in the playlist to the position SONGPOS.
     # @macro returnraise
     def move(songid, songpos)
-      @mpd.send_command :playlistmove, @name
+      @mpd.send_command :playlistmove, @name, songid, songpos
     end
 
     # Renames the playlist to +new_name+.
