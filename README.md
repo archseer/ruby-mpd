@@ -45,7 +45,7 @@ mpd.disconnect
 Once connected, you can issue commands to talk to the server.
 
 ```ruby
-mpd.connect    
+mpd.connect
 mpd.play if mpd.stopped?
 song = mpd.current_song
 puts "Current Song: #{song.artist} - #{song.title}"
@@ -178,7 +178,7 @@ end
 ```
 
 One can also use separate methods or Procs and whatnot, just pass them in as a parameter.
-  
+
 ```ruby
 # Using a Proc
 proc = Proc.new { |volume| puts “Volume was set to #{volume}.” }
@@ -218,7 +218,7 @@ ruby-mpd supports callbacks for any of the keys returned by `MPD#status`, as wel
 * *error*: if there is an error, returns message here
 
 * *connection*: Are we connected to the daemon? true or false
- 
+
 Note that if the callback returns more than one value, the callback needs more arguments in order to recieve those values:
 
 ```ruby
@@ -266,7 +266,13 @@ Idle seems like a possible way to reimplement callbacks; make a separate connect
 
 ### Tests
 
-Tests fail at the moment, as they are 6 years old. The entire MPD server mock class either needs to be rewritten, or a `mpd.conf` along with a sample database and instructions for a controlled environment needs to be written.
+There is the beginings of a test suite, that can be ran with:
+
+```
+$ bin/rspec spec/
+```
+
+The entire MPD server mock class either needs to be rewritten, or a `mpd.conf` along with a sample database and instructions for a controlled environment needs to be written.
 
 ## TODO list
 
