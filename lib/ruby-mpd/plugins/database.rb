@@ -91,7 +91,7 @@ class MPD
         else
           command = options[:strict] ? :find : :search
         end
-      
+
         response = send_command(command, params)
         if response == true
           return true
