@@ -47,16 +47,17 @@ RSpec.describe 'MPD' do
       end
     end
 
-    # context "when not yet connected" do
-    #   before do
-    #     expect(subject).to receive(:connected?).and_return(false)
-    #   end
+    context "when not yet connected" do
+      before do
+        expect(subject).to receive(:connected?).and_return(false)
+        expect(subject).to receive(:socket).and_return(double(gets: 'OK MPD 1'))
+      end
 
-    #   it 'calls #authenticate' do
-    #     expect(subject).to receive(:authenticate)
-    #     subject.connect
-    #   end
-    # end
+      it 'calls #authenticate' do
+        expect(subject).to receive(:authenticate)
+        subject.connect
+      end
+    end
   end
 
   # describe '#socket' do
