@@ -1,12 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/reflection'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Reflection do
-  class MPD
-    def send_command(command, *args); end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#config" do
     it "should send correct params" do

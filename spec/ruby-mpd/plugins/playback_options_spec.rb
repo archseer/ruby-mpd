@@ -1,12 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/playback_options'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::PlaybackOptions do
-  class MPD
-    def send_command(command, *args); end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#consume=" do
     it "should send correct params" do

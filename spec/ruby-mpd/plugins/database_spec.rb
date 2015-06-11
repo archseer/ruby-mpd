@@ -1,13 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/database'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Database do
-  class MPD
-    def send_command(command, *args); end
-    def build_songs_list(array); end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#count" do
     it "should send correct params" do

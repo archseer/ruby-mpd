@@ -1,14 +1,8 @@
 require 'spec_helper'
-require_relative '../../lib/ruby-mpd/parser'
+require_relative '../../lib/ruby-mpd'
 
 RSpec.describe MPD::Parser do
-  class MPD
-    class Song
-      def file; end
-    end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#convert_command" do
     context "when given boolean params of true" do
@@ -115,6 +109,24 @@ RSpec.describe MPD::Parser do
     context "with a valid response line" do
       let(:response) { "UPTIME:32\n xxxx" }
       it { expect(subject.send(:parse_line, response)).to eql([:uptime, 32]) }
+    end
+  end
+
+  context "#build_hash" do
+    context "when passed nil" do
+      let(:str) { nil }
+      it { expect(subject.send(:build_hash, str)).to eql({}) }
+    end
+
+    context "when passed a multiline strong" do
+      let(:str) { "UPTIME:32\nXFADE:11\nUPTIME:12\n" }
+      it { expect(subject.send(:build_hash, str)).to eql({:uptime=>[32, 12], :xfade=>11}) }
+    end
+  end
+
+  context "#build_songs_list" do
+    context "when passed an empty array" do
+      it { expect(subject.send(:build_songs_list, [])).to eql([]) }
     end
   end
 end

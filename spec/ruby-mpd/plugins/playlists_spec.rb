@@ -1,15 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/playlists'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Playlists do
-  class MPD
-    def send_command(command, *args); end
-
-    class Playlist
-    end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#playlists" do
     let(:pl1) { 'playlist1' }

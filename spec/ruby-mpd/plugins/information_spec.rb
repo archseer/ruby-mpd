@@ -1,15 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/information'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Information do
-  class MPD
-    def send_command(command, *args); end
-
-    class Song
-    end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#clearerror" do
     it "should make the correct call" do

@@ -1,12 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/outputs'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Outputs do
-  class MPD
-    def send_command(command, *args); end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#outputs" do
     it "should send correct params" do

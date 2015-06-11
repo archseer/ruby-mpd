@@ -1,14 +1,8 @@
 require 'spec_helper'
-require_relative '../../../lib/ruby-mpd/plugins/queue'
+require_relative '../../../lib/ruby-mpd'
 
 RSpec.describe MPD::Plugins::Queue do
-  class MPD
-    def send_command(command, *args); end
-    def build_songs_list(array); end
-    def Song; end
-  end
-
-  subject { MPD.new.extend described_class }
+  subject { MPD.new }
 
   context "#queue" do
     context "when pass a limit" do
