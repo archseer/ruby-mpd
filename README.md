@@ -1,5 +1,7 @@
 # ruby-mpd
 
+[![Build Status](https://travis-ci.org/archSeer/ruby-mpd.svg?branch=master)](https://travis-ci.org/archSeer/ruby-mpd)
+
 ruby-mpd is a powerful object-oriented client for the  [Music Player Daemon](http://www.musicpd.org), forked from librmpd. librmpd is as of writing outdated by 6 years! This library tries to act as a successor, originally using librmpd as a base, however almost all of the codebase was rewritten. ruby-mpd supports all "modern" MPD features as well as callbacks.
 
 ## MPD Protocol
@@ -45,7 +47,7 @@ mpd.disconnect
 Once connected, you can issue commands to talk to the server.
 
 ```ruby
-mpd.connect    
+mpd.connect
 mpd.play if mpd.stopped?
 song = mpd.current_song
 puts "Current Song: #{song.artist} - #{song.title}"
@@ -178,7 +180,7 @@ end
 ```
 
 One can also use separate methods or Procs and whatnot, just pass them in as a parameter.
-  
+
 ```ruby
 # Using a Proc
 proc = Proc.new { |volume| puts “Volume was set to #{volume}.” }
@@ -218,7 +220,7 @@ ruby-mpd supports callbacks for any of the keys returned by `MPD#status`, as wel
 * *error*: if there is an error, returns message here
 
 * *connection*: Are we connected to the daemon? true or false
- 
+
 Note that if the callback returns more than one value, the callback needs more arguments in order to recieve those values:
 
 ```ruby
