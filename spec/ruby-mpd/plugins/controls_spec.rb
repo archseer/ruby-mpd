@@ -22,11 +22,18 @@ RSpec.describe MPD::Plugins::Controls do
     context "when pos is a Hash" do
       context "with the correct key" do
         let(:pos) { { id: 32 } }
-        let(:priority) { 1 }
 
         it "should send correct params" do
-          expect(subject).to receive(:priority).and_return(priority)
-          expect(subject).to receive(:send_command).with(:playid, priority, pos[:id])
+          expect(subject).to receive(:send_command).with(:playid, pos[:id])
+          subject.play(pos)
+        end
+      end
+
+      context "with the correct key and priority" do
+        let(:pos) { { id: 32 } }
+
+        it "should send correct params" do
+          expect(subject).to receive(:send_command).with(:playid, pos[:id])
           subject.play(pos)
         end
       end
