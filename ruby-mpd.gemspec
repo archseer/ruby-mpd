@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "ruby-mpd"
   spec.version       = MPD::VERSION
   spec.authors       = ["Blaž Hrastnik"]
-  spec.email         = ["speed.the.bboy@gmail.com"]
+  spec.email         = ["blaz@mxxn.io"]
 
   spec.summary       = "Modern client library for MPD"
   spec.description   = "A powerful, modern and feature complete library for the Music Player Daemon"
