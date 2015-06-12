@@ -4,7 +4,7 @@ require_relative '../../lib/ruby-mpd'
 RSpec.describe MPD::Parser do
   subject { MPD.new }
 
-  context "#convert_command" do
+  describe "#convert_command" do
     context "when given boolean params of true" do
       let(:args) { [:convert_command, 'command', true] }
       it { expect(subject.send(*args)).to eql("command 1") }
@@ -56,7 +56,7 @@ RSpec.describe MPD::Parser do
     end
   end
 
-  context "#parse_key" do
+  describe "#parse_key" do
     context "with valid INT_KEYS" do
       MPD::Parser::INT_KEYS.each do |key|
         it { expect(subject.send(:parse_key, key, '32')).to eql(32) }
@@ -100,25 +100,26 @@ RSpec.describe MPD::Parser do
     end
 
     context "with :time, :audio key" do
-      it { expect(subject.send(:parse_key, :time, '12:33')).to eql([12, 33]) }
+      it { expect(subject.send(:parse_key, :time, '123')).to eql([nil, 123]) }
+      it { expect(subject.send(:parse_key, :time, '99:123')).to eql([99, 123]) }
       it { expect(subject.send(:parse_key, :audio, '12:33')).to eql([12, 33]) }
     end
   end
 
-  context "#parse_line" do
+  describe "#parse_line" do
     context "with a valid response line" do
       let(:response) { "UPTIME:32\n xxxx" }
       it { expect(subject.send(:parse_line, response)).to eql([:uptime, 32]) }
     end
   end
 
-  context "#build_songs_list" do
+  describe "#build_songs_list" do
     context "when passed an empty array" do
       it { expect(subject.send(:build_songs_list, [])).to eql([]) }
     end
   end
 
-  context "#parse_response" do
+  describe "#parse_response" do
     context "when passed listall command" do
       let(:command) { :listall }
       let(:str) { "File: file1\nFile: file2\nFile: file3\nFile: file4\n" }

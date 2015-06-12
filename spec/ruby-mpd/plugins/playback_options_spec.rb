@@ -4,70 +4,70 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::PlaybackOptions do
   subject { MPD.new }
 
-  context "#consume=" do
+  describe "#consume=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:consume, 'yes')
       subject.consume = 'yes'
     end
   end
 
-  context "#crossfade=" do
+  describe "#crossfade=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:crossfade, 'yes')
       subject.crossfade = 'yes'
     end
   end
 
-  context "#mixrampdb=" do
+  describe "#mixrampdb=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:mixrampdb, 'yes')
       subject.mixrampdb = 'yes'
     end
   end
 
-  context "#mixrampdelay=" do
+  describe "#mixrampdelay=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:mixrampdelay, 'yes')
       subject.mixrampdelay = 'yes'
     end
   end
 
-  context "#random=" do
+  describe "#random=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:random, 'yes')
       subject.random = 'yes'
     end
   end
 
-  context "#repeat=" do
+  describe "#repeat=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:repeat, 'yes')
       subject.repeat = 'yes'
     end
   end
 
-  context "#volume=" do
+  describe "#volume=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:setvol, 11)
       subject.volume = 11
     end
   end
 
-  context "#single=" do
+  describe "#single=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:single, 'yes')
       subject.single = 'yes'
     end
   end
 
-  context "#replay_gain_mode=" do
+  describe "#replay_gain_mode=" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:replay_gain_mode, 'yes')
       subject.replay_gain_mode = 'yes'
     end
   end
 
-  context "#replay_gain_status" do
+  describe "#replay_gain_status" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:replay_gain_status)
       subject.replay_gain_status

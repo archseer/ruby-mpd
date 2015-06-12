@@ -4,14 +4,14 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::Information do
   subject { MPD.new }
 
-  context "#clearerror" do
+  describe "#clearerror" do
     it "should make the correct call" do
       expect(subject).to receive(:send_command).with(:clearerror)
       subject.clearerror
     end
   end
 
-  context "#current_song" do
+  describe "#current_song" do
     context "when there is no currentsong" do
       it "should make the correct call" do
         expect(subject).to receive(:send_command).with(:currentsong).and_return(true)
@@ -30,21 +30,21 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#status" do
+  describe "#status" do
     it "should make the correct call" do
       expect(subject).to receive(:send_command).with(:status)
       subject.status
     end
   end
 
-  context "#stats" do
+  describe "#stats" do
     it "should make the correct call" do
       expect(subject).to receive(:send_command).with(:stats)
       subject.stats
     end
   end
 
-  context "#paused?" do
+  describe "#paused?" do
     context "when paused" do
       let(:status) { { state: :pause } }
 
@@ -64,7 +64,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#playing?" do
+  describe "#playing?" do
     context "when playing" do
       let(:status) { { state: :play } }
 
@@ -84,7 +84,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#stopped?" do
+  describe "#stopped?" do
     context "when stopped" do
       let(:status) { { state: :stop } }
 
@@ -104,7 +104,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#volume" do
+  describe "#volume" do
     context "when there is volume" do
       let(:status) { { volume: 11 } }
 
@@ -124,7 +124,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#crossfade" do
+  describe "#crossfade" do
     context "when there is crossfade" do
       let(:status) { { xfade: 11 } }
 
@@ -144,7 +144,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#playlist_version" do
+  describe "#playlist_version" do
     context "when there is playlist_version" do
       let(:status) { { playlist: 1 } }
 
@@ -164,7 +164,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#consume?" do
+  describe "#consume?" do
     let(:status) { { consume: true } }
 
     it "should make the correct call" do
@@ -173,7 +173,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#single?" do
+  describe "#single?" do
     let(:status) { { single: true } }
 
     it "should make the correct call" do
@@ -182,7 +182,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#random?" do
+  describe "#random?" do
     let(:status) { { random: true } }
 
     it "should make the correct call" do
@@ -191,7 +191,7 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
-  context "#repeat?" do
+  describe "#repeat?" do
     let(:status) { { repeat: true } }
 
     it "should make the correct call" do

@@ -4,7 +4,7 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::Stickers do
   subject { MPD.new }
 
-  context "#get_sticker" do
+  describe "#get_sticker" do
     it "should send correct params" do
       expect(subject).to receive(:send_command)
         .with(:sticker, :get, 'type', 'uri', 'name')
@@ -12,7 +12,7 @@ RSpec.describe MPD::Plugins::Stickers do
     end
   end
 
-  context "#set_sticker" do
+  describe "#set_sticker" do
     it "should send correct params" do
       expect(subject).to receive(:send_command)
         .with(:sticker, :set, 'type', 'uri', 'name', 'value')
@@ -20,7 +20,7 @@ RSpec.describe MPD::Plugins::Stickers do
     end
   end
 
-  context "#delete_sticker" do
+  describe "#delete_sticker" do
     context "when passed a name" do
       it "should send correct params" do
         expect(subject).to receive(:send_command)
@@ -38,7 +38,7 @@ RSpec.describe MPD::Plugins::Stickers do
     end
   end
 
-  context "#list_stickers" do
+  describe "#list_stickers" do
     it "should send correct params" do
       expect(subject).to receive(:send_command)
         .with(:sticker, :list, 'type', 'uri')

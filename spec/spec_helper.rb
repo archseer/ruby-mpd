@@ -5,6 +5,8 @@
 # files.
 require 'pry-byebug'
 require 'pry-stack_explorer'
+require 'simplecov'
+SimpleCov.start
 #
 # Given that it is always loaded, you are encouraged to keep this file as
 # light-weight as possible. Requiring heavyweight dependencies from this file

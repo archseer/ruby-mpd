@@ -5,3 +5,4 @@ gemspec
 
 gem 'pry-byebug'
 gem 'pry-stack_explorer'
+gem 'simplecov', :require => false, :group => :tes

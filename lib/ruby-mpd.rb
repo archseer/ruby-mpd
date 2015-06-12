@@ -186,11 +186,11 @@ class MPD
   # @return (see #handle_server_response)
   # @raise [MPDError] if the command failed.
   def send_command(command, *args)
-    raise ConnectionError, "Not connected to the server!" unless @socket
+    raise ConnectionError, "Not connected to the server!" unless socket
 
     @mutex.synchronize do
       begin
-        @socket.puts convert_command(command, *args)
+        socket.puts convert_command(command, *args)
         response = handle_server_response
         return parse_response(command, response)
       rescue Errno::EPIPE
@@ -253,7 +253,7 @@ private
   def handle_server_response
     msg = ''
     while true
-      case line = @socket.gets
+      case line = socket.gets
       when "OK\n", nil
         break
       when /^ACK/

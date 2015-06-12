@@ -4,42 +4,42 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::Reflection do
   subject { MPD.new }
 
-  context "#config" do
+  describe "#config" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:config)
       subject.config
     end
   end
 
-  context "#commands" do
+  describe "#commands" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:commands)
       subject.commands
     end
   end
 
-  context "#notcommands" do
+  describe "#notcommands" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:notcommands)
       subject.notcommands
     end
   end
 
-  context "#url_handlers" do
+  describe "#url_handlers" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:urlhandlers)
       subject.url_handlers
     end
   end
 
-  context "#decoders" do
+  describe "#decoders" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:decoders)
       subject.decoders
     end
   end
 
-  context "#tags" do
+  describe "#tags" do
     let(:tagtypes) { ['TAG1', 'TAG2'] }
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:tagtypes).and_return(tagtypes)

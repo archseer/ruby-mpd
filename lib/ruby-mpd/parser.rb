@@ -73,7 +73,13 @@ class MPD
         Time.at(value.to_i)
       elsif key == :"last-modified"
         Time.iso8601(value)
-      elsif [:time, :audio].include? key
+      elsif key == :time
+        if value.include?(':')
+          value.split(':').map(&:to_i)
+        else
+          [nil, value.to_i]
+        end
+      elsif key == :audio
         value.split(':').map(&:to_i)
       else
         value.force_encoding('UTF-8')

@@ -4,7 +4,7 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::Queue do
   subject { MPD.new }
 
-  context "#queue" do
+  describe "#queue" do
     context "when pass a limit" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:playlistinfo, 'limit').and_return('result')
@@ -22,28 +22,28 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#add" do
+  describe "#add" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:add, 'path')
       subject.add('path')
     end
   end
 
-  context "#addid" do
+  describe "#addid" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:addid, 'path', 1)
       subject.addid('path', 1)
     end
   end
 
-  context "#clear" do
+  describe "#clear" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:clear)
       subject.clear
     end
   end
 
-  context "#delete" do
+  describe "#delete" do
     context "when pos is a hash" do
       context "when we have a valid id" do
         let(:pos) { { id: 32 } }
@@ -73,7 +73,7 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#move" do
+  describe "#move" do
     context "when from is a hash" do
       context "when we have a valid id" do
         let(:from) { { id: 32 } }
@@ -106,7 +106,7 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#song_with_id" do
+  describe "#song_with_id" do
     it "should send correct params" do
       expect(subject).to receive(:send_command)
         .with(:playlistid, 'songid')
@@ -116,7 +116,27 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#queue_where" do
+  describe "#queue_search" do
+    context "when no options passed in" do
+      it "should send correct params" do
+        expect(subject).to receive(:warn)
+        expect(subject).to receive(:queue_where)
+          .with({'type' => 'what'}, {:strict=>nil})
+        subject.queue_search('type', 'what', {})
+      end
+    end
+
+    context "when :case_sensitive option passed in" do
+      it "should send correct params" do
+        expect(subject).to receive(:warn)
+        expect(subject).to receive(:queue_where)
+          .with({'type' => 'what'}, {:case_sensitive=>true, :strict=>true})
+        subject.queue_search('type', 'what', {case_sensitive:true})
+      end
+    end
+  end
+
+  describe "#queue_where" do
     context "when passed strict" do
       it "should send correct params" do
         expect(subject).to receive(:send_command)
@@ -128,7 +148,7 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#queue_changes" do
+  describe "#queue_changes" do
     it "should send correct params" do
       expect(subject).to receive(:send_command)
         .with(:plchanges, 'version')
@@ -138,7 +158,7 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#song_priority" do
+  describe "#song_priority" do
     context "when pos is a hash" do
       context "when we have a valid pos" do
         let(:pos) { { id: [5,6,7] } }
@@ -171,28 +191,28 @@ RSpec.describe MPD::Plugins::Queue do
     end
   end
 
-  context "#shuffle" do
+  describe "#shuffle" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:shuffle, 'range')
       subject.shuffle('range')
     end
   end
 
-  context "#swap" do
+  describe "#swap" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:swap, 'song1', 'song2')
       subject.swap('song1', 'song2')
     end
   end
 
-  context "#swapid" do
+  describe "#swapid" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:swapid, 'songid1', 'songid2')
       subject.swapid('songid1', 'songid2')
     end
   end
 
-  context "#save" do
+  describe "#save" do
     it "should send correct params" do
       expect(subject).to receive(:send_command).with(:save, 'playlist')
       subject.save('playlist')

@@ -4,7 +4,7 @@ require_relative '../../../lib/ruby-mpd'
 RSpec.describe MPD::Plugins::Playlists do
   subject { MPD.new }
 
-  context "#playlists" do
+  describe "#playlists" do
     let(:pl1) { 'playlist1' }
     let(:pl2) { 'playlist2' }
     let(:pls) { ['opts1', 'opts2'] }
