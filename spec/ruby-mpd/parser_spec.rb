@@ -112,21 +112,56 @@ RSpec.describe MPD::Parser do
     end
   end
 
-  context "#build_hash" do
-    context "when passed nil" do
-      let(:str) { nil }
-      it { expect(subject.send(:build_hash, str)).to eql({}) }
-    end
-
-    context "when passed a multiline strong" do
-      let(:str) { "UPTIME:32\nXFADE:11\nUPTIME:12\n" }
-      it { expect(subject.send(:build_hash, str)).to eql({:uptime=>[32, 12], :xfade=>11}) }
-    end
-  end
-
   context "#build_songs_list" do
     context "when passed an empty array" do
       it { expect(subject.send(:build_songs_list, [])).to eql([]) }
+    end
+  end
+
+  context "#parse_response" do
+    context "when passed listall command" do
+      let(:command) { :listall }
+      let(:str) { "File: file1\nFile: file2\nFile: file3\nFile: file4\n" }
+      it { expect(subject.send(:parse_response, command, str))
+        .to eql({:file=>["file1", "file2", "file3", "file4"]}) }
+    end
+
+    context "when passed listallinfo command" do
+      let(:command) { :listallinfo }
+      let(:str) { "Directory: xxxx\nFile: file1\nFile: file2\nFile: file3\nFile: file4\n" }
+      it { expect(subject.send(:parse_response, command, str))
+        .to eql(["file1", "file2", "file3", "file4"]) }
+    end
+
+    context "when passed unknown command with empty string" do
+      let(:command) { :xxxx }
+      let(:str) { "" }
+      it { expect(subject.send(:parse_response, command, str)).to eql(true) }
+    end
+
+    context "when passed known command with data" do
+      let(:command) { :outputs }
+      let(:str) { "" }
+      it { expect(subject.send(:parse_response, command, str)).to be_empty }
+    end
+
+    context "when passed valid command and a string of elements" do
+      let(:command) { :find }
+      let(:str) { "title: Shelter\nTrack: 7\nxfade: 0\nstate: play\n" }
+      it { expect(subject.send(:parse_response, command, str))
+        .to eql([{:title=>"Shelter", :track=>7, :xfade=>0, :state=>:play}]) }
+    end
+
+    context "when passed valid command and a single element" do
+      let(:command) { :find }
+      let(:str) { "title: Shelter\n" }
+      it { expect(subject.send(:parse_response, command, str)).to eql(["Shelter"]) }
+    end
+
+    context "when passed invalid command and a single element" do
+      let(:command) { :xxxx }
+      let(:str) { "title: Shelter\n" }
+      it { expect(subject.send(:parse_response, command, str)).to eql("Shelter") }
     end
   end
 end

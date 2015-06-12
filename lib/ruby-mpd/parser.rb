@@ -4,7 +4,7 @@ class MPD
   # Parser module, being able to parse messages to and from the MPD daemon format.
   # @todo There are several parser hacks. Time is an array in status and a normal
   #   string in MPD::Song, so we do`@time = options.delete(:time) { [nil] }.first`
-  #   to hack the array return. Playlist names are strings, whilst in status it's 
+  #   to hack the array return. Playlist names are strings, whilst in status it's
   #   and int, so we parse it as an int if it's parsed as non-zero (if it's 0 it's a string)
   #   and to fix numeric name playlists (123.m3u), we convert the name to_s inside
   #   MPD::Playlist too.
@@ -114,7 +114,7 @@ class MPD
 
     # Remove lines which we don't want.
     def filter_lines(string, filter)
-      string.lines.reject {|line| line =~ /(#{filter.join('|')}):/}.join
+      string.lines.reject {|line| line =~ /(#{filter.join('|')}):/i}.join
     end
 
     # Make chunks from string.
