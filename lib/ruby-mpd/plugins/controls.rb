@@ -21,7 +21,7 @@ class MPD
       def play(pos = nil)
         if pos.is_a?(Hash)
           if pos[:id]
-            send_command :playid, priority, pos[:id]
+            send_command :playid, pos[:id]
           else
             raise ArgumentError, 'Only :id key is allowed!'
           end

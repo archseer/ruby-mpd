@@ -25,14 +25,16 @@ class MPD
     # @return [Array<MPD::Song>] songs in the playlist.
     def songs
       result = @mpd.send_command(:listplaylistinfo, @name)
-      if result.to_s =~ URI::regexp
-        Song.new(@mpd, {:file => result, :time => 0})
-      else
-        result.map {|hash| Song.new(@mpd, hash) }
+      result.map do |hash|
+        if hash[:file] && !hash[:file].match(/^(https?:\/\/)?/)[0].empty?
+          Song.new(@mpd, {:file => hash[:file], :time => [0]})
+        else
+          Song.new(@mpd, hash)
+        end
       end
     rescue TypeError
       puts "Files inside Playlist '#{@name}' do not exist!"
-      return nil
+      return []
     rescue NotFound
       return [] # we rescue in the case the playlist doesn't exist.
     end

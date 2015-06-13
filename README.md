@@ -209,7 +209,7 @@ ruby-mpd supports callbacks for any of the keys returned by `MPD#status`, as wel
 * *songid*: playlist songid of the current song stopped on or playing.
 * *nextsong*: playlist song number of the next song to be played.
 * *nextsongid*: playlist songid of the next song to be played.
-* *time*: Returns two variables, `total` and `elapsed`, Integers representing seconds.
+* *time*: Returns two integers, `elapsed` and `total`, Integers representing seconds.
 * *elapsed*: Float, representing total time elapsed within the current song, but with higher accuracy.
 * *bitrate*: instantaneous bitrate in kbps.
 * *xfade*: crossfade in seconds
@@ -268,7 +268,13 @@ Idle seems like a possible way to reimplement callbacks; make a separate connect
 
 ### Tests
 
-Tests fail at the moment, as they are 6 years old. The entire MPD server mock class either needs to be rewritten, or a `mpd.conf` along with a sample database and instructions for a controlled environment needs to be written.
+There is the beginings of a test suite, that can be ran with:
+
+```
+$ bin/rspec spec/
+```
+
+The entire MPD server mock class either needs to be rewritten, or a `mpd.conf` along with a sample database and instructions for a controlled environment needs to be written.
 
 ## TODO list
 
