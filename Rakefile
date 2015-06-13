@@ -5,6 +5,12 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec)
+rescue LoadError
+end
+
 desc "Open an irb session preloaded with this API"
 task :console do
   require 'ruby-mpd'
@@ -13,4 +19,4 @@ task :console do
   IRB.start
 end
 
-task :default => :test
+task :default => [:test, :spec]
