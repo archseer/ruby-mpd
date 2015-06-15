@@ -89,9 +89,9 @@ RSpec.describe MPD::Parser do
     end
 
     context "with :db_update key" do
-      expected_time = Time.local(2015, 6, 11, 21, 14, 33)
-      it { expect(subject.send(:parse_key, :db_update, '1434024873'))
-        .to eql(expected_time) }
+      expected_time = Time.at(1434024873)
+      it { expect(subject.send(:parse_key, :db_update, '1434024873').to_i)
+        .to eql(expected_time.to_i) }
     end
 
     context "with :'last-modified' key" do
