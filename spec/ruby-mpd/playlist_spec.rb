@@ -51,7 +51,7 @@ RSpec.describe MPD::Playlist do
 
       before :each do
         server = double('server').as_null_object
-        allow(mpd).to receive(:socket).and_return(server)
+        mpd.instance_variable_set(:@socket, server)
 
         expect(server).to receive(:puts)
         expect(server).to receive(:gets).and_return(response)
@@ -92,7 +92,7 @@ RSpec.describe MPD::Playlist do
 
       before :each do
         server = double('server').as_null_object
-        allow(mpd).to receive(:socket).and_return(server)
+        mpd.instance_variable_set(:@socket, server)
 
         expect(server).to receive(:puts)
         expect(server).to receive(:gets).and_return(response)
