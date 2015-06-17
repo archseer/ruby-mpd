@@ -1,6 +1,7 @@
 # ruby-mpd
 
 [![Build Status](https://travis-ci.org/archSeer/ruby-mpd.svg?branch=master)](https://travis-ci.org/archSeer/ruby-mpd)
+[![Code Climate](https://codeclimate.com/github/archSeer/ruby-mpd/badges/gpa.svg)](https://codeclimate.com/github/archSeer/ruby-mpd)
 
 ruby-mpd is a powerful object-oriented client for the  [Music Player Daemon](http://www.musicpd.org), forked from librmpd. librmpd is as of writing outdated by 6 years! This library tries to act as a successor, originally using librmpd as a base, however almost all of the codebase was rewritten. ruby-mpd supports all "modern" MPD features as well as callbacks.
 
