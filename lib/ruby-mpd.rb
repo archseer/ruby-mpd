@@ -18,6 +18,8 @@ require 'ruby-mpd/plugins/outputs'
 require 'ruby-mpd/plugins/reflection'
 require 'ruby-mpd/plugins/channels'
 
+require 'ruby-mpd/callback_processor'
+
 # @!macro [new] error_raise
 #   @raise (see #send_command)
 # @!macro [new] returnraise
@@ -96,7 +98,7 @@ class MPD
   #
   # @return [true] Successfully connected.
   # @raise [MPDError] If connect is called on an already connected instance.
-  def connect(callbacks = nil)
+  def connect
     raise ConnectionError, 'Already connected!' if connected?
 
     # by protocol, we need to get a 'OK MPD <version>' reply
@@ -109,12 +111,7 @@ class MPD
     authenticate
     @version = response.chomp.gsub('OK MPD ', '') # Read the version
 
-    if callbacks
-      warn "Using 'true' or 'false' as an argument to MPD#connect has been deprecated, and will be removed in the future!"
-      @options.merge!(callbacks: callbacks)
-    end
-
-    callback_thread if @options[:callbacks]
+    start_callback_thread! if @options[:callbacks]
     return true
   end
 
@@ -202,7 +199,7 @@ class MPD
     end
   end
 
-private
+  private
 
   # Initialize instance variables on new object, or on disconnect.
   def reset_vars
@@ -213,37 +210,16 @@ private
 
   # Constructs a callback loop thread and/or resumes it.
   # @return [Thread]
-  def callback_thread
-    @cb_thread ||= Thread.new(self) do |mpd|
-      old_status = {}
-      while true
-        status = mpd.status rescue {}
+  def start_callback_thread!
+    Thread::abort_on_exception = true
+    processor = CallbackProcessor.new(self)
 
-        status[:connection] = mpd.connected?
-
-        status[:time] ||= [nil, nil] # elapsed, total
-        status[:audio] ||= [nil, nil, nil] # samp, bits, chans
-        status[:song] = mpd.current_song rescue nil
-        status[:updating_db] ||= nil
-
-        status.each do |key, val|
-          next if val == old_status[key] # skip unchanged keys
-          emit key, *val # splat arrays
-        end
-
-        old_status = status
+    Thread.new do
+      loop do
+        processor.process!
         sleep 0.1
-
-        unless status[:connection] || Thread.current[:stop]
-          sleep 2
-          mpd.connect rescue nil
-        end
-
-        Thread.stop if Thread.current[:stop]
       end
     end
-    @cb_thread[:stop] = false
-    @cb_thread.run if @cb_thread.stop?
   end
 
   # Handles the server's response (called inside {#send_command}).

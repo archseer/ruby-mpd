@@ -75,10 +75,7 @@ RSpec.describe 'MPD' do
 
       it 'calls #authenticate' do
         expect(subject).to receive(:authenticate)
-        expect(subject).to receive(:warn)
-        expect(subject.instance_variable_get(:@options))
-          .to receive(:merge!).with(callbacks: 'callbacks')
-        subject.connect('callbacks')
+        subject.connect
         expect(subject.instance_variable_get(:@version)).to eql('0.17.0')
       end
     end
@@ -263,6 +260,18 @@ RSpec.describe 'MPD' do
     end
   end
 
+  describe "#start_callback_thread!" do
+    let(:processor) { double('processor') }
+
+    it "should do a loop" do
+      allow(MPD::CallbackProcessor).to receive(:new).and_return(processor)
+      expect(Thread).to receive(:new).and_yield
+      expect(subject).to receive(:loop).and_yield
+      expect(processor).to receive(:process!).once
+      subject.send(:start_callback_thread!)
+    end
+  end
+
   describe "#handle_server_response" do
     let(:socket) { double('socket').as_null_object }
 
@@ -296,6 +305,13 @@ RSpec.describe 'MPD' do
           .to raise_error(MPD::SystemError, "[volume] problems setting volume")
       }
     end
+  end
+
+  describe "#socket" do
+    it {
+      expect(TCPSocket).to receive(:new)
+      subject.send(:socket)
+    }
   end
 
   describe "SERVER_ERROR codes" do

@@ -135,9 +135,10 @@ class MPD
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
-      if command == :listall # Explicitly handle :listall (#files) -> always return a Hash
+      case command
+      when :listall # Explicitly handle :listall (#files) -> always return a Hash
         return build_hash(string)
-      elsif command == :listallinfo
+      when :listallinfo
         string = filter_lines(string, [:directory, :playlist])
       end
 
