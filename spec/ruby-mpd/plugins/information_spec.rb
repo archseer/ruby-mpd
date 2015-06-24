@@ -30,6 +30,22 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
+  describe "#idle" do
+    context "when we pass no args" do
+      it "should make the correct call" do
+        expect(subject).to receive(:send_command).with(:idle)
+        subject.idle
+      end
+    end
+
+    context "when we pass some args" do
+      it "should make the correct call" do
+        expect(subject).to receive(:send_command).with(:idle, "player", "mixer")
+        subject.idle('player', 'mixer')
+      end
+    end
+  end
+
   describe "#status" do
     it "should make the correct call" do
       expect(subject).to receive(:send_command).with(:status)

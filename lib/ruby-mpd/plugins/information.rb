@@ -44,9 +44,9 @@ class MPD
       #
       # @since MPD 0.14
       # @param [Symbol] masks A list of subsystems we want to be notified on.
-      #def idle(*masks)
-      #  send_command(:idle, *masks)
-      #end
+      def idle(*masks)
+        send_command(:idle, *masks)
+      end
 
       # MPD status: volume, time, modes...
       # * *volume*: 0-100
