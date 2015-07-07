@@ -24,6 +24,17 @@ class MPD::Song
     self.class == another.class && self.file == another.file
   end
 
+  def to_h
+    {
+      time: @time,
+      file: @file,
+      title: @title,
+      artist: @artist,
+      album: @album,
+      albumartist: @albumartist
+    }.merge(@data)
+  end
+
   def elapsed
     @time.first
   end
