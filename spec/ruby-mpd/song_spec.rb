@@ -42,6 +42,20 @@ RSpec.describe MPD::Song do
     }
   end
 
+  describe "#to_h" do
+    it {
+      expect(subject.to_h).to eql({
+        time: [123, 300],
+        file: 'music_filename.mp3',
+        title: 'title',
+        artist: nil,
+        album: nil,
+        albumartist: nil,
+        custom_key: 'custom'
+      })
+    }
+  end
+
   describe "#method_missing" do
     context "when data has method" do
       it { expect(subject.custom_key).to eql('custom') }
