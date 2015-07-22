@@ -19,9 +19,9 @@ class MPD::Song
     @data.merge! options
   end
 
-  # Two songs are the same when they are the same file.
+  # Two songs are the same when they share the same hash.
   def ==(another)
-    self.class == another.class && self.file == another.file
+    to_h == another.to_h
   end
 
   def to_h
@@ -68,4 +68,6 @@ class MPD::Song
       raise NoMethodError, "#{m}"
     end
   end
+
+  alias :eql? :==
 end
