@@ -30,6 +30,26 @@ RSpec.describe MPD::Plugins::Information do
     end
   end
 
+  describe "#current" do
+    context "when there is no currentsong" do
+      it "should make the correct call" do
+        expect(subject).to receive(:send_command).with(:currentsong).and_return(true)
+        expect(subject.current).to be_nil
+      end
+    end
+
+    context "when there is a currentsong" do
+      let(:song) { double('song') }
+
+      it "should make the correct calls" do
+        expect(MPD::Song).to receive(:new).with(subject, {:time => nil}).and_return(song)
+        expect(subject).to receive(:send_command).with(:currentsong).and_return({})
+        expect(subject).to receive(:status).and_return({})
+        expect(subject.current).to eql(song)
+      end
+    end
+  end
+
   describe "#status" do
     it "should make the correct call" do
       expect(subject).to receive(:send_command).with(:status)
