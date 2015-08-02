@@ -21,6 +21,19 @@ class MPD
         hash.is_a?(TrueClass) ? nil : Song.new(self, hash)
       end
 
+      # Calls both currentsong and status in order to get complete song information
+      #
+      # @return [MPD::Song]
+      # @return [nil] if there is no song playing
+      def current
+        hash = send_command :currentsong
+        # if there is no current song
+        return nil if hash == true
+        # currentsong leaves out time, so we get it from status
+        hash[:time] = status[:time]
+        Song.new(self, hash)
+      end
+
       # Waits until there is a noteworthy change in one or more of MPD's subsystems.
       # As soon as there is one, it lists all changed systems in a line in the format
       # 'changed: SUBSYSTEM', where SUBSYSTEM is one of the following:
