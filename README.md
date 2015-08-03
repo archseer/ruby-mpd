@@ -50,7 +50,7 @@ Once connected, you can issue commands to talk to the server.
 ```ruby
 mpd.connect
 mpd.play if mpd.stopped?
-song = mpd.current_song
+song = mpd.current
 puts "Current Song: #{song.artist} - #{song.title}"
 ```
 

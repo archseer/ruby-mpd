@@ -221,7 +221,7 @@ private
 
         status[:time] ||= [nil, nil] # elapsed, total
         status[:audio] ||= [nil, nil, nil] # samp, bits, chans
-        status[:song] = mpd.current_song rescue nil
+        status[:song] = mpd.current rescue nil
         status[:updating_db] ||= nil
 
         status.each do |key, val|
