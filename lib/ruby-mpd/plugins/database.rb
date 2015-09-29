@@ -150,7 +150,7 @@ class MPD
 
       # Returns all songs with a specific title
       def songs_by_title(title)
-        puts "lolol"
+        puts "qweqweqweqweqweqwe"
         puts "Searching for #{title}.."
         # FIXME - Not working.
         # Working:
