@@ -148,6 +148,15 @@ class MPD
         where(artist: artist)
       end
 
+      # Returns all songs with a specific title
+      def songs_by_title(title)
+        puts "Searching for #{title}.."
+        # FIXME - Not working.
+        # Working:
+        #    mpd.where({artist: "Nujabes", album: "Modal Soul"}, {add: true})
+        mpd.where( { title: title }, {strict: false})
+      end
+
     end
   end
 end
