@@ -127,6 +127,29 @@ While searching, one can also enable the `add` option, which will automatically 
 mpd.where({artist: 'MyArtiSt'}, {strict: true, add: true})
 ```
 
+For easier use you can use the following method. Note: The options hash is
+entirely optional. (strict: true/false, add: true/false)
+```
+mpd.songs_by_title("Your Title", {strict: false, add: true}
+```
+This will return you true/false, depending on if mpd successfully added the
+song(s) to your current queue or not.
+
+```
+mpd.songs_by_title("Your Title", {strict: false}
+```
+This however will return an array of songs found.
+
+```
+mpd.songs_by_artists("Your Artist", {strict: false, add: true})
+```
+Again, this returns either true or false.
+
+```
+mpd.songs_by_artists("Your Artist", {strict: false})
+```
+Again, returns an array of found songs.
+
 ### Queue searching
 
 Queue searching works the same way (except by using `MPD#queue_where`), and it also accepts multiple search parameters (which seems to be undocumented in the MPD protocol
