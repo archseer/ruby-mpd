@@ -144,8 +144,8 @@ class MPD
       # List all of the songs by an artist.
       #
       # @return [Array<MPD::Song>]
-      def songs_by_artist(artist)
-        where(artist: artist)
+      def songs_by_artist(artist, options = {})
+        where({ artist: artist}, options)
       end
 
       # Returns all songs with a specific title
