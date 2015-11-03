@@ -154,7 +154,7 @@ RSpec.describe MPD::Plugins::Database do
 
   describe "#songs_by_artist" do
     it "should send correct params" do
-      expect(subject).to receive(:where).with(artist: 'artist')
+      expect(subject).to receive(:where).with({artist: 'artist'}, {})
       subject.songs_by_artist('artist')
     end
   end
