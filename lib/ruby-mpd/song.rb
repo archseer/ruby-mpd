@@ -5,7 +5,7 @@ class MPD; end
 # If the field doesn't exist or isn't set, nil will be returned
 class MPD::Song
   # length in seconds
-  attr_reader :file, :title, :time, :artist, :album, :albumartist
+  attr_reader :file, :title, :time, :artist, :album, :albumartist, :data
 
   def initialize(mpd, options)
     @mpd = mpd
