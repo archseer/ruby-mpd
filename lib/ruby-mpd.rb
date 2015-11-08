@@ -270,7 +270,7 @@ private
   end
 
   def socket
-    @socket ||= File.exists?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
+    @socket ||= File.exist?(@hostname) ? UNIXSocket.new(@hostname) : TCPSocket.new(@hostname, @port)
   end
 
   SERVER_ERRORS = {
