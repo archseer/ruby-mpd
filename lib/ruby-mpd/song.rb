@@ -1,22 +1,16 @@
+require 'hashie/mash'
+
 class MPD; end
 
 # Object representation of a song.
 #
 # If the field doesn't exist or isn't set, nil will be returned
-class MPD::Song
-  # length in seconds
-  attr_reader :file, :title, :time, :artist, :album, :albumartist
+class MPD::Song < Hashie::Mash
 
-  def initialize(mpd, options)
+  # allowed fields are @types + :file
+  def initialize(mpd, data)
     @mpd = mpd
-    @data = {} # allowed fields are @types + :file
-    @time = options.delete(:time) # an array of 2 items where last is time
-    @file = options.delete(:file)
-    @title = options.delete(:title)
-    @artist = options.delete(:artist)
-    @album = options.delete(:album)
-    @albumartist = options.delete(:albumartist)
-    @data.merge! options
+    super data
   end
 
   # Two songs are the same when they share the same hash.
@@ -36,11 +30,11 @@ class MPD::Song
   end
 
   def elapsed
-    @time.first
+    time.first
   end
 
   def track_length
-    @time.last
+    time.last
   end
 
   # @return [String] A formatted representation of the song length ("1:02")
@@ -54,19 +48,7 @@ class MPD::Song
   # @return [Hash] Key value pairs from "comments" metadata on a file.
   # @return [Boolean] True if comments are empty
   def comments
-    @comments ||= @mpd.send_command :readcomments, @file
-  end
-
-  # Pass any unknown calls over to the data hash.
-  def method_missing(m, *a)
-    key = m #.to_s
-    if key =~ /=$/
-      @data[$`] = a[0]
-    elsif a.empty?
-      @data[key]
-    else
-      raise NoMethodError, "#{m}"
-    end
+    @comments ||= @mpd.send_command :readcomments, file
   end
 
   alias :eql? :==
