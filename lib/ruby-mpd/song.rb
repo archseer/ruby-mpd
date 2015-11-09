@@ -260,7 +260,7 @@ class MPD::Song
   # to the corresponding correct value
   def genre
     if genre = @data[:genre]
-      id = genre[/\((\d+)\)/,1]
+      id = genre[/\A\((\d+)\)\z/,1]
       id && ID3V1_GENRE_BY_ID[id] || genre
     end
   end
