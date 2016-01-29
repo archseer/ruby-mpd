@@ -89,7 +89,7 @@ class MPD::Song
     '77'=>"Musical",
     '78'=>"Rock & Roll",
     '79'=>"Hard Rock",
-    
+
     # WinAmp additions beyond ID3v1
     '80'=>"Folk",
     '81'=>"Folk-Rock",
@@ -259,7 +259,8 @@ class MPD::Song
   # Find the genre for the song, converting ID3v1 integer results
   # to the corresponding correct value
   def genre
-    if genre = @data[:genre]
+    if genre=@data[:genre]
+      genre = genre.first if genre.is_a?(Array)
       id = genre[/\A\((\d+)\)\z/,1]
       id && ID3V1_GENRE_BY_ID[id] || genre
     end
