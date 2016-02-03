@@ -24,15 +24,15 @@ class MPD
             "#{param.begin}:#{param.end + (param.exclude_end? ? 0 : 1)}"
           end
         when MPD::Song
-          %Q["#{param.file}"] # escape filename
+          %Q["#{param.file.gsub('"','\\"')}"] # escape filename
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
-            query << %Q[#{type} "#{what}" ]
+            query << %Q[#{type} "#{what.gsub('"','\\"')}" ]
           end.strip
         else
           # escape any strings with space (wrap in double quotes)
           param = param.to_s
-          param.match(/\s|'/) ? %Q["#{param}"] : param
+          param=~/[\s'"]/ ? %Q["#{param.gsub('"','\\"')}"] : param
         end
       end
       return [command, params].join(' ').strip
