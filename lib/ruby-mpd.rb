@@ -17,6 +17,7 @@ require 'ruby-mpd/plugins/stickers'
 require 'ruby-mpd/plugins/outputs'
 require 'ruby-mpd/plugins/reflection'
 require 'ruby-mpd/plugins/channels'
+require 'ruby-mpd/plugins/command_list'
 
 # @!macro [new] error_raise
 #   @raise (see #send_command)
@@ -38,6 +39,7 @@ class MPD
   include Plugins::Outputs
   include Plugins::Reflection
   include Plugins::Channels
+  include Plugins::CommandList
 
   attr_reader :version, :hostname, :port
 

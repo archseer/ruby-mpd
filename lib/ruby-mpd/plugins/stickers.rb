@@ -40,8 +40,9 @@ class MPD
       # @return [Hash] Hash mapping sticker names (as strings) to values (as strings).
       def list_stickers(type, uri)
         result = send_command :sticker, :list, type, uri
-        if result==true # response when there are no
-          {}
+        case result
+        when true then {}  # response when there are no stickers
+        when nil  then nil # when called in a command_list
         else
           result = [result] if result.is_a?(String)
           Hash[result.map{|s| s.split('=',2)}]
