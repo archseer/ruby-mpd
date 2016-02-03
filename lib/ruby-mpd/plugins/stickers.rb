@@ -19,8 +19,9 @@ class MPD
       # playlist too "(e.g. song files, directories, albums)"
 
       # Reads a sticker value for the specified object.
+      # @return [String] The value of the sticker.
       def get_sticker(type, uri, name)
-        send_command :sticker, :get, type, uri, name
+        send_command( :sticker, :get, type, uri, name ).split('=',2).last
       end
 
       # Adds a sticker value to the specified object. If a sticker
@@ -36,8 +37,15 @@ class MPD
       end
 
       # Lists the stickers for the specified object.
+      # @return [Hash] Hash mapping sticker names (as strings) to values (as strings).
       def list_stickers(type, uri)
-        send_command :sticker, :list, type, uri
+        result = send_command :sticker, :list, type, uri
+        if result==true # response when there are no
+          {}
+        else
+          result = [result] if result.is_a?(String)
+          Hash[result.map{|s| s.split('=',2)}]
+        end
       end
 
       # Searches the sticker database for stickers with the specified name,
