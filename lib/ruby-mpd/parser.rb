@@ -1,4 +1,5 @@
 require 'time' # required for Time.iso8601
+require 'set'
 
 class MPD
   # Parser module, being able to parse messages to and from the MPD daemon format.
@@ -38,19 +39,19 @@ class MPD
       return [command, params].join(' ').strip
     end
 
-    INT_KEYS = [
+    INT_KEYS = Set[
       :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
       :playlistlength, :xfade, :pos, :id, :date, :track, :disc, :outputid, :mixrampdelay,
       :bitrate, :nextsong, :nextsongid, :songid, :updating_db,
       :musicbrainz_trackid, :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartistid
     ]
 
-    SYM_KEYS = [:command, :state, :changed, :replay_gain_mode, :tagtype]
-    FLOAT_KEYS = [:mixrampdb, :elapsed]
-    BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
+    SYM_KEYS   = Set[:command, :state, :changed, :replay_gain_mode, :tagtype]
+    FLOAT_KEYS = Set[:mixrampdb, :elapsed]
+    BOOL_KEYS  = Set[:repeat, :random, :single, :consume, :outputenabled]
 
     # Commands, where it makes sense to always explicitly return an array.
-    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list,
+    RETURN_ARRAY = Set[:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
       :decoders, :listplaylistinfo, :playlistinfo]
