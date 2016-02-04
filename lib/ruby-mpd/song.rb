@@ -256,14 +256,26 @@ class MPD::Song
     @comments ||= @mpd.send_command :readcomments, @file
   end
 
-  # Find the genre for the song, converting ID3v1 integer results
-  # to the corresponding correct value
-  def genre
-    if genre=@data[:genre]
-      genre = genre.first if genre.is_a?(Array)
+  # All genres for the song.
+  #
+  # Songs may have multiple genres applied.
+  # This method returns an array, which will be empty
+  # if the song has no genre information.
+  #
+  # @return [Array<String>] All genres for the song.
+  def genres
+    Array(@data[:genre]).map do |genre|
       id = genre[/\A\((\d+)\)\z/,1]
       id && ID3V1_GENRE_BY_ID[id] || genre
     end
+  end
+
+  # The first genre for the song.
+  #
+  # @return [String] if the song has a genre.
+  # @return [nil] if the song has no genre information.
+  def genre
+    genres.first
   end
 
   # Pass any unknown calls over to the data hash.
