@@ -244,12 +244,10 @@ class MPD::Song
 
   # @return [String] A formatted representation of the song length ("1:02")
   def length
-    len = track_length
-    return '--:--' if len.nil?
-    if len<3600
-      "%d:%02d" % [ len/60, len%60 ]
-    else
-      "%d:%02d:%02d" % [ len/3600, len/60%60, len%60 ]
+    case len=track_length
+      when nil      then '--:--'
+      when 0...3600 then "%d:%02d"      % [ len/60, len%60 ]
+      else               "%d:%02d:%02d" % [ len/3600, len/60%60, len%60 ]
     end
   end
 
