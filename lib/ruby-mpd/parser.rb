@@ -31,15 +31,16 @@ class MPD
             query << "#{type} #{quotable_param what}"
           end.strip
         else
-          quotable_param param.to_s
+          quotable_param param
         end
       end
       [command, params].join(' ').strip
     end
 
-    # MPD requires that parameters with whitespace or quotes be double-quoted
+    # MPD requires that certain parameters be double-quoted
     def quotable_param(value)
-      value.to_s =~ /['"\s]/ ? %Q{"#{value.gsub '"','\\"'}"} : value
+      value = value.to_s
+      value.empty? || (value=~/['"\s]/) ? %Q{"#{value.gsub '"','\\"'}"} : value
     end
 
     INT_KEYS = Set[
