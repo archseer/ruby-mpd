@@ -25,18 +25,21 @@ class MPD
             "#{param.begin}:#{param.end + (param.exclude_end? ? 0 : 1)}"
           end
         when MPD::Song
-          %Q["#{param.file.gsub('"','\\"')}"] # escape filename
+          quotable_param param.file
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
-            query << %Q[#{type} "#{what.gsub('"','\\"')}" ]
+            query << "#{type} #{quotable_param what}"
           end.strip
         else
-          # escape any strings with space (wrap in double quotes)
-          param = param.to_s
-          param=~/[\s'"]/ ? %Q["#{param.gsub('"','\\"')}"] : param
+          quotable_param param.to_s
         end
       end
-      return [command, params].join(' ').strip
+      [command, params].join(' ').strip
+    end
+
+    # MPD requires that parameters with whitespace or quotes be double-quoted
+    def quotable_param(str)
+      str =~ /['"\s]/ ? %Q{"#{str.gsub '"','\\"'}"} : str
     end
 
     INT_KEYS = Set[
