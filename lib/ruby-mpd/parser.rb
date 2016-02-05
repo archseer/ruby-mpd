@@ -119,11 +119,6 @@ class MPD
       return array.map { |hash| Song.new(self, hash) }
     end
 
-    # Remove lines which we don't want.
-    def filter_lines(string, filter)
-      string.lines.reject {|line| line =~ /(#{filter.join('|')}):/i}.join
-    end
-
     # Make chunks from string.
     # @return [Array<String>]
     def make_chunks(string)
@@ -139,7 +134,9 @@ class MPD
       if command == :listall # Explicitly handle :listall (#files) -> always return a Hash
         return build_hash(string)
       elsif command == :listallinfo
-        string = filter_lines(string, [:directory, :playlist])
+        # We do not care about directories or playlists,
+        # and leaving them in breaks the heuristic used by `make_chunks`.
+        string.gsub! /^(?:directory|playlist): .+?\n(?:last-modified: .+?\n)?/i, ''
       end
 
       # return explicit array or true if the message is empty
