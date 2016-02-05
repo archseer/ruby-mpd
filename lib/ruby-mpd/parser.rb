@@ -38,8 +38,8 @@ class MPD
     end
 
     # MPD requires that parameters with whitespace or quotes be double-quoted
-    def quotable_param(str)
-      str =~ /['"\s]/ ? %Q{"#{str.gsub '"','\\"'}"} : str
+    def quotable_param(value)
+      value.to_s =~ /['"\s]/ ? %Q{"#{value.gsub '"','\\"'}"} : value
     end
 
     INT_KEYS = Set[
