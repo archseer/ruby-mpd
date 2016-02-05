@@ -89,7 +89,7 @@ class MPD::Song
     '77'=>"Musical",
     '78'=>"Rock & Roll",
     '79'=>"Hard Rock",
-    
+
     # WinAmp additions beyond ID3v1
     '80'=>"Folk",
     '81'=>"Folk-Rock",
@@ -244,8 +244,11 @@ class MPD::Song
 
   # @return [String] A formatted representation of the song length ("1:02")
   def length
-    return '--:--' if track_length.nil?
-    "#{track_length / 60}:#{"%02d" % (track_length % 60)}"
+    case len=track_length
+      when nil      then '--:--'
+      when 0...3600 then "%d:%02d"      % [ len/60, len%60 ]
+      else               "%d:%02d:%02d" % [ len/3600, len/60%60, len%60 ]
+    end
   end
 
   # Retrieve "comments" metadata from a file and cache it in the object.
@@ -256,13 +259,26 @@ class MPD::Song
     @comments ||= @mpd.send_command :readcomments, @file
   end
 
-  # Find the genre for the song, converting ID3v1 integer results
-  # to the corresponding correct value
-  def genre
-    if genre = @data[:genre]
+  # All genres for the song.
+  #
+  # Songs may have multiple genres applied.
+  # This method returns an array, which will be empty
+  # if the song has no genre information.
+  #
+  # @return [Array<String>] All genres for the song.
+  def genres
+    Array(@data[:genre]).map do |genre|
       id = genre[/\A\((\d+)\)\z/,1]
       id && ID3V1_GENRE_BY_ID[id] || genre
     end
+  end
+
+  # The first genre for the song.
+  #
+  # @return [String] if the song has a genre.
+  # @return [nil] if the song has no genre information.
+  def genre
+    genres.first
   end
 
   # Pass any unknown calls over to the data hash.
