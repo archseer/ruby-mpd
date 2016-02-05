@@ -89,7 +89,7 @@ class MPD::Song
     '77'=>"Musical",
     '78'=>"Rock & Roll",
     '79'=>"Hard Rock",
-    
+
     # WinAmp additions beyond ID3v1
     '80'=>"Folk",
     '81'=>"Folk-Rock",
@@ -244,8 +244,11 @@ class MPD::Song
 
   # @return [String] A formatted representation of the song length ("1:02")
   def length
-    return '--:--' if track_length.nil?
-    "#{track_length / 60}:#{"%02d" % (track_length % 60)}"
+    case len=track_length
+      when nil      then '--:--'
+      when 0...3600 then "%d:%02d"      % [ len/60, len%60 ]
+      else               "%d:%02d:%02d" % [ len/3600, len/60%60, len%60 ]
+    end
   end
 
   # Retrieve "comments" metadata from a file and cache it in the object.
