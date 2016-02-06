@@ -39,8 +39,10 @@ class MPD
 
     # MPD requires that certain parameters be double-quoted
     def quotable_param(value)
-      value = value.to_s
-      value.empty? || (value=~/['"\s]/) ? %Q{"#{value.gsub '"','\\"'}"} : value
+      unless value.nil?
+        value = value.to_s
+        value.empty? || (value=~/['"\s]/) ? %Q{"#{value.gsub '"','\\"'}"} : value
+      end
     end
 
     INT_KEYS = Set[
