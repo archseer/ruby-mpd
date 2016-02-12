@@ -28,7 +28,7 @@ class MPD
           quotable_param param.file
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
-            query << "#{type} #{quotable_param what}"
+            query << "#{type} #{quotable_param what} "
           end.strip
         else
           quotable_param param
