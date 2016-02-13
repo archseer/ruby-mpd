@@ -239,7 +239,7 @@ class MPD::Song
   end
 
   def track_length
-    @time.last
+    @time && @time.last
   end
 
   # @return [String] A formatted representation of the song length ("1:02")
