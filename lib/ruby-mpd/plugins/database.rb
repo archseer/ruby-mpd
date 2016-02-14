@@ -93,8 +93,9 @@ class MPD
         end
 
         response = send_command(command, params)
-        if response == true
-          return true
+        case response
+        when true then true
+        when nil  then nil
         else
           build_songs_list response
         end
