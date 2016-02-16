@@ -36,13 +36,18 @@ RSpec.describe MPD::Parser do
 
       it {
         allow(song).to receive(:file).and_return('filename123')
-        expect(subject.send(*args)).to eql("command \"filename123\"")
+        expect(subject.send(*args)).to eql("command filename123")
+      }
+
+      it {
+        allow(song).to receive(:file).and_return('filename "123"')
+        expect(subject.send(*args)).to eql('command "filename \"123\""')
       }
     end
 
     context "when given params that are a hash" do
-      let(:args) { [:convert_command, 'command', {foo:'foo', bar:'bar'}] }
-      it { expect(subject.send(*args)).to eql("command foo \"foo\" bar \"bar\"") }
+      let(:args) { [:convert_command, 'command', {foo:'foo', bar:'bar baz', quux:'"xyzzy"'}] }
+      it { expect(subject.send(*args)).to eql('command foo foo bar "bar baz" quux "\"xyzzy\""') }
     end
 
     context "when given params of a string" do

@@ -1,4 +1,5 @@
 require 'time' # required for Time.iso8601
+require 'set'
 
 class MPD
   # Parser module, being able to parse messages to and from the MPD daemon format.
@@ -24,33 +25,39 @@ class MPD
             "#{param.begin}:#{param.end + (param.exclude_end? ? 0 : 1)}"
           end
         when MPD::Song
-          %Q["#{param.file}"] # escape filename
+          quotable_param param.file
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
-            query << %Q[#{type} "#{what}" ]
+            query << "#{type} #{quotable_param what} "
           end.strip
         else
-          # escape any strings with space (wrap in double quotes)
-          param = param.to_s
-          param.match(/\s|'/) ? %Q["#{param}"] : param
+          quotable_param param
         end
       end
-      return [command, params].join(' ').strip
+      [command, params].join(' ').strip
     end
 
-    INT_KEYS = [
+    # MPD requires that certain parameters be double-quoted
+    def quotable_param(value)
+      unless value.nil?
+        value = value.to_s
+        value.empty? || (value=~/['"\s]/) ? %Q{"#{value.gsub '"','\\"'}"} : value
+      end
+    end
+
+    INT_KEYS = Set[
       :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
       :playlistlength, :xfade, :pos, :id, :date, :track, :disc, :outputid, :mixrampdelay,
       :bitrate, :nextsong, :nextsongid, :songid, :updating_db,
       :musicbrainz_trackid, :musicbrainz_artistid, :musicbrainz_albumid, :musicbrainz_albumartistid
     ]
 
-    SYM_KEYS = [:command, :state, :changed, :replay_gain_mode, :tagtype]
-    FLOAT_KEYS = [:mixrampdb, :elapsed]
-    BOOL_KEYS = [:repeat, :random, :single, :consume, :outputenabled]
+    SYM_KEYS   = Set[:command, :state, :changed, :replay_gain_mode, :tagtype]
+    FLOAT_KEYS = Set[:mixrampdb, :elapsed]
+    BOOL_KEYS  = Set[:repeat, :random, :single, :consume, :outputenabled]
 
     # Commands, where it makes sense to always explicitly return an array.
-    RETURN_ARRAY = [:channels, :outputs, :readmessages, :list,
+    RETURN_ARRAY = Set[:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
       :decoders, :listplaylistinfo, :playlistinfo, :commandlist]
