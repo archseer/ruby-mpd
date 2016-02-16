@@ -50,10 +50,23 @@ class MPD
       end
 
       # Searches the sticker database for stickers with the specified name,
-      # below the specified directory (URI). For each matching song, it prints
-      # the URI and that one sticker's value.
-      def find_sticker(type, uri, name)
-        send_command :sticker, :find, type, uri, name
+      # below a directory.
+      #
+      # To search the entire database, pass an empty string for the directory.
+      #
+      # @param [String] type Object type (usually must be 'song')
+      # @param [String] directory The directory to search under.
+      # @param [String] sticker_name The sticker name to search for.
+      # @return [Hash] Map the object uri to the sticker value.
+      def find_sticker(type, directory, sticker_name)
+        result = send_command(:sticker, :find, type, directory, sticker_name)
+        case result
+        when nil  then nil # Happens inside command_list
+        when true then {}  # When no objects are found
+        else
+          intro = /^#{sticker_name}=/
+          Hash[ result.map{|h| [ h[:file], h[:sticker].sub(intro,'') ] } ]
+        end
       end
     end
 
