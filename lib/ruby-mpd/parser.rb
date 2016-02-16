@@ -41,7 +41,7 @@ class MPD
     def quotable_param(value)
       return if value.nil?
       value = value.to_s
-      value.empty? || (value=~/['"\s]/) ? %Q{"#{value.gsub '"','\\"'}"} : value
+      value.empty? || (value=~/['"\s\\]/) ? %Q{"#{value.gsub('\\','\\\\\\\\').gsub('"','\\"')}"} : value
     end
 
     INT_KEYS = Set[
