@@ -148,10 +148,10 @@ class MPD
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(command, string)
+    def build_response(command, string, force_hash=nil)
       chunks = make_chunks(string)
       # if there are any new lines (more than one data piece), it's a hash, else an object.
-      is_hash = chunks.any? { |chunk| chunk.include? "\n" }
+      is_hash = force_hash || chunks.any?{ |chunk| chunk.include? "\n" }
 
       list = chunks.inject([]) do |result, chunk|
         result << (is_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object
