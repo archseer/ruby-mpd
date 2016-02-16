@@ -9,18 +9,19 @@ module MPD::Plugins
     # By default, any response from the server is ignored (for speed).
     # To get results, pass `response_type` as one of the following options:
     #
+    #  * `:hash`   — a single hash of return values; multiple return values for the same key are grouped in an array
     #  * `:values` — an array of individual values
-    #  * `:hash` — a single hash of return values; multiple return values for the same key are grouped in an array
     #  * `:hashes` — an array of hashes (where value boundaries are guessed based on the first result)
-    #  * `:songs` — an array of Song instances from the results
+    #  * `:songs`  — an array of Song instances from the results
     #  * `:playlists` - an array of Playlist instances from the results
     #
     # Note that each supported command has no return value inside the block.
     # Instead, the block itself returns the array of results.
     #
     # @param [Symbol] response_type the type of responses desired.
-    # @return [nil] by default, or if no commands have any results.
-    # @return [Array] of results if `response_type` is supplied (types may vary).
+    # @return [nil] default behavior.
+    # @return [Array] if `response_type` is `:values`, `:hashes`, `:songs`, or `:playlists`.
+    # @return [Hash] if `response_type` is `:hash`.
     #
     # @example Simple batched control commands
     #   @mpd.command_list do
