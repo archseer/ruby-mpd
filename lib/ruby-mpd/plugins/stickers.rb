@@ -19,8 +19,9 @@ class MPD
       # playlist too "(e.g. song files, directories, albums)"
 
       # Reads a sticker value for the specified object.
+      # @return [String] The value of the sticker.
       def get_sticker(type, uri, name)
-        send_command :sticker, :get, type, uri, name
+        send_command( :sticker, :get, type, uri, name ).split('=',2).last
       end
 
       # Adds a sticker value to the specified object. If a sticker
@@ -36,15 +37,35 @@ class MPD
       end
 
       # Lists the stickers for the specified object.
+      # @return [Hash] Hash mapping sticker names (as strings) to values (as strings).
       def list_stickers(type, uri)
-        send_command :sticker, :list, type, uri
+        result = send_command :sticker, :list, type, uri
+        if result==true # response when there are no
+          {}
+        else
+          result = [result] if result.is_a?(String)
+          Hash[result.map{|s| s.split('=',2)}]
+        end
       end
 
       # Searches the sticker database for stickers with the specified name,
-      # below the specified directory (URI). For each matching song, it prints
-      # the URI and that one sticker's value.
-      def find_sticker(type, uri, name)
-        send_command :sticker, :find, type, uri, name
+      # below a directory.
+      #
+      # To search the entire database, pass an empty string for the directory.
+      #
+      # @param [String] type Object type (usually must be 'song')
+      # @param [String] directory The directory to search under.
+      # @param [String] sticker_name The sticker name to search for.
+      # @return [Hash] Map the object uri to the sticker value.
+      def find_sticker(type, directory, sticker_name)
+        result = send_command(:sticker, :find, type, directory, sticker_name)
+        case result
+        when nil  then nil # Happens inside command_list
+        when true then {}  # When no objects are found
+        else
+          intro = /^#{sticker_name}=/
+          Hash[ result.map{|h| [ h[:file], h[:sticker].sub(intro,'') ] } ]
+        end
       end
     end
 
