@@ -1,5 +1,5 @@
-require '../lib/ruby-mpd'
-require './socket_spoof'
+require_relative '../lib/ruby-mpd'
+require_relative './socket_spoof'
 require 'minitest/autorun'
 
 class PlaybackMPD < MPD
