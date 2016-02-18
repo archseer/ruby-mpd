@@ -26,6 +26,8 @@ class MPD
           end
         when MPD::Song
           quotable_param param.file
+        when MPD::Playlist
+          quotable_param param.name
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
             query << "#{type} #{quotable_param what} "
@@ -59,7 +61,7 @@ class MPD
     RETURN_ARRAY = Set[:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
-      :decoders, :listplaylistinfo, :playlistinfo]
+      :decoders, :listplaylistinfo, :playlistinfo, :commandlist]
 
     # Parses key-value pairs into correct class.
     def parse_key(key, value)
@@ -120,8 +122,8 @@ class MPD
 
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
-    def build_songs_list(array)
-      return array.map { |hash| Song.new(self, hash) }
+    def build_songs_list(array=nil)
+      array.map { |hash| Song.new(self, hash) } if array
     end
 
     # Make chunks from string.
@@ -154,10 +156,10 @@ class MPD
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(command, string)
+    def build_response(command, string, force_hash=nil)
       chunks = make_chunks(string)
       # if there are any new lines (more than one data piece), it's a hash, else an object.
-      is_hash = chunks.any? { |chunk| chunk.include? "\n" }
+      is_hash = force_hash || chunks.any?{ |chunk| chunk.include? "\n" }
 
       list = chunks.inject([]) do |result, chunk|
         result << (is_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object

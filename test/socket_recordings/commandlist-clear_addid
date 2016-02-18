@@ -1,0 +1,11 @@
+command_list_begin
+clear
+addid test1.mp3
+addid "test 2.mp3"
+addid test3.mp3
+command_list_end
+--putsabove--getsbelow--
+Id: 107
+Id: 108
+Id: 109
+OK
