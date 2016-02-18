@@ -1,5 +1,6 @@
 require '../lib/ruby-mpd'
 require './socket_spoof'
+require 'minitest/autorun'
 
 class PlaybackMPD < MPD
   def initialize( recordings_directory=nil )
@@ -11,7 +12,6 @@ class PlaybackMPD < MPD
   end
 end
 
-require 'minitest/autorun'
 class TestQueue < MiniTest::Unit::TestCase
   def setup
     @mpd = PlaybackMPD.new 'socket_recordings'
@@ -65,7 +65,7 @@ class TestQueue < MiniTest::Unit::TestCase
 
     assert_equal(
       {
-        playlist:["Mix Rock Alternative Electric", "SNBRN", "Enya-esque", "RecentNice", "Dancetown", "Piano", "Thump", "GavinLikesIt"],
+        playlist:["Mix Rock Alt Electric", "SNBRN", "Enya-esque", "RecentNice", "Dancetown", "Piano", "Thump", "Smooth Town"],
         :"last-modified" => [
           Time.iso8601('2015-11-23T15:58:51Z'), Time.iso8601('2016-01-26T00:25:52Z'), Time.iso8601('2015-11-18T16:19:12Z'),
           Time.iso8601('2015-12-01T15:52:38Z'), Time.iso8601('2015-11-18T16:19:26Z'), Time.iso8601('2015-11-18T16:17:13Z'),
@@ -77,28 +77,28 @@ class TestQueue < MiniTest::Unit::TestCase
 
     assert_equal(
       [
-        { playlist: "Mix Rock Alternative Electric", :"last-modified" => Time.iso8601('2015-11-23T15:58:51Z') },
+        { playlist: "Mix Rock Alt Electric", :"last-modified" => Time.iso8601('2015-11-23T15:58:51Z') },
         { playlist: "SNBRN", :"last-modified" => Time.iso8601('2016-01-26T00:25:52Z') },
         { playlist: "Enya-esque", :"last-modified" => Time.iso8601('2015-11-18T16:19:12Z') },
         { playlist: "RecentNice", :"last-modified" => Time.iso8601('2015-12-01T15:52:38Z') },
         { playlist: "Dancetown", :"last-modified" => Time.iso8601('2015-11-18T16:19:26Z') },
         { playlist: "Piano", :"last-modified" => Time.iso8601('2015-11-18T16:17:13Z') },
         { playlist: "Thump", :"last-modified" => Time.iso8601('2015-11-20T15:32:30Z') },
-        { playlist: "GavinLikesIt", :"last-modified" => Time.iso8601('2015-11-20T15:54:49Z') },
+        { playlist: "Smooth Town", :"last-modified" => Time.iso8601('2015-11-20T15:54:49Z') },
       ],
       @mpd.command_list(:hashes){ playlists }
     )
 
     assert_equal(
       [
-        "Mix Rock Alternative Electric", Time.iso8601('2015-11-23T15:58:51Z'),
+        "Mix Rock Alt Electric", Time.iso8601('2015-11-23T15:58:51Z'),
         "SNBRN", Time.iso8601('2016-01-26T00:25:52Z'),
         "Enya-esque", Time.iso8601('2015-11-18T16:19:12Z'),
         "RecentNice", Time.iso8601('2015-12-01T15:52:38Z'),
         "Dancetown", Time.iso8601('2015-11-18T16:19:26Z'),
         "Piano", Time.iso8601('2015-11-18T16:17:13Z'),
         "Thump", Time.iso8601('2015-11-20T15:32:30Z'),
-        "GavinLikesIt", Time.iso8601('2015-11-20T15:54:49Z'),
+        "Smooth Town", Time.iso8601('2015-11-20T15:54:49Z'),
       ],
       @mpd.command_list(:values){ playlists }
     )
@@ -127,7 +127,7 @@ class TestQueue < MiniTest::Unit::TestCase
       assert_kind_of Array, v, "all hash keys are arrays"
       assert_equal 5, v.length, "there are 5 values for each hash key"
     end
-    assert_equal [2,5,2,2,2], result[:track]
+    assert_equal [5,6,2,7,2], result[:track]
 
     result = @mpd.command_list(:hashes,&twogenres)
     assert_kind_of Array, result, ":hashes style always returns an array"
