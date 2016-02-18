@@ -107,13 +107,20 @@ class MPD
     # The end result is a hash containing the proper key/value pairs
     def build_hash(string)
       return {} if string.nil?
+      array_keys = {}
 
       string.lines.each_with_object({}) do |line, hash|
         key, object = parse_line(line)
 
         # if val appears more than once, make an array of vals.
         if hash.include? key
-          hash[key] = Array(hash[key]) << object
+          # cannot use Array(hash[key]) or [*hash[key]] because Time instances get splatted
+          # cannot check for is_a?(Array) because some values (time) are already arrays
+          unless array_keys[key]
+            hash[key] = [hash[key]] 
+            array_keys[key] = true
+          end
+          hash[key] << object
         else # val hasn't appeared yet, map it.
           hash[key] = object # map obj to key
         end
@@ -123,7 +130,15 @@ class MPD
     # Converts the response to MPD::Song objects.
     # @return [Array<MPD::Song>] An array of songs.
     def build_songs_list(array=nil)
-      array.map { |hash| Song.new(self, hash) } if array
+      array.map{ |hash| hash.is_a?(Hash) ? Song.new(self, hash) : nil }.compact if array
+    end
+
+    # Converts the response to MPD::Playlist objects.
+    # @return [Array<MPD::Playlist>] An array of playlists.
+    def build_playlists(array)
+      array.map do |hash|
+        Playlist.new(self, hash) if hash.is_a?(Hash) && hash[:playlist]
+      end.compact
     end
 
     # Make chunks from string.

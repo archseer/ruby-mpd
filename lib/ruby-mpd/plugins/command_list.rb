@@ -68,7 +68,7 @@ module MPD::Plugins
           when :hash      then build_hash(response)
           when :hashes    then build_response(:commandlist,response,true)
           when :songs     then build_songs_list parse_response(:listallinfo,response)
-          when :playlists then parse_response(:listplaylists,response).map{ |h| MPD::Playlist.new(self, h) }
+          when :playlists then build_playlists  parse_response(:listplaylists,response)
           end
         rescue Errno::EPIPE
           reconnect
