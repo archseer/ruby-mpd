@@ -14,7 +14,8 @@ end
 
 class TestQueue < MiniTest::Unit::TestCase
   def setup
-    @mpd = PlaybackMPD.new 'socket_recordings'
+    spoof_dir = File.expand_path('../socket_recordings',__FILE__)
+    @mpd = PlaybackMPD.new spoof_dir
   end
 
   def test_songs
