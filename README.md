@@ -247,20 +247,6 @@ Easy as pie. The above will connect to the server like normal, but this time it 
 
 This section documents the features that are missing in this library at the moment.
 
-### Command lists
-
-Command lists are not implemented yet. The proposed API would look like:
-
-```ruby
-mpd.command_list do
-  volume 80
-  repeat true
-  status
-end
-```
-
-What makes me not so eager to implement this is that MPD returns all values one after another. This gets fixed with `command_list_ok_begin`, which returns `list_OK` for every command used, however then we still get more than one response, and I can't think of a reasonable way to retun all of them back to the user. Maybe just ignore the return values?
-
 ### Idle
 
 To implement idle, what is needed is a lock that prevents sending commands to the daemon while waiting for the response (except `noidle`). An intermediate solution would be to queue the commands to send them later, when idle has returned the response.
