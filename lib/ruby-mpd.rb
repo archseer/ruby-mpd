@@ -253,9 +253,10 @@ private
   # @return [true] If "OK" is returned.
   # @raise [MPDError] If an "ACK" is returned.
   def handle_server_response
+    sock = socket # Cache to prevent an extra method call for every response line
     msg = ''
     while true
-      case line = socket.gets
+      case line = sock.gets
       when "OK\n", nil
         break
       when /^ACK/
