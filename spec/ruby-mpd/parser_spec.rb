@@ -45,9 +45,14 @@ RSpec.describe MPD::Parser do
       }
     end
 
+    context "when given params with a backslash" do
+      let(:args) { [:convert_command, 'command', "a\\b"] }
+      it { expect(subject.send(*args)).to eql('command "a\\\\b"') }
+    end
+
     context "when given params that are a hash" do
-      let(:args) { [:convert_command, 'command', {foo:'foo', bar:'bar baz', quux:'"xyzzy"'}] }
-      it { expect(subject.send(*args)).to eql('command foo foo bar "bar baz" quux "\"xyzzy\""') }
+      let(:args) { [:convert_command, 'command', {foo:'foo', bar:'bar baz', quux:'"xyzzy"', escape:"a\\b"}] }
+      it { expect(subject.send(*args)).to eql('command foo foo bar "bar baz" quux "\"xyzzy\"" escape "a\\\\b"') }
     end
 
     context "when given params of a string" do

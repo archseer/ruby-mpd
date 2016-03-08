@@ -197,8 +197,8 @@ class MPD
         begin
           socket.puts convert_command(command, *args)
           response = handle_server_response
-          return parse_response(command, response)
-        rescue Errno::EPIPE
+          parse_response(command, response)
+        rescue Errno::EPIPE, ConnectionError
           reconnect
           retry
         end
@@ -262,11 +262,13 @@ private
     msg = ''
     while true
       case line = sock.gets
-      when "OK\n", nil
+      when "OK\n"
         break
       when /^ACK/
         error = line
         break
+      when nil
+        raise ConnectionError, 'Connection closed'
       else
         msg << line
       end
