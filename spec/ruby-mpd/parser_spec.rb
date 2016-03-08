@@ -119,12 +119,6 @@ RSpec.describe MPD::Parser do
     end
   end
 
-  describe "#build_songs_list" do
-    context "when passed an empty array" do
-      it { expect(subject.send(:build_songs_list, [])).to eql([]) }
-    end
-  end
-
   describe "#parse_response" do
     context "when passed listall command" do
       let(:command) { :listall }
@@ -136,8 +130,12 @@ RSpec.describe MPD::Parser do
     context "when passed listallinfo command" do
       let(:command) { :listallinfo }
       let(:str) { "Directory: xxxx\nFile: file1\nFile: file2\nFile: file3\nFile: file4\n" }
+      let(:song1){ MPD::Song.new(subject,{file:'file1'}) }
+      let(:song2){ MPD::Song.new(subject,{file:'file2'}) }
+      let(:song3){ MPD::Song.new(subject,{file:'file3'}) }
+      let(:song4){ MPD::Song.new(subject,{file:'file4'}) }
       it { expect(subject.send(:parse_response, command, str))
-        .to eql(["file1", "file2", "file3", "file4"]) }
+        .to eql([song1,song2,song3,song4]) }
     end
 
     context "when passed unknown command with empty string" do
@@ -155,14 +153,9 @@ RSpec.describe MPD::Parser do
     context "when passed valid command and a string of elements" do
       let(:command) { :find }
       let(:str) { "title: Shelter\nTrack: 7\nxfade: 0\nstate: play\n" }
+      let(:song){ [MPD::Song.new( nil, title:'Shelter', track:7, xfade:0, state: :play )] }
       it { expect(subject.send(:parse_response, command, str))
-        .to eql([{:title=>"Shelter", :track=>7, :xfade=>0, :state=>:play}]) }
-    end
-
-    context "when passed valid command and a single element" do
-      let(:command) { :find }
-      let(:str) { "title: Shelter\n" }
-      it { expect(subject.send(:parse_response, command, str)).to eql(["Shelter"]) }
+        .to eql(song) }
     end
 
     context "when passed invalid command and a single element" do

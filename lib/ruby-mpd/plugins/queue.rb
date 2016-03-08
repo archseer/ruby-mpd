@@ -12,7 +12,7 @@ class MPD
       # @return [Array<MPD::Song>] Array of songs in the queue
       # or a single song.
       def queue(limit=nil)
-        build_songs_list send_command(:playlistinfo, limit)
+        send_command(:playlistinfo, limit)
       end
 
       # Add the file _path_ to the queue. If path is a directory,
@@ -120,13 +120,13 @@ class MPD
       # @return [Array<MPD::Song>] Songs that matched.
       def queue_where(params, options = {})
         command = options[:strict] ? :playlistfind : :playlistsearch
-        build_songs_list send_command(command, params)
+        send_command(command, params)
       end
 
       # List the changes since the specified version in the queue.
       # @return [Array<MPD::Song>]
       def queue_changes(version)
-        build_songs_list send_command(:plchanges, version)
+        send_command(:plchanges, version)
       end
 
       # plchangesposid

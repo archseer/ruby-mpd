@@ -47,7 +47,6 @@ RSpec.describe MPD::Plugins::Database do
     context "when given all args" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:listallinfo, 'path').and_return('result')
-        expect(subject).to receive(:build_songs_list).with('result')
         subject.songs('path')
       end
     end
@@ -55,7 +54,6 @@ RSpec.describe MPD::Plugins::Database do
     context "when given one arg" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:listallinfo, nil).and_return('result')
-        expect(subject).to receive(:build_songs_list).with('result')
         subject.songs
       end
     end
@@ -90,8 +88,7 @@ RSpec.describe MPD::Plugins::Database do
     context "when given no options and response is not true" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:search, 'params').and_return('xxxxx')
-        expect(subject).to receive(:build_songs_list).with('xxxxx').and_return('yyyyy')
-        expect(subject.where('params', {})).to eql('yyyyy')
+        expect(subject.where('params', {})).to eql('xxxxx')
       end
     end
 

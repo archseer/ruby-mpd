@@ -8,7 +8,6 @@ RSpec.describe MPD::Plugins::Queue do
     context "when pass a limit" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:playlistinfo, 'limit').and_return('result')
-        expect(subject).to receive(:build_songs_list).with('result')
         subject.queue('limit')
       end
     end
@@ -16,7 +15,6 @@ RSpec.describe MPD::Plugins::Queue do
     context "when not passed a limit" do
       it "should send correct params" do
         expect(subject).to receive(:send_command).with(:playlistinfo, nil).and_return('result')
-        expect(subject).to receive(:build_songs_list).with('result')
         subject.queue
       end
     end
@@ -142,7 +140,6 @@ RSpec.describe MPD::Plugins::Queue do
         expect(subject).to receive(:send_command)
           .with(:playlistfind, 'params')
           .and_return('result')
-        expect(subject).to receive(:build_songs_list).with('result')
         subject.queue_where('params', {strict: true})
       end
     end
@@ -153,7 +150,6 @@ RSpec.describe MPD::Plugins::Queue do
       expect(subject).to receive(:send_command)
         .with(:plchanges, 'version')
         .and_return('result')
-      expect(subject).to receive(:build_songs_list).with('result')
       subject.queue_changes('version')
     end
   end
