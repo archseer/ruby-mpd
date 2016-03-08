@@ -5,7 +5,7 @@ class MPD; end
 # If the field doesn't exist or isn't set, nil will be returned
 class MPD::Song
   # length in seconds
-  attr_reader :file, :title, :time, :artist, :album, :albumartist
+  attr_reader :file, :title, :time, :date, :artist, :album, :albumartist
 
   # Source: https://de.wikipedia.org/wiki/Liste_der_ID3v1-Genres
   ID3V1_GENRE_BY_ID = {
@@ -210,6 +210,7 @@ class MPD::Song
     @mpd = mpd
     @data = {} # allowed fields are @types + :file
     @time = options.delete(:time) # an array of 2 items where last is time
+    @date = options.delete(:date)
     @file = options.delete(:file)
     @title = options.delete(:title)
     @artist = options.delete(:artist)
@@ -226,6 +227,7 @@ class MPD::Song
   def to_h
     {
       time: @time,
+      date: @date,
       file: @file,
       title: @title,
       artist: @artist,
