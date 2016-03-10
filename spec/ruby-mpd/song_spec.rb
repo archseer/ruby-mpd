@@ -5,6 +5,7 @@ RSpec.describe MPD::Song do
   let(:mpd) { MPD.new }
   let(:options) {{
     time: [123, 300],
+    date: "1972",
     file: 'music_filename.mp3',
     title: 'title',
     custom_key: 'custom'
@@ -46,6 +47,7 @@ RSpec.describe MPD::Song do
     it {
       expect(subject.to_h).to eql({
         time: [123, 300],
+        date: "1972",
         file: 'music_filename.mp3',
         title: 'title',
         artist: nil,
