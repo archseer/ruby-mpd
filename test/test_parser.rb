@@ -42,11 +42,11 @@ class TestParser < MiniTest::Test
   end
 
   def test_parse_playlist_uint
-    assert_equal @parser.parse_key(:playlist, '31'), 31
+    assert_equal @parser.parse_key(:status, :playlist, '31'), 31
   end
 
   def test_parse_playlist_name
-    assert_equal @parser.parse_key(:playlist, 'leftover/classics.m3u'), 'leftover/classics.m3u'
+    assert_equal @parser.parse_key(:listplaylists, :playlist, 'leftover/classics.m3u'), 'leftover/classics.m3u'
   end
 
 end
