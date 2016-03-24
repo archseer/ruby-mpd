@@ -95,7 +95,12 @@ RSpec.describe MPD::Parser do
 
     context "with :playlist key" do
       it { expect(subject.send(:parse_key, :status, :playlist, '32')).to eql(32) }
-      it { expect(subject.send(:parse_key, :status, :playlist, '0')).to eql('0') }
+      it { expect(subject.send(:parse_key, :status, :playlist, '0')).to eql(0) }
+
+      context "for :listplaylists command" do
+        it { expect(subject.send(:parse_key, :listplaylists, :playlist, '0')).to eql('0') }
+        it { expect(subject.send(:parse_key, :listplaylists, :playlist, '70s')).to eql('70s') }
+      end
     end
 
     context "with :db_update key" do

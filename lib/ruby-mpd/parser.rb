@@ -71,9 +71,7 @@ class MPD
         value != '0'
       elsif SYM_KEYS.include? key
         value.to_sym
-      elsif key == :playlist && !value.to_i.zero?
-        # doc states it's an unsigned int, meaning if we get 0,
-        # then it's a name string.
+      elsif key == :playlist && command != :listplaylists
         value.to_i
       elsif key == :db_update
         Time.at(value.to_i)
