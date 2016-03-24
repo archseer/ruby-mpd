@@ -62,7 +62,7 @@ class MPD
       :decoders, :listplaylistinfo, :playlistinfo]
 
     # Parses key-value pairs into correct class.
-    def parse_key(key, value)
+    def parse_key(command, key, value)
       if INT_KEYS.include? key
         value.to_i
       elsif FLOAT_KEYS.include? key
@@ -93,21 +93,21 @@ class MPD
     end
 
     # Parses a single response line into a key-object (value) pair.
-    def parse_line(line)
+    def parse_line(command, line)
       key, value = line.split(/:\s?/, 2)
       key = key.downcase.to_sym
-      return key, parse_key(key, value.chomp)
+      return key, parse_key(command, key, value.chomp)
     end
 
     # This builds a hash out of lines returned from the server,
     # elements parsed into the correct type.
     #
     # The end result is a hash containing the proper key/value pairs
-    def build_hash(string)
+    def build_hash(command, string)
       return {} if string.nil?
 
       string.lines.each_with_object({}) do |line, hash|
-        key, object = parse_line(line)
+        key, object = parse_line(command, line)
 
         # if val appears more than once, make an array of vals.
         if hash.include? key
@@ -137,7 +137,7 @@ class MPD
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
     def parse_response(command, string)
       if command == :listall # Explicitly handle :listall (#files) -> always return a Hash
-        return build_hash(string)
+        return build_hash(command, string)
       elsif command == :listallinfo
         # We do not care about directories or playlists,
         # and leaving them in breaks the heuristic used by `make_chunks`.
@@ -160,7 +160,13 @@ class MPD
       is_hash = chunks.any? { |chunk| chunk.include? "\n" }
 
       list = chunks.inject([]) do |result, chunk|
-        result << (is_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object
+        result << begin
+          if is_hash
+            build_hash(command, chunk)
+          else
+            parse_line(command, chunk)[1] # object
+          end
+        end
       end
 
       # if list has only one element and not set to explicit array, return it, else return array

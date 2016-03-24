@@ -69,58 +69,58 @@ RSpec.describe MPD::Parser do
   describe "#parse_key" do
     context "with valid INT_KEYS" do
       MPD::Parser::INT_KEYS.each do |key|
-        it { expect(subject.send(:parse_key, key, '32')).to eql(32) }
+        it { expect(subject.send(:parse_key, :status, key, '32')).to eql(32) }
       end
     end
 
     context "with valid SYM_KEYS" do
       MPD::Parser::SYM_KEYS.each do |key|
-        it { expect(subject.send(:parse_key, key, 'value')).to eql(:value) }
+        it { expect(subject.send(:parse_key, :status, key, 'value')).to eql(:value) }
       end
     end
 
     context "with valid FLOAT_KEYS" do
       MPD::Parser::FLOAT_KEYS.each do |key|
-        it { expect(subject.send(:parse_key, key, 10)).to eql(10.0) }
-        it { expect(subject.send(:parse_key, key, 'nan')).to be(Float::NAN) }
+        it { expect(subject.send(:parse_key, :status, key, 10)).to eql(10.0) }
+        it { expect(subject.send(:parse_key, :status, key, 'nan')).to be(Float::NAN) }
       end
     end
 
     context "with valid BOOL_KEYS" do
       MPD::Parser::BOOL_KEYS.each do |key|
-        it { expect(subject.send(:parse_key, key, '1')).to be_truthy }
-        it { expect(subject.send(:parse_key, key, '0')).to be_falsey }
+        it { expect(subject.send(:parse_key, :status, key, '1')).to be_truthy }
+        it { expect(subject.send(:parse_key, :status, key, '0')).to be_falsey }
       end
     end
 
     context "with :playlist key" do
-      it { expect(subject.send(:parse_key, :playlist, '32')).to eql(32) }
-      it { expect(subject.send(:parse_key, :playlist, '0')).to eql('0') }
+      it { expect(subject.send(:parse_key, :status, :playlist, '32')).to eql(32) }
+      it { expect(subject.send(:parse_key, :status, :playlist, '0')).to eql('0') }
     end
 
     context "with :db_update key" do
       expected_time = Time.at(1434024873)
-      it { expect(subject.send(:parse_key, :db_update, '1434024873').utc)
+      it { expect(subject.send(:parse_key, :status, :db_update, '1434024873').utc)
         .to eql(expected_time.utc) }
     end
 
     context "with :'last-modified' key" do
       let(:time) { Time.parse("Thu Nov 29 14:33:20 GMT 2001") }
-      it { expect(subject.send(:parse_key, :"last-modified", time.utc.iso8601))
+      it { expect(subject.send(:parse_key, :status, :"last-modified", time.utc.iso8601))
         .to eql(time) }
     end
 
     context "with :time, :audio key" do
-      it { expect(subject.send(:parse_key, :time, '123')).to eql([nil, 123]) }
-      it { expect(subject.send(:parse_key, :time, '99:123')).to eql([99, 123]) }
-      it { expect(subject.send(:parse_key, :audio, '12:33')).to eql([12, 33]) }
+      it { expect(subject.send(:parse_key, :status, :time, '123')).to eql([nil, 123]) }
+      it { expect(subject.send(:parse_key, :status, :time, '99:123')).to eql([99, 123]) }
+      it { expect(subject.send(:parse_key, :status, :audio, '12:33')).to eql([12, 33]) }
     end
   end
 
   describe "#parse_line" do
     context "with a valid response line" do
       let(:response) { "UPTIME:32\n xxxx" }
-      it { expect(subject.send(:parse_line, response)).to eql([:uptime, 32]) }
+      it { expect(subject.send(:parse_line, :stats, response)).to eql([:uptime, 32]) }
     end
   end
 
