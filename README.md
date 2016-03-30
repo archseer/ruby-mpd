@@ -20,7 +20,7 @@ gem 'ruby-mpd'
 Then `bunde install`, require and make a new MPD instance:
 
 ```ruby
-require ‘ruby-mpd’
+require 'ruby-mpd'
 mpd = MPD.new 'localhost', 6600
 ```
 
@@ -184,12 +184,12 @@ One can also use separate methods or Procs and whatnot, just pass them in as a p
 
 ```ruby
 # Using a Proc
-proc = Proc.new { |volume| puts “Volume was set to #{volume}.” }
+proc = Proc.new { |volume| puts "Volume was set to #{volume}." }
 mpd.on :volume, &proc
 
 # Using a method
 def volume_change(value)
-  puts “Volume changed to #{value}.”
+  puts "Volume changed to #{value}."
 end
 
 handler = method(:volume_change)
@@ -231,14 +231,14 @@ end
 
 # or
 mpd.on :audio do |*args|
-  puts args.join(‘,’)
+  puts args.join(',')
 end
 ```
 
 Finally, the easiest step. In order for callbacks to work, create a MPD instance with callbacks enabled:
 
 ```ruby
-MPD.new ‘localhost’, 6600, { callbacks: true }
+MPD.new 'localhost', 6600, { callbacks: true }
 ```
 
 Easy as pie. The above will connect to the server like normal, but this time it will create a new thread that loops until you issue a `disconnect`. This loop checks the server, then sleeps for two tenths of a second, then loops.
