@@ -1,22 +1,23 @@
 require 'socket'
 require 'thread'
 
-require 'ruby-mpd/version'
-require 'ruby-mpd/exceptions'
-require 'ruby-mpd/song'
-require 'ruby-mpd/parser'
-require 'ruby-mpd/playlist'
+require_relative 'ruby-mpd/version'
+require_relative 'ruby-mpd/exceptions'
+require_relative 'ruby-mpd/song'
+require_relative 'ruby-mpd/parser'
+require_relative 'ruby-mpd/playlist'
 
-require 'ruby-mpd/plugins/information'
-require 'ruby-mpd/plugins/playback_options'
-require 'ruby-mpd/plugins/controls'
-require 'ruby-mpd/plugins/queue'
-require 'ruby-mpd/plugins/playlists'
-require 'ruby-mpd/plugins/database'
-require 'ruby-mpd/plugins/stickers'
-require 'ruby-mpd/plugins/outputs'
-require 'ruby-mpd/plugins/reflection'
-require 'ruby-mpd/plugins/channels'
+require_relative 'ruby-mpd/plugins/information'
+require_relative 'ruby-mpd/plugins/playback_options'
+require_relative 'ruby-mpd/plugins/controls'
+require_relative 'ruby-mpd/plugins/queue'
+require_relative 'ruby-mpd/plugins/playlists'
+require_relative 'ruby-mpd/plugins/database'
+require_relative 'ruby-mpd/plugins/stickers'
+require_relative 'ruby-mpd/plugins/outputs'
+require_relative 'ruby-mpd/plugins/reflection'
+require_relative 'ruby-mpd/plugins/channels'
+require_relative 'ruby-mpd/plugins/command_list'
 
 # @!macro [new] error_raise
 #   @raise (see #send_command)
@@ -38,6 +39,7 @@ class MPD
   include Plugins::Outputs
   include Plugins::Reflection
   include Plugins::Channels
+  include Plugins::CommandList
 
   attr_reader :version, :hostname, :port
 
@@ -187,15 +189,19 @@ class MPD
   # @raise [MPDError] if the command failed.
   def send_command(command, *args)
     raise ConnectionError, "Not connected to the server!" unless socket
-
-    @mutex.synchronize do
-      begin
-        socket.puts convert_command(command, *args)
-        response = handle_server_response
-        return parse_response(command, response)
-      rescue Errno::EPIPE, ConnectionError
-        reconnect
-        retry
+    if @command_list_commands
+      @command_list_commands << command
+      socket.puts convert_command(command, *args)
+    else
+      @mutex.synchronize do
+        begin
+          socket.puts convert_command(command, *args)
+          response = handle_server_response
+          parse_response(command, response)
+        rescue Errno::EPIPE, ConnectionError
+          reconnect
+          retry
+        end
       end
     end
   end
@@ -251,9 +257,11 @@ private
   # @return [true] If "OK" is returned.
   # @raise [MPDError] If an "ACK" is returned.
   def handle_server_response
+    raise "Cannot read from the server during a command list" if @command_list_active
+    sock = socket # Cache to prevent an extra method call for every response line
     msg = ''
     while true
-      case line = socket.gets
+      case line = sock.gets
       when "OK\n"
         break
       when /^ACK/

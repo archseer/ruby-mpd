@@ -1,0 +1,28 @@
+command_list_ok_begin
+playlistclear temp
+playlistadd temp song2.mp3
+playlistadd temp dummy.mp3
+playlistadd temp song1.mp3
+playlistadd temp song3.mp3
+playlistdelete temp 1
+playlistmove temp 1 0
+listplaylistinfo temp
+rm temp
+command_list_end
+--putsabove--getsbelow--
+list_OK
+list_OK
+list_OK
+list_OK
+list_OK
+list_OK
+list_OK
+file: song1.mp3
+Time: 296
+file: song2.mp3
+Time: 308
+file: song3.mp3
+Time: 152
+list_OK
+list_OK
+OK

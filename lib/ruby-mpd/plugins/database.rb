@@ -35,7 +35,7 @@ class MPD
       #
       # @return [Array<MPD::Song>]
       def songs(path = nil)
-        build_songs_list send_command(:listallinfo, path)
+        send_command(:listallinfo, path)
       end
 
       # lsinfo - Clients that are connected via UNIX domain socket may use this
@@ -92,12 +92,7 @@ class MPD
           command = options[:strict] ? :find : :search
         end
 
-        response = send_command(command, params)
-        if response == true
-          return true
-        else
-          build_songs_list response
-        end
+        send_command(command, params)
       end
 
       # Tell the server to update the database. Optionally,

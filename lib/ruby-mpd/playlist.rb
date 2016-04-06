@@ -24,14 +24,7 @@ class MPD
     # Lists the songs in the playlist. Playlist plugins are supported.
     # @return [Array<MPD::Song>] songs in the playlist.
     def songs
-      result = @mpd.send_command(:listplaylistinfo, @name)
-      result.map do |hash|
-        if hash[:file] && !hash[:file].match(/^(https?:\/\/)?/)[0].empty?
-          Song.new(@mpd, {:file => hash[:file], :time => [0]})
-        else
-          Song.new(@mpd, hash)
-        end
-      end
+      @mpd.send_command(:listplaylistinfo, @name)
     rescue TypeError
       puts "Files inside Playlist '#{@name}' do not exist!"
       return []
@@ -77,10 +70,10 @@ class MPD
       @mpd.send_command :playlistdelete, @name, pos
     end
 
-    # Moves song with SONGID in the playlist to the position SONGPOS.
+    # Move a song in the playlist to a new 0-based index.
     # @macro returnraise
-    def move(songid, songpos)
-      @mpd.send_command :playlistmove, @name, songid, songpos
+    def move(from_index, to_index)
+      @mpd.send_command :playlistmove, @name, from_index, to_index
     end
 
     # Renames the playlist to +new_name+.

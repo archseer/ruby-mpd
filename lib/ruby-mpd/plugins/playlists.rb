@@ -7,7 +7,7 @@ class MPD
       #
       # @return [Array<MPD::Playlist>] Array of playlists
       def playlists
-        send_command(:listplaylists).map { |opt| MPD::Playlist.new(self, opt) }
+        send_command(:listplaylists)
       end
 
     end

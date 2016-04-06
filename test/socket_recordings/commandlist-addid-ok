@@ -1,0 +1,7 @@
+command_list_ok_begin
+addid test1.mp3
+command_list_end
+--putsabove--getsbelow--
+Id: 107
+list_OK
+OK

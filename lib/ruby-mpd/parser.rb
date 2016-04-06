@@ -26,6 +26,8 @@ class MPD
           end
         when MPD::Song
           quotable_param param.file
+        when MPD::Playlist
+          quotable_param param.name
         when Hash # normally a search query
           param.each_with_object("") do |(type, what), query|
             query << "#{type} #{quotable_param what} "
@@ -55,11 +57,18 @@ class MPD
     FLOAT_KEYS = Set[:mixrampdb, :elapsed]
     BOOL_KEYS  = Set[:repeat, :random, :single, :consume, :outputenabled]
 
-    # Commands, where it makes sense to always explicitly return an array.
+    # Commands where it makes sense to always explicitly return an array.
     RETURN_ARRAY = Set[:channels, :outputs, :readmessages, :list,
       :listallinfo, :find, :search, :listplaylists, :listplaylist, :playlistfind,
       :playlistsearch, :plchanges, :tagtypes, :commands, :notcommands, :urlhandlers,
       :decoders, :listplaylistinfo, :playlistinfo]
+
+    # Commands that should always return MPD::Song instances
+    SONG_COMMANDS = Set[:listallinfo,:playlistinfo,:find,:findadd,:search,
+      :searchadd,:playlistfind,:playlistsearch,:plchanges,:listplaylistinfo]
+
+    # Commands that should always return MPD::Playlist instances
+    PLAYLIST_COMMANDS = Set[:listplaylists]
 
     # Parses key-value pairs into correct class.
     def parse_key(key, value)
@@ -105,23 +114,24 @@ class MPD
     # The end result is a hash containing the proper key/value pairs
     def build_hash(string)
       return {} if string.nil?
+      array_keys = {}
 
       string.lines.each_with_object({}) do |line, hash|
         key, object = parse_line(line)
 
         # if val appears more than once, make an array of vals.
         if hash.include? key
-          hash[key] = Array(hash[key]) << object
+          # cannot use Array(hash[key]) or [*hash[key]] because Time instances get splatted
+          # cannot check for is_a?(Array) because some values (time) are already arrays
+          unless array_keys[key]
+            hash[key] = [hash[key]] 
+            array_keys[key] = true
+          end
+          hash[key] << object
         else # val hasn't appeared yet, map it.
           hash[key] = object # map obj to key
         end
       end
-    end
-
-    # Converts the response to MPD::Song objects.
-    # @return [Array<MPD::Song>] An array of songs.
-    def build_songs_list(array)
-      return array.map { |hash| Song.new(self, hash) }
     end
 
     # Make chunks from string.
@@ -150,17 +160,39 @@ class MPD
       build_response(command, string)
     end
 
+    def parse_command_list(commands, string)
+      [].tap do |results|
+        string.split("list_OK\n").each do |str|
+          command = commands.shift
+          results << parse_response(command, str) unless str.empty?
+        end
+      end
+    end
+
     # Parses the response into appropriate objects (either a single object,
     # or an array of objects or an array of hashes).
     #
     # @return [Array<Hash>, Array<String>, String, Integer] Parsed response.
-    def build_response(command, string)
+    def build_response(command, string, force_hash=nil)
       chunks = make_chunks(string)
-      # if there are any new lines (more than one data piece), it's a hash, else an object.
-      is_hash = chunks.any? { |chunk| chunk.include? "\n" }
+
+      make_song  = SONG_COMMANDS.include?(command)
+      make_plist = PLAYLIST_COMMANDS.include?(command)
+      make_hash  = force_hash || make_song || make_plist || chunks.any?{ |chunk| chunk.include? "\n" }
 
       list = chunks.inject([]) do |result, chunk|
-        result << (is_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object
+        result << (make_hash ? build_hash(chunk) : parse_line(chunk)[1]) # parse_line(chunk)[1] is object
+      end
+
+      if make_song
+        list.map! do |opts|
+          if opts[:file] && opts[:file] =~ %r{^https?://}i
+            opts = { file:opts[:file], time:[0] }
+          end
+          Song.new(@mpd, opts)
+        end
+      elsif make_plist
+        list.map!{ |opts| Playlist.new(self,opts) }
       end
 
       # if list has only one element and not set to explicit array, return it, else return array

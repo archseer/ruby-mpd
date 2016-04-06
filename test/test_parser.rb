@@ -1,5 +1,4 @@
-require_relative '../lib/ruby-mpd'
-require 'minitest/autorun'
+require_relative './_helper'
 
 Parser = Class.new do
   include MPD::Parser
@@ -7,13 +6,8 @@ end
 Parser.send(:public, *MPD::Parser.private_instance_methods)
 
 class TestParser < MiniTest::Test
-
   def setup
     @parser = Parser.new
-  end
-
-  def teardown
-
   end
 
   # Conversions for commands to the server
@@ -49,4 +43,31 @@ class TestParser < MiniTest::Test
     assert_equal @parser.parse_key(:playlist, 'leftover/classics.m3u'), 'leftover/classics.m3u'
   end
 
+end
+
+class TestParsingSongs < MiniTest::Test
+  def setup
+    spoof_dir = File.expand_path('../socket_recordings',__FILE__)
+    @mpd = PlaybackMPD.new spoof_dir
+  end
+  def test_playlist_songs
+    songs = MPD::Playlist.new( @mpd, 'onesong' ).songs
+    assert_kind_of Array, songs
+    assert_equal 1, songs.length
+    assert songs.all?{ |value| value.is_a? MPD::Song }, "Every return value is a Song"
+    assert_equal songs.first.track_length, 226
+
+    songs = MPD::Playlist.new( @mpd, 'twosongs' ).songs
+    assert_kind_of Array, songs
+    assert_equal 2, songs.length
+    assert songs.all?{ |value| value.is_a? MPD::Song }, "Every return value is a Song"
+    assert_equal songs.first.track_length, 226
+
+    songs = MPD::Playlist.new( @mpd, 'filesonly' ).songs
+    assert_kind_of Array, songs
+    assert_equal 2, songs.length
+    assert songs.all?{ |value| value.is_a? MPD::Song }, "Every return value is a Song"
+    assert_equal songs.first.file, "Crash Test Dummies/The Ghosts that Haunt Me/06 The Ghosts That Haunt Me.mp3"
+    assert_nil songs.first.track_length
+  end
 end

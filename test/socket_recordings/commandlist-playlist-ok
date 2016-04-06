@@ -1,0 +1,58 @@
+command_list_ok_begin
+listplaylistinfo Thump
+command_list_end
+--putsabove--getsbelow--
+file: gavin/Muse/The 2nd Law (Deluxe Version)/02 Madness.m4a
+Last-Modified: 2013-11-17T22:30:54Z
+Artist: Muse
+Album: The 2nd Law (Deluxe Version)
+Title: Madness
+Track: 2/13
+Genre: Alternative
+Date: 2012-10-01T07:00:00Z
+Disc: 1/1
+AlbumArtist: Muse
+Time: 280
+file: gavin/U2/The Best Of 1990-2000/15 Numb (New Mix).mp3
+Last-Modified: 2003-09-24T14:31:05Z
+Artist: U2
+Title: Numb (New Mix)
+Album: The Best Of 1990-2000
+Track: 15/16
+Date: 2002
+Genre: Rock
+Composer: U2
+Time: 264
+file: gavin/Massive Attack/Mezzanine/03 Teardrop.m4a
+Last-Modified: 2012-09-05T19:38:14Z
+Artist: Massive Attack
+Album: Mezzanine
+Title: Teardrop
+Track: 3/11
+Genre: Electronic
+Date: 1998-04-20T07:00:00Z
+Disc: 1/1
+AlbumArtist: Massive Attack
+Time: 331
+file: gavin/Massive Attack/Mezzanine/01 Angel.m4a
+Last-Modified: 2012-09-05T19:38:17Z
+Artist: Massive Attack
+Album: Mezzanine
+Title: Angel
+Track: 1/11
+Genre: Electronic
+Date: 1998-04-20T07:00:00Z
+Disc: 1/1
+AlbumArtist: Massive Attack
+Time: 380
+file: gavin/Eels/Shrek 2/07 I Need Some Sleep.mp3
+Last-Modified: 2005-01-14T21:24:25Z
+Artist: Eels
+Title: I Need Some Sleep
+Album: Shrek 2
+Track: 7/14
+Date: 2004
+Genre: Soundtrack
+Time: 147
+list_OK
+OK
