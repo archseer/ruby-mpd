@@ -22,6 +22,16 @@ class MPD
         send_command :add, path
       end
 
+      # Insert a song to the queue after the current track
+      # @macro returnraise
+      def insert(path)
+        qlen = self.queue.length
+        self.add path
+        newqlen = self.queue.length
+        self.move "#{qlen}:#{newqlen}", self.status[:nextsong]
+        self.next
+      end
+
       # Adds a song to the queue (*non-recursive*) and returns the song id.
       # Optionally, one can specify the position on which to add the song (since MPD 0.14).
       # @return [Integer] id of the song that was added.
