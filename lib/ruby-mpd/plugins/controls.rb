@@ -59,6 +59,18 @@ class MPD
       def stop
         send_command :stop
       end
+
+      # Play if paused, pause if playing
+      # @macro returnraise
+      def toggle
+        case self.status[:state]
+        when :play
+          send_command :pause
+        else
+          send_command :play
+        end
+      end
+
     end
   end
 end
